@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Comunica a Tailwind v4 di attivare la variante dark usando la classe .dark sull'html */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Stili globali per il body */
+body {
+  @apply bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100;
+}
