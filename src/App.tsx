@@ -6,11 +6,11 @@ import { SettingsModal } from './components/SettingsModal';
 import { Sidebar } from './components/Sidebar';
 import { SidebarControls } from './components/SidebarControls';
 import { ThreadModal } from './components/ThreadModal';
-import { useDrafts } from './hooks/useDrafts';
+import { useAppHooks } from './hooks/useAppHooks';
 import { useEmailLogic } from './hooks/useEmailLogic';
 
 export default function App() {
-  const { drafts, updateDraft, createDraft, deleteDraft } = useDrafts();
+  const { drafts, updateDraft, createDraft, deleteDraft, loading } = useAppHooks();
   const [activeId, setActiveId] = useState<string>(drafts[0]?.id || '1');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -23,12 +23,42 @@ export default function App() {
   const [threadModalOpen, setThreadModalOpen] = useState(false);
   const [clientReply, setClientReply] = useState('');
 
-  const activeDraft = drafts.find((d) => d.id === activeId) || drafts[0];
+  const activeDraft = drafts.find((d) => d.id === activeId) ||
+    drafts[0] || {
+      id: 'placeholder',
+      title: '',
+      context: '',
+      draft: '',
+      result: '',
+      persona: 'dev',
+      tone: 'professional',
+      detail: 'balanced',
+      updatedAt: Date.now(),
+    };
+
   const { isLoading, handleRefine, copyToClipboard, pasteFromClipboard } = useEmailLogic(
     activeDraft,
     (updates) => updateDraft(activeId, updates),
     setIsSettingsOpen
   );
+
+  if (loading) {
+    return <div className="flex h-screen items-center justify-center">Caricamento...</div>;
+  }
+
+  if (!drafts.length) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <button
+          type="button"
+          onClick={() => setActiveId(createDraft())}
+          className="bg-blue-600 text-white px-4 py-2 rounded"
+        >
+          Crea prima bozza
+        </button>
+      </div>
+    );
+  }
 
   const saveSettings = () => {
     localStorage.setItem('sentai_provider', provider);

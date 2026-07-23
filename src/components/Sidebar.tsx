@@ -74,7 +74,7 @@ export const Sidebar = ({
                 e.stopPropagation();
                 onDelete(d.id);
               }}
-              className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400 transition-all"
+              className="cursor-pointer opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400 transition-all"
             >
               <Trash2 className="w-4 h-4" />
             </button>

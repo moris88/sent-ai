@@ -1,7 +1,7 @@
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import type { EmailDraft } from '../types';
-import { LANGUAGES, PERSONAS, DETAIL_LEVELS, TONES } from '../types';
+import { DETAIL_LEVELS, LANGUAGES, PERSONAS, TONES } from '../types';
 
 interface ControlsProps {
   draft: EmailDraft;
@@ -102,7 +102,10 @@ export const SidebarControls = ({ draft, onUpdate }: ControlsProps) => {
                 </select>
               </div>
               <div>
-                <label htmlFor="details" className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                <label
+                  htmlFor="details"
+                  className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1"
+                >
                   Dettaglio
                 </label>
                 <div className="flex bg-slate-100 dark:bg-slate-600 p-1 rounded-lg">
@@ -111,10 +114,11 @@ export const SidebarControls = ({ draft, onUpdate }: ControlsProps) => {
                       type="button"
                       key={d.id}
                       onClick={() => onUpdate({ detail: d.id })}
-                      className={`flex-1 py-1.5 rounded-md text-sm font-medium transition-all ${draft.detail === d.id
+                      className={`flex-1 py-1.5 rounded-md text-sm font-medium transition-all ${
+                        draft.detail === d.id
                           ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm'
-                        : 'text-slate-500 hover:text-blue-600 dark:text-slate-300 hover:bg-white dark:hover:bg-gray-800'
-                        }`}
+                          : 'text-slate-500 hover:text-blue-600 dark:text-slate-300 hover:bg-white dark:hover:bg-gray-800'
+                      }`}
                     >
                       {d.label}
                     </button>
