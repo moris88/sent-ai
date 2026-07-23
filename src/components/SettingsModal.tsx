@@ -26,7 +26,10 @@ export const SettingsModal = ({
         </div>
         <div className="space-y-4">
           <div>
-            <label htmlFor='provider-ai' className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+            <label
+              htmlFor="provider-ai"
+              className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
+            >
               Provider AI
             </label>
             <select
@@ -41,7 +44,10 @@ export const SettingsModal = ({
             </select>
           </div>
           <div>
-            <label htmlFor='api-key' className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+            <label
+              htmlFor="api-key"
+              className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
+            >
               API Key
             </label>
             <input
@@ -54,7 +60,10 @@ export const SettingsModal = ({
             />
           </div>
           <div>
-            <label htmlFor='model-name' className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+            <label
+              htmlFor="model-name"
+              className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
+            >
               Modello
             </label>
             <input

@@ -74,7 +74,7 @@ export const Sidebar = ({
                 e.stopPropagation();
                 onDelete(d.id);
               }}
-              className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400 transition-all"
+              className="cursor-pointer opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400 transition-all"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -88,5 +88,20 @@ export const Sidebar = ({
         </button>
       ))}
     </div>
+
+    {import.meta.env.VITE_APP !== 'desktop' && (
+      <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-center">
+        <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">Versione desktop:</p>
+        <div className="flex flex-col gap-2">
+          <a
+            href="https://github.com/moris88/sent-ai/releases"
+            download
+            className="text-xs bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-1.5 px-3 rounded-lg font-semibold hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors"
+          >
+            Scarica
+          </a>
+        </div>
+      </div>
+    )}
   </aside>
 );

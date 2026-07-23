@@ -23,9 +23,7 @@ type RefineOptions = {
   model?: string;
 };
 
-export const refineEmail = async (
-  options: RefineOptions
-): Promise<string> => {
+export const refineEmail = async (options: RefineOptions): Promise<string> => {
   const { provider, apiKey, model, ...opts } = options;
 
   const prompt = `
