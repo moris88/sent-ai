@@ -2,11 +2,10 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { app, BrowserWindow, ipcMain } from 'electron';
 
-
-const isDev = process.env.VITE_ENV === "development";
+const isDev = process.env.VITE_ENV === 'development';
 console.log(
-  `>>> Electron is running in ${isDev ? "development" : "production"} mode.`,
-  process.env.VITE_ENV,
+  `>>> Electron is running in ${isDev ? 'development' : 'production'} mode.`,
+  process.env.VITE_ENV
 );
 let mainWindow: BrowserWindow | null = null;
 
