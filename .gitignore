@@ -2,3 +2,5 @@
 /dist
 /out
 .env
+public/download/*.AppImage
+public/download/*.exe
