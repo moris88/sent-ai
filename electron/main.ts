@@ -1,4 +1,4 @@
-import fs from 'node:fs/promises';
+import fs from 'node:fs';
 import path from 'node:path';
 import { app, BrowserWindow, ipcMain } from 'electron';
 
@@ -17,10 +17,10 @@ function getFilePath(key: string): string {
 
 function registerIpcHandlers() {
   // Salvataggio dati su file .json
-  ipcMain.handle('save-data', async (_, { key, data }: { key: string; data: unknown }) => {
+  ipcMain.handle('save-data', (_, { key, data }: { key: string; data: unknown }) => {
     try {
       const filePath = getFilePath(key);
-      await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
+      fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
       return { success: true };
     } catch (error) {
       console.error(`Errore durante il salvataggio di ${key}:`, error);
@@ -29,10 +29,10 @@ function registerIpcHandlers() {
   });
 
   // Lettura dati da file .json
-  ipcMain.handle('load-data', async (_, key: string) => {
+  ipcMain.handle('load-data', (_, key: string) => {
     try {
       const filePath = getFilePath(key);
-      const fileContent = await fs.readFile(filePath, 'utf-8');
+      const fileContent = fs.readFileSync(filePath, 'utf-8');
       return JSON.parse(fileContent);
     } catch {
       // Se il file non esiste ancora, restituisce null (come fa localStorage)
@@ -51,7 +51,7 @@ function createWindow() {
     height: 800,
     show: true,
     webPreferences: {
-      preload: path.join(__dirname, '../preload/preload.mjs'),
+      preload: path.join(__dirname, '../preload/preload.cjs'),
       nodeIntegration: false,
       contextIsolation: true,
     },

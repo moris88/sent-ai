@@ -12,16 +12,21 @@ let command = '';
 let args = [];
 
 if (appMode === 'desktop') {
-  command = 'pnpm';
-  args = ['run', 'dev:electron'];
+  command = 'npm';
+  args = ['run', 'dev:electron', '--', '--no-sandbox'];
 } else {
-  command = 'pnpm';
-  args = ['run', 'dev:web'];
+  command = 'npm';
+  args = ['run', 'dev'];
 }
 
 const child = spawn(command, args, {
   stdio: 'inherit',
   shell: true,
+  env: {
+    ...process.env,
+    VITE_APP: 'desktop',
+    VITE_ENV: 'production',
+  },
 });
 
 child.on('error', (err) => {

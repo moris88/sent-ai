@@ -1,9 +1,40 @@
 {
-  "name": "sentai",
+  "name": "sent-ai",
   "private": true,
   "version": "0.0.0",
+  "author": {
+    "name": "Maurizio Tolomeo",
+    "email": "mauriziotolomeo@outlook.it",
+    "url": "https://mauriziotolomeo.it"
+  },
+  "desktopName": "SentAI",
+  "description": "Email Refiner Application",
   "type": "module",
   "main": "out/main/main.js",
+  "build": {
+    "appId": "com.sentai.app",
+    "productName": "SentAI",
+    "linux": {
+      "category": "Utility",
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "icon": "resources/icon.png",
+    "win": {
+      "target": [
+        "zip"
+      ]
+    },
+    "files": [
+      "out/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    }
+  },
   "scripts": {
     "lint": "biome check .",
     "dev": "node scripts/start.js",
@@ -12,9 +43,8 @@
     "preview": "vite preview",
     "preview:electron": "electron-vite preview",
     "build": "tsc -b && vite build",
-    "build:win": "npm run build && electron-builder --win",
-    "build:mac": "npm run build && electron-builder --mac",
-    "build:linux": "npm run build && electron-builder --linux"
+    "build:electron": "pnpm clean && electron-vite build && electron-builder --win --linux",
+    "clean": "rimraf dist out"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.112.3",
