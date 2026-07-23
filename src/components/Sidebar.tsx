@@ -91,21 +91,14 @@ export const Sidebar = ({
 
     {import.meta.env.VITE_APP !== 'desktop' && (
       <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-center">
-        <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">Scarica la versione desktop:</p>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">Versione desktop:</p>
         <div className="flex flex-col gap-2">
           <a
-            href="/download/sentai Setup 0.0.0.exe"
+            href="https://github.com/moris88/sent-ai/releases"
             download
             className="text-xs bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-1.5 px-3 rounded-lg font-semibold hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors"
           >
-            Windows (.exe)
-          </a>
-          <a
-            href="/download/sentai-0.0.0.AppImage"
-            download
-            className="text-xs bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-1.5 px-3 rounded-lg font-semibold hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors"
-          >
-            Linux (.AppImage)
+            Scarica
           </a>
         </div>
       </div>
