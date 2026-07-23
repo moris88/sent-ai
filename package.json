@@ -14,7 +14,6 @@
   "build": {
     "appId": "com.sentai.app",
     "productName": "SentAI",
-    "publish": "never",
     "linux": {
       "category": "Utility",
       "target": [
@@ -44,7 +43,7 @@
     "preview": "vite preview",
     "preview:electron": "electron-vite preview",
     "build": "tsc -b && vite build",
-    "build:electron": "pnpm clean && electron-vite build && electron-builder --win --linux",
+    "build:electron": "pnpm clean && electron-vite build && electron-builder --win --linux --publish=never",
     "clean": "rimraf dist out"
   },
   "dependencies": {
