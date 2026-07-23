@@ -12,9 +12,9 @@
     "preview": "vite preview",
     "preview:electron": "electron-vite preview",
     "build": "tsc -b && vite build",
-    "build:win": "npm run build && electron-builder --win",
+    "build:win": "npm run build && electron-builder --win && mkdir -p public/download && cp dist/sentai\\ Setup\\ 0.0.0.exe public/download/",
     "build:mac": "npm run build && electron-builder --mac",
-    "build:linux": "npm run build && electron-builder --linux"
+    "build:linux": "npm run build && electron-builder --linux && mkdir -p public/download && cp dist/sentai-0.0.0.AppImage public/download/"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.112.3",
