@@ -66,7 +66,6 @@ export default function App() {
     localStorage.setItem('sentai_model', modelName);
     setIsSettingsOpen(false);
   };
-
   const handleContinueThread = () => {
     const timestamp = new Date().toLocaleString();
     const newContext = `${activeDraft.context}\n\n[Email Precedente (AI)]:\n${activeDraft.result}\n\n[Risposta Cliente - ${timestamp}]:\n${clientReply}`;
@@ -93,17 +92,21 @@ export default function App() {
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           onOpenSettings={() => setIsSettingsOpen(true)}
         />
-        <div className="w-full flex lg:flex-row flex-col lg:justify-center justify-start overflow-y-auto">
-          <EmailEditor
-            draft={activeDraft}
-            isLoading={isLoading}
-            onUpdate={(u) => updateDraft(activeId, u)}
-            onRefine={handleRefine}
-            onPaste={pasteFromClipboard}
-            onContinueThread={() => setThreadModalOpen(true)}
-            onCopyResult={copyToClipboard}
-          />
-          <SidebarControls draft={activeDraft} onUpdate={(u) => updateDraft(activeId, u)} />
+        <div className="w-full flex xl:flex-row flex-col xl:justify-center justify-start overflow-y-auto">
+          <div className="order-2 xl:order-1 flex-1">
+            <EmailEditor
+              draft={activeDraft}
+              isLoading={isLoading}
+              onUpdate={(u) => updateDraft(activeId, u)}
+              onRefine={handleRefine}
+              onPaste={pasteFromClipboard}
+              onContinueThread={() => setThreadModalOpen(true)}
+              onCopyResult={copyToClipboard}
+            />
+          </div>
+          <div className="order-1 xl:order-2">
+            <SidebarControls draft={activeDraft} onUpdate={(u) => updateDraft(activeId, u)} />
+          </div>
         </div>
       </main>
       <SettingsModal

@@ -65,10 +65,63 @@ Scrivi SOLO il testo dell'email, in ${opts.language}.`;
 
   // Default to Gemini
   const genAI = new GoogleGenerativeAI(apiKey);
-  const geminiModel = genAI.getGenerativeModel({ model: model || 'gemini-2.0-flash' });
+  const geminiModel = genAI.getGenerativeModel({
+    model: model || 'gemini-2.0-flash',
+  });
   const result = await geminiModel.generateContent({
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
     generationConfig: { temperature: opts.temperature },
   });
   return result.response.text();
 };
+
+export async function getModels(provider: Provider, apiKey: string): Promise<string[]> {
+  if (provider === 'openai') {
+    const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
+    return openai.models.list().then((res) => res.data.map((model) => model.id));
+  }
+
+  if (provider === 'anthropic') {
+    const anthropic = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+    return anthropic.models.list().then((res) => res.data.map((model) => model.display_name));
+  }
+
+  let OriginalModels: any = {};
+  const nameOnlyList: string[] = [];
+  const realModelNames: string[] = [];
+  let GeminiModelsSplitByComma = '';
+  // gemini api
+  return await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`)
+    .then((response) => {
+      return response.json();
+    })
+    .then((data) => {
+      OriginalModels = data;
+      console.log(data);
+      // get the name only list
+
+      OriginalModels.models.forEach((model: { name: string }) => {
+        nameOnlyList.push(model.name);
+      });
+
+      // get the real model name
+
+      nameOnlyList.forEach((model) => {
+        const name = model.split('/')[1];
+        realModelNames.push(name);
+      });
+
+      GeminiModelsSplitByComma = realModelNames.join(',');
+
+      // print
+      console.log(GeminiModelsSplitByComma);
+      console.log(nameOnlyList);
+      console.log(realModelNames);
+
+      return realModelNames;
+    })
+    .catch((error) => {
+      console.error(error);
+      return [];
+    });
+}

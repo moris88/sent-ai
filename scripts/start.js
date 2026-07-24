@@ -4,6 +4,8 @@ import { config } from 'dotenv';
 // Carica le variabili dal file .env
 config();
 
+console.log(">>> Variabili d'ambiente caricate:", process.env);
+
 const appMode = process.env.VITE_APP || 'web'; // Default a web se non specificato
 
 console.log(`>>> Avvio dell'applicazione in modalità: ${appMode}`);
@@ -14,9 +16,11 @@ let args = [];
 if (appMode === 'desktop') {
   command = 'npm';
   args = ['run', 'dev:electron', '--', '--no-sandbox'];
-} else {
+} else if (appMode === 'web') {
   command = 'npm';
-  args = ['run', 'dev'];
+  args = ['run', 'dev:web'];
+} else {
+  console.error(`Modalità sconosciuta: ${appMode}. Usa "desktop" o "web".`);
 }
 
 const child = spawn(command, args, {
