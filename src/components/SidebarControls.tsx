@@ -155,7 +155,7 @@ export const SidebarControls = ({ draft, onUpdate }: ControlsProps) => {
                   type="text"
                   value={draft.keywords}
                   onChange={(e) => onUpdate({ keywords: e.target.value })}
-                  placeholder="Es: Kubernetes, API..."
+                  placeholder="Es: urgente, follow-up, meeting"
                   className="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg dark:text-white"
                 />
               </div>

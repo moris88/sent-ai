@@ -19,6 +19,9 @@ export default function App() {
   const [modelName, setModelName] = useState(
     localStorage.getItem('sentai_model') || 'gemini-2.0-flash'
   );
+  const [additionalPrompt, setAdditionalPrompt] = useState(
+    localStorage.getItem('sentai_additional_prompt') || ''
+  );
   const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(null);
   const [threadModalOpen, setThreadModalOpen] = useState(false);
   const [clientReply, setClientReply] = useState('');
@@ -64,6 +67,7 @@ export default function App() {
     localStorage.setItem('sentai_provider', provider);
     localStorage.setItem('sentai_api_key', apiKey);
     localStorage.setItem('sentai_model', modelName);
+    localStorage.setItem('sentai_additional_prompt', additionalPrompt);
     setIsSettingsOpen(false);
   };
   const handleContinueThread = () => {
@@ -119,6 +123,8 @@ export default function App() {
         onSave={saveSettings}
         setProvider={setProvider}
         provider={provider}
+        additionalPrompt={additionalPrompt}
+        setAdditionalPrompt={setAdditionalPrompt}
       />
       <DeleteConfirmationModal
         isOpen={!!deleteConfirmation}

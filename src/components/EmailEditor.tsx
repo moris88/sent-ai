@@ -1,6 +1,7 @@
-import { ChevronDown, ChevronUp, Copy, History, RefreshCw, Sparkles } from 'lucide-react';
+import { ChevronDown, ChevronUp, Copy, FileText, History, RefreshCw, Sparkles } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { EmailDraft } from '../types';
+import { extractTextFromPDF } from '../utils/pdf';
 
 interface EditorProps {
   draft: EmailDraft;
@@ -23,12 +24,28 @@ export const EmailEditor = ({
 }: EditorProps) => {
   const resultSectionRef = useRef<HTMLOptionElement>(null);
   const [isContextOpen, setIsContextOpen] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (draft.result && resultSectionRef.current) {
       resultSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [draft.result]);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === 'application/pdf') {
+      try {
+        const text = await extractTextFromPDF(file);
+        onUpdate({
+          context: draft.context ? `${draft.context}\n\n[PDF: ${file.name}]\n${text}` : `[PDF: ${file.name}]\n${text}`,
+        });
+      } catch (error) {
+        console.error('Error extracting text from PDF:', error);
+        alert('Impossibile estrarre il testo dal PDF.');
+      }
+    }
+  };
 
   return (
     <div className="flex-1 p-4 w-full min-w-125">
@@ -61,6 +78,20 @@ export const EmailEditor = ({
               <div className="flex items-center gap-2">
                 <button
                   type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm flex items-center gap-1"
+                >
+                  <FileText className="w-3 h-3" /> PDF
+                </button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  accept=".pdf"
+                  className="hidden"
+                />
+                <button
+                  type="button"
                   onClick={() => onUpdate({ context: '' })}
                   className="text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm"
                 >
@@ -79,7 +110,7 @@ export const EmailEditor = ({
               <div className="p-4">
                 <textarea
                   value={draft.context}
-                  placeholder="Incolla qui il contesto della conversazione..."
+                  placeholder="Incolla qui il contesto della conversazione o carica un PDF..."
                   onChange={(e) => onUpdate({ context: e.target.value })}
                   className="w-full h-64 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y text-lg text-slate-900 dark:text-white"
                 />

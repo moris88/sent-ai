@@ -28,20 +28,21 @@ export const refineEmail = async (options: RefineOptions): Promise<string> => {
   const { provider, apiKey, model, ...opts } = options;
 
   const prompt = `
-Sei un assistente AI specializzato nella scrittura di email professionali.
-PERSONA: ${opts.persona}
-TONO: ${opts.tone}
-DETTAGLIO: ${opts.detail}
-LINGUA: ${opts.language}
-STRUTTURA: ${opts.structure}
-${opts.keywords ? `PAROLE CHIAVE: ${opts.keywords}` : ''}
-${opts.generateSubject ? `GENERA ANCHE UN OGGETTO EMAIL.` : ''}
+  You are an AI assistant specialized in writing professional emails.
 
-CONTESTO: ${opts.context || 'Nessun contesto.'}
-BOZZA: ${opts.draft}
-${opts.prompt ? `PROMPT AGGIUNTIVO: ${opts.prompt}` : ''}
+  <persona>${opts.persona}</persona>
+  <tone>${opts.tone}</tone>
+  <detail>${opts.detail}</detail>
+  <language>${opts.language}</language>
+  <structure>${opts.structure}</structure>
+  ${opts.keywords ? `<keywords>${opts.keywords}</keywords>` : ""}
+  <generate_subject>${opts.generateSubject ? 'Generate an email subject.' : 'No generate an email subject.'}</generate_subject>
 
-Scrivi SOLO il testo dell'email, in ${opts.language}.`;
+  <context>${opts.context || "No context provided."}</context>
+  <draft>${opts.draft}</draft>
+  ${opts.prompt ? `<additional_prompt>${opts.prompt}</additional_prompt>` : ""}
+
+  Write ONLY the email text in ${opts.language}.`;
 
   if (provider === 'openai') {
     const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });

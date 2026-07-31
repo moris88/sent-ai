@@ -40,4 +40,7 @@ export const LANGUAGES = [
   { id: 'it', label: 'Italiano' },
   { id: 'en', label: 'English' },
   { id: 'fr', label: 'Français' },
+  { id: 'es', label: 'Español' },
+  { id: 'de', label: 'Deutsch' },
+  { id: 'pt', label: 'Português' },
 ];

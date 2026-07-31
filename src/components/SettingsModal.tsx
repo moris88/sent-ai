@@ -12,6 +12,8 @@ export const SettingsModal = ({
   provider,
   setProvider,
   onSave,
+  additionalPrompt,
+  setAdditionalPrompt,
 }: any) => {
   const [availableModels, setAvailableModels] = React.useState<string[]>([]);
 
@@ -95,6 +97,21 @@ export const SettingsModal = ({
               >
                 {options}
               </select>
+            </div>
+            <div>
+              <label
+                htmlFor="additional-prompt"
+                className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
+              >
+                Prompt Aggiuntivo
+              </label>
+              <textarea
+                id="additional-prompt"
+                value={additionalPrompt}
+                onChange={(e) => setAdditionalPrompt(e.target.value)}
+                placeholder="Istruzioni aggiuntive per l'AI..."
+                className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 dark:text-white h-24"
+              />
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Le credenziali vengono salvate solo nel tuo browser.

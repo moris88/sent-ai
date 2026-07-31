@@ -16,12 +16,14 @@ export const useEmailLogic = (
       const provider = (localStorage.getItem('sentai_provider') as any) || 'gemini';
       const apiKey = localStorage.getItem('sentai_api_key') || '';
       const model = localStorage.getItem('sentai_model') || '';
+      const prompt = localStorage.getItem('sentai_additional_prompt') || '';
 
       const refinedText = await refineEmail({
         ...activeDraft,
         provider,
         apiKey,
         model,
+        prompt,
       });
       updateActiveDraft({ result: refinedText });
     } catch (error: any) {
