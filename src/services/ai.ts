@@ -35,12 +35,12 @@ export const refineEmail = async (options: RefineOptions): Promise<string> => {
   <detail>${opts.detail}</detail>
   <language>${opts.language}</language>
   <structure>${opts.structure}</structure>
-  ${opts.keywords ? `<keywords>${opts.keywords}</keywords>` : ""}
+  ${opts.keywords ? `<keywords>${opts.keywords}</keywords>` : ''}
   <generate_subject>${opts.generateSubject ? 'Generate an email subject.' : 'No generate an email subject.'}</generate_subject>
 
-  <context>${opts.context || "No context provided."}</context>
+  <context>${opts.context || 'No context provided.'}</context>
   <draft>${opts.draft}</draft>
-  ${opts.prompt ? `<additional_prompt>${opts.prompt}</additional_prompt>` : ""}
+  ${opts.prompt ? `<additional_prompt>${opts.prompt}</additional_prompt>` : ''}
 
   Write ONLY the email text in ${opts.language}.`;
 

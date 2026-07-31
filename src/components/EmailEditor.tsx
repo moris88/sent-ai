@@ -38,7 +38,9 @@ export const EmailEditor = ({
       try {
         const text = await extractTextFromPDF(file);
         onUpdate({
-          context: draft.context ? `${draft.context}\n\n[PDF: ${file.name}]\n${text}` : `[PDF: ${file.name}]\n${text}`,
+          context: draft.context
+            ? `${draft.context}\n\n[PDF: ${file.name}]\n${text}`
+            : `[PDF: ${file.name}]\n${text}`,
         });
       } catch (error) {
         console.error('Error extracting text from PDF:', error);
