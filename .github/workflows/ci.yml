@@ -22,5 +22,7 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Lint
         run: pnpm lint
-      - name: Build
+      - name: Build Web
         run: pnpm build
+      - name: Build Desktop
+        run: pnpm build:electron
