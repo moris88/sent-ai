@@ -21,6 +21,7 @@ type RefineOptions = {
   provider: Provider;
   apiKey: string;
   model?: string;
+  prompt?: string;
 };
 
 export const refineEmail = async (options: RefineOptions): Promise<string> => {
@@ -38,6 +39,7 @@ ${opts.generateSubject ? `GENERA ANCHE UN OGGETTO EMAIL.` : ''}
 
 CONTESTO: ${opts.context || 'Nessun contesto.'}
 BOZZA: ${opts.draft}
+${opts.prompt ? `PROMPT AGGIUNTIVO: ${opts.prompt}` : ''}
 
 Scrivi SOLO il testo dell'email, in ${opts.language}.`;
 
