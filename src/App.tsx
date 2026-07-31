@@ -36,6 +36,9 @@ export default function App() {
       persona: 'dev',
       tone: 'professional',
       detail: 'balanced',
+      temperature: 0.5,
+      keywords: '',
+      generateSubject: false,
       updatedAt: Date.now(),
     };
 
