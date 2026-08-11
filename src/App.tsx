@@ -139,7 +139,7 @@ export default function App() {
         />
         <button
           type="button"
-          className="absolute top-20 right-6 cursor-pointer bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold p-2 rounded-full flex items-center justify-center gap-2 transition-all disabled:cursor-not-allowed"
+          className="absolute bottom-6 right-6 cursor-pointer bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold p-2 rounded-full flex items-center justify-center gap-2 transition-all disabled:cursor-not-allowed"
           onClick={() => setShowSidebarControls((prev) => !prev)}
           title="Mostra i controlli della sidebar"
         >
