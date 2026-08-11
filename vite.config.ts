@@ -5,7 +5,6 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 dotenv.config();
-console.log('VITE_APP:', process.env.VITE_APP);
 
 export default defineConfig({
   build: {

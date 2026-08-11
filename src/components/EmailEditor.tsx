@@ -25,6 +25,7 @@ interface EditorProps {
   onCopyResult: () => void;
   onDiscard: () => void;
   onRegenerate: () => void;
+  checkApiKey: () => boolean;
 }
 
 export const EmailEditor = ({
@@ -37,6 +38,7 @@ export const EmailEditor = ({
   onCopyResult,
   onDiscard,
   onRegenerate,
+  checkApiKey,
 }: EditorProps) => {
   const resultSectionRef = useRef<HTMLOptionElement>(null);
   const [isContextOpen, setIsContextOpen] = useState(false);
@@ -50,11 +52,17 @@ export const EmailEditor = ({
   }, [draft.result]);
 
   const handleGenerateTitle = async () => {
+    if (!checkApiKey()) return;
     setIsGeneratingTitle(true);
     try {
-      const apiKey = localStorage.getItem('sentai_api_key') || '';
-      const provider = (localStorage.getItem('sentai_provider') as any) || 'gemini';
-      const model = localStorage.getItem('sentai_model') || undefined;
+      const apiKey = localStorage.getItem('sentai_api_key');
+      const provider = localStorage.getItem('sentai_provider') as any;
+      const model = localStorage.getItem('sentai_model');
+
+      if (!apiKey || !provider || !model) {
+        setIsGeneratingTitle(false);
+        return;
+      }
 
       const title = await generateTitle(draft.context, draft.draft, provider, apiKey, model);
       onUpdate({ title });
@@ -82,8 +90,11 @@ export const EmailEditor = ({
     }
   };
 
+  const classNameButton =
+    'cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm flex items-center gap-1';
+
   return (
-    <div className="flex-1 p-4 w-full min-w-125 overflow-y-auto">
+    <div className="flex-1 md:p-4 p-1 w-full overflow-y-auto">
       <div className="max-w-5xl mx-auto space-y-6 w-full pb-8">
         <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 flex items-center gap-2">
           <input
@@ -128,9 +139,10 @@ export const EmailEditor = ({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm flex items-center gap-1"
+                  className={classNameButton}
+                  title="Incolla da PDF"
                 >
-                  <FileText className="w-3 h-3" /> Incolla da PDF
+                  <FileText className="w-3 h-3" />
                 </button>
                 <input
                   type="file"
@@ -142,17 +154,18 @@ export const EmailEditor = ({
                 <button
                   type="button"
                   onClick={() => onPaste('context')}
-                  className="cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm flex items-center gap-1"
+                  className={classNameButton}
+                  title="Incolla da appunti"
                 >
-                  <Upload className="w-3 h-3" /> Incolla
+                  <Upload className="w-3 h-3" />
                 </button>
                 <button
                   type="button"
                   onClick={() => onUpdate({ context: '' })}
                   disabled={!draft.context}
-                  className="cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                  className={classNameButton}
                 >
-                  <Trash2 className="w-3 h-3" /> Svuota
+                  <Trash2 className="w-3 h-3" />
                 </button>
               </div>
             </div>
@@ -176,33 +189,37 @@ export const EmailEditor = ({
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="cursor-pointer flex items-center gap-1 text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 px-2 py-1 rounded shadow-sm"
+                  className="cursor-pointer flex items-center gap-1 text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 px-2 py-1 rounded shadow-sm border border-slate-200 dark:border-slate-600"
                   onClick={onContinueThread}
                   title="Aggiungi al contesto la bozza e continua il thread"
                 >
-                  <History className="w-3 h-3" /> Continua Thread
+                  <History className="w-3 h-3" /><span className="hidden md:inline">Continua Thread</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => navigator.clipboard.writeText(draft.draft)}
-                  className="cursor-pointer flex items-center gap-1 text-xs bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm"
+                  disabled={!draft.draft}
+                  className={classNameButton}
+                  title="Copia la bozza negli appunti"
                 >
-                  <Copy className="w-3 h-3" /> Copia
+                  <Copy className="w-3 h-3" />
                 </button>
                 <button
                   type="button"
                   onClick={() => onPaste('draft')}
-                  className="cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm flex items-center gap-1"
+                  className={classNameButton}
+                  title="Incolla da appunti"
                 >
-                  <Upload className="w-3 h-3" /> Incolla
+                  <Upload className="w-3 h-3" />
                 </button>
                 <button
                   type="button"
                   onClick={() => onUpdate({ draft: '' })}
                   disabled={!draft.draft}
-                  className="cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                  className={classNameButton}
+                  title="Svuota la bozza"
                 >
-                  <Trash2 className="w-3 h-3" /> Svuota
+                  <Trash2 className="w-3 h-3" />
                 </button>
               </div>
             </div>
@@ -217,7 +234,7 @@ export const EmailEditor = ({
             <div className="p-4 flex justify-center items-center w-full gap-4">
               <button
                 type="button"
-                className="cursor-pointer bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all disabled:cursor-not-allowed"
+                className="cursor-pointer bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-all disabled:cursor-not-allowed"
                 onClick={onRefine}
                 disabled={isLoading || !draft.draft}
                 title="Raffina la bozza con l'AI"
@@ -246,9 +263,9 @@ export const EmailEditor = ({
             ) : (
               <>
                 <div className="flex items-center justify-between">
-                  <div className="font-bold text-lg text-blue-800 dark:text-blue-300 flex items-center gap-2">
+                  <p className="font-bold md:text-lg text-sm text-blue-800 dark:text-blue-300 flex items-center gap-2">
                     <Sparkles className="w-5 h-5" /> Risultato Raffinato
-                  </div>
+                  </p>
                   <div className="flex gap-2">
                     <button
                       type="button"
@@ -256,8 +273,7 @@ export const EmailEditor = ({
                       className="cursor-pointer flex items-center justify-center gap-2 text-sm text-red-700 dark:text-red-300 bg-white/50 dark:bg-red-900/50 hover:bg-white dark:hover:bg-red-800 p-2 custom-lg:px-3 custom-lg:py-1.5 rounded-md font-medium border border-red-200 dark:border-red-700 transition-colors"
                       title="Scarta"
                     >
-                      <Trash2 className="w-4 h-4" />{' '}
-                      <span className="hidden custom-lg:block">Scarta</span>
+                      <Trash2 className="w-4 h-4" />
                     </button>
                     <button
                       type="button"
@@ -265,8 +281,7 @@ export const EmailEditor = ({
                       className="cursor-pointer flex items-center justify-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-blue-900/50 hover:bg-white dark:hover:bg-blue-800 p-2 custom-lg:px-3 custom-lg:py-1.5 rounded-md font-medium border border-blue-200 dark:border-blue-700 transition-colors"
                       title="Rigenera"
                     >
-                      <RefreshCw className="w-4 h-4" />{' '}
-                      <span className="hidden custom-lg:block">Rigenera</span>
+                      <RefreshCw className="w-4 h-4" />
                     </button>
                     <button
                       type="button"
@@ -274,8 +289,7 @@ export const EmailEditor = ({
                       className="cursor-pointer flex items-center justify-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-blue-900/50 hover:bg-white dark:hover:bg-blue-800 p-2 custom-lg:px-3 custom-lg:py-1.5 rounded-md font-medium border border-blue-200 dark:border-blue-700 transition-colors"
                       title="Aggiorna Bozza"
                     >
-                      <Upload className="w-4 h-4" />{' '}
-                      <span className="hidden custom-lg:block">Aggiorna Bozza</span>
+                      <Upload className="w-4 h-4" />
                     </button>
                     <button
                       type="button"
@@ -283,8 +297,7 @@ export const EmailEditor = ({
                       className="cursor-pointer flex items-center justify-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-blue-900/50 hover:bg-white dark:hover:bg-blue-800 p-2 custom-lg:px-3 custom-lg:py-1.5 rounded-md font-medium border border-blue-200 dark:border-blue-700 transition-colors"
                       title="Copia"
                     >
-                      <Copy className="w-4 h-4" />{' '}
-                      <span className="hidden custom-lg:block">Copia</span>
+                      <Copy className="w-4 h-4" />
                     </button>
                   </div>
                 </div>

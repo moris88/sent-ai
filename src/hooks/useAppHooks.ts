@@ -31,7 +31,7 @@ export const useAppHooks = () => {
         draft: '',
         result: '',
         persona: 'dev',
-        tone: 'professional',
+        tone: 'formal',
         detail: 'balanced',
         language: 'it',
         structure: 'paragraphs',

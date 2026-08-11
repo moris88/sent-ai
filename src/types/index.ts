@@ -16,18 +16,60 @@ export interface EmailDraft {
 }
 
 export const PERSONAS = [
-  { id: 'dev', label: 'Sviluppatore', icon: '💻' },
-  { id: 'pm', label: 'Project Manager', icon: '📋' },
-  { id: 'support', label: 'Supporto Tecnico', icon: '🛠️' },
-  { id: 'sales', label: 'Sales/Account', icon: '🤝' },
-  { id: 'it', label: 'Tecnico IT', icon: '🖥️' },
+  {
+    id: 'dev',
+    label: 'Sviluppatore',
+    icon: '💻',
+    description: "L'ai impersona uno sviluppatore software",
+  },
+  {
+    id: 'pm',
+    label: 'Project Manager',
+    icon: '📋',
+    description: "L'ai impersona un project manager",
+  },
+  {
+    id: 'support',
+    label: 'Supporto Tecnico',
+    icon: '🛠️',
+    description: "L'ai impersona un tecnico di supporto",
+  },
+  {
+    id: 'sales',
+    label: 'Sales/Account',
+    icon: '🤝',
+    description: "L'ai impersona un professionista delle vendite",
+  },
+  { id: 'it', label: 'Tecnico IT', icon: '🖥️', description: "L'ai impersona un tecnico IT" },
 ];
 
 export const TONES = [
-  { id: 'professional', label: 'Professionale' },
-  { id: 'friendly', label: 'Amichevole' },
-  { id: 'technical', label: 'Tecnico' },
-  { id: 'urgent', label: 'Urgente' },
+  { id: 'formal', label: 'Formale', icon: '👔', description: "L'ai userà un tono formale" },
+  { id: 'friendly', label: 'Amichevole', icon: '😊', description: "L'ai userà un tono amichevole" },
+  { id: 'technical', label: 'Tecnico', icon: '⚙️', description: "L'ai userà un tono tecnico" },
+  {
+    id: 'persuasive',
+    label: 'Persuasivo',
+    icon: '💡',
+    description: "L'ai userà un tono persuasivo",
+  },
+  { id: 'empathetic', label: 'Empatico', icon: '💙', description: "L'ai userà un tono empatico" },
+  { id: 'concise', label: 'Conciso', icon: '✂️', description: "L'ai userà un tono conciso" },
+  {
+    id: 'sarcastic',
+    label: 'Sarcastico',
+    icon: '😏',
+    description: "L'ai userà un tono sarcastico",
+  },
+  { id: 'critical', label: 'Critico', icon: '🧐', description: "L'ai userà un tono critico" },
+  { id: 'analytical', label: 'Analitico', icon: '📊', description: "L'ai userà un tono analitico" },
+  {
+    id: 'reflective',
+    label: 'Riflessivo',
+    icon: '🧘',
+    description: "L'ai userà un tono riflessivo",
+  },
+  { id: 'thoughtful', label: 'Premuroso', icon: '🤔', description: "L'ai userà un tono premuroso" },
 ];
 
 export const DETAIL_LEVELS = [

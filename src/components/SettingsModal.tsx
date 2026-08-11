@@ -19,7 +19,6 @@ export const SettingsModal = ({
 
   React.useEffect(() => {
     getModels(provider, apiKey).then((models) => {
-      console.log('Available models:', models);
       setAvailableModels(models);
     });
   }, [provider, apiKey]);

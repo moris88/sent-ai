@@ -1,28 +1,31 @@
-import { ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Bot, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import type { EmailDraft } from '../types';
 import { DETAIL_LEVELS, LANGUAGES, PERSONAS, TONES } from '../types';
 
 interface ControlsProps {
+  isOpen: boolean;
   draft: EmailDraft;
   onUpdate: (updates: Partial<EmailDraft>) => void;
-  onClose?: () => void;
 }
 
-export const SidebarControls = ({ draft, onUpdate, onClose }: ControlsProps) => {
+export const SidebarControls = ({ isOpen, draft, onUpdate }: ControlsProps) => {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   return (
-    <aside className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-      <div className="max-w-5xl mx-auto space-y-6 w-full pb-8 relative overflow-y-auto">
-        <button
-          className="absolute top-5 right-5 cursor-pointer text-slate-400 hover:text-slate-600 dark:text-slate-300"
-          type="button"
-          onClick={onClose}
-        >
-          <X className="w-6 h-6" />
-        </button>
-        <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 space-y-6">
+    <aside
+      className={`${
+        isOpen
+          ? 'fixed inset-y-0 right-0 z-40 bg-white dark:bg-slate-900 w-full md:w-80 h-full border-l border-slate-200 dark:border-slate-700'
+          : 'w-0'
+      } bg-white dark:bg-slate-900 transition-all duration-300 flex flex-col overflow-hidden xl:relative xl:w-80 xl:border-l xl:border-slate-200 xl:dark:border-slate-700 pt-16`}
+    >
+      <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 p-4 border-b border-slate-200 dark:border-slate-700 mb-4">
+        <Bot className="w-5 h-5 text-blue-600" /> Controlli AI
+      </h2>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-6 min-w-[320px]">
+        <section className="space-y-6">
           <div>
             <label
               htmlFor="persona"
@@ -35,11 +38,14 @@ export const SidebarControls = ({ draft, onUpdate, onClose }: ControlsProps) => 
                 <button
                   type="button"
                   key={p.id}
-                  onClick={() => onUpdate({ persona: p.id })}
+                  onClick={() => {
+                    onUpdate({ persona: p.id });
+                  }}
                   className={`cursor-pointer flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${draft.persona === p.id
-                    ? 'border-blue-600 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200 font-semibold'
-                    : 'border-slate-100 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-slate-600 dark:text-slate-400'
+                      ? 'border-blue-600 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200 font-semibold'
+                    : 'border-slate-200 dark:border-slate-600 hover:border-blue-600 text-slate-600 dark:text-slate-400'
                     }`}
+                  title={p.description}
                 >
                   <span className="text-xl">{p.icon}</span> {p.label}
                 </button>
@@ -60,12 +66,13 @@ export const SidebarControls = ({ draft, onUpdate, onClose }: ControlsProps) => 
                   type="button"
                   key={t.id}
                   onClick={() => onUpdate({ tone: t.id })}
-                  className={`cursor-pointer px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${draft.tone === t.id
-                    ? 'bg-slate-800 dark:bg-blue-600 text-white border-slate-800 dark:border-blue-600'
-                    : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500'
+                  className={`cursor-pointer px-3 py-1.5 rounded-lg text-sm font-medium border transition-all flex items-center gap-1.5 ${draft.tone === t.id
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500'
                     }`}
+                  title={t.description}
                 >
-                  {t.label}
+                  {t.icon} {t.label}
                 </button>
               ))}
             </div>
@@ -76,7 +83,7 @@ export const SidebarControls = ({ draft, onUpdate, onClose }: ControlsProps) => 
             <button
               type="button"
               onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-              className="cursor-pointer w-full flex items-center justify-between text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider"
+              className="cursor-pointer w-full flex items-center justify-between text-sm font-bold dark:text-slate-300 uppercase tracking-wider bg-blue-600 p-2 rounded-lg text-white hover:bg-blue-700 transition-colors"
             >
               Impostazioni Avanzate
               {isAdvancedOpen ? (
@@ -115,15 +122,15 @@ export const SidebarControls = ({ draft, onUpdate, onClose }: ControlsProps) => 
                   >
                     Dettaglio
                   </label>
-                  <div className="flex bg-slate-100 dark:bg-slate-600 p-1 rounded-lg">
+                  <div className="flex bg-slate-100 dark:bg-slate-600 p-1 rounded-lg gap-1">
                     {DETAIL_LEVELS.map((d) => (
                       <button
                         type="button"
                         key={d.id}
                         onClick={() => onUpdate({ detail: d.id })}
                         className={`cursor-pointer flex-1 py-1.5 rounded-md text-sm font-medium transition-all ${draft.detail === d.id
-                          ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm'
-                          : 'text-slate-500 hover:text-blue-600 dark:text-slate-300 hover:bg-white dark:hover:bg-gray-800'
+                            ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm'
+                            : 'text-slate-500 hover:text-blue-600 dark:text-slate-300 hover:bg-white dark:hover:bg-gray-800'
                           }`}
                       >
                         {d.label}
@@ -162,7 +169,7 @@ export const SidebarControls = ({ draft, onUpdate, onClose }: ControlsProps) => 
                     value={draft.keywords}
                     onChange={(e) => onUpdate({ keywords: e.target.value })}
                     placeholder="Es: urgente, follow-up, meeting"
-                    className="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg dark:text-white"
+                    className="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg dark:text-white ring-blue-600 focus:ring-1 focus:outline-none"
                   />
                 </div>
                 <label

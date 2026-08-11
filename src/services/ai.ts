@@ -17,7 +17,7 @@ type RefineOptions = {
   temperature?: number;
   provider: Provider;
   apiKey: string;
-  model?: string;
+  model: string;
   prompt?: string;
 };
 
@@ -44,7 +44,7 @@ export const refineEmail = async (options: RefineOptions): Promise<string> => {
   if (provider === 'openai') {
     const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
     const completion = await openai.chat.completions.create({
-      model: model || 'gpt-4o',
+      model: model,
       messages: [{ role: 'user', content: prompt }],
       temperature: opts.temperature,
     });
@@ -54,7 +54,7 @@ export const refineEmail = async (options: RefineOptions): Promise<string> => {
   if (provider === 'anthropic') {
     const anthropic = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
     const message = await anthropic.messages.create({
-      model: model || 'claude-3-5-sonnet-20241022',
+      model: model,
       max_tokens: 1024,
       messages: [{ role: 'user', content: prompt }],
       temperature: opts.temperature,
@@ -66,7 +66,7 @@ export const refineEmail = async (options: RefineOptions): Promise<string> => {
   // Default to Gemini
   const genAI = new GoogleGenerativeAI(apiKey);
   const geminiModel = genAI.getGenerativeModel({
-    model: model || 'gemini-2.0-flash',
+    model: model,
   });
   const result = await geminiModel.generateContent({
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
@@ -89,7 +89,7 @@ export async function getModels(provider: Provider, apiKey: string): Promise<str
   let OriginalModels: any = {};
   const nameOnlyList: string[] = [];
   const realModelNames: string[] = [];
-  let GeminiModelsSplitByComma = '';
+
   // gemini api
   return await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`)
     .then((response) => {
@@ -97,7 +97,6 @@ export async function getModels(provider: Provider, apiKey: string): Promise<str
     })
     .then((data) => {
       OriginalModels = data;
-      console.log(data);
       // get the name only list
 
       OriginalModels.models.forEach((model: { name: string }) => {
@@ -110,13 +109,6 @@ export async function getModels(provider: Provider, apiKey: string): Promise<str
         const name = model.split('/')[1];
         realModelNames.push(name);
       });
-
-      GeminiModelsSplitByComma = realModelNames.join(',');
-
-      // print
-      console.log(GeminiModelsSplitByComma);
-      console.log(nameOnlyList);
-      console.log(realModelNames);
 
       return realModelNames;
     })
@@ -131,7 +123,7 @@ export const generateTitle = async (
   draft: string,
   provider: Provider,
   apiKey: string,
-  model?: string
+  model: string
 ): Promise<string> => {
   const prompt = `
   Analyze the following email context and draft and generate a concise, descriptive title for the conversation.
@@ -144,7 +136,7 @@ export const generateTitle = async (
   if (provider === 'openai') {
     const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
     const completion = await openai.chat.completions.create({
-      model: model || 'gpt-4o',
+      model: model,
       messages: [{ role: 'user', content: prompt }],
     });
     return completion.choices[0].message.content?.trim() || 'Nuova conversazione';
@@ -153,7 +145,7 @@ export const generateTitle = async (
   if (provider === 'anthropic') {
     const anthropic = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
     const message = await anthropic.messages.create({
-      model: model || 'claude-3-5-sonnet-20241022',
+      model: model,
       max_tokens: 100,
       messages: [{ role: 'user', content: prompt }],
     });
@@ -163,7 +155,7 @@ export const generateTitle = async (
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const geminiModel = genAI.getGenerativeModel({
-    model: model || 'gemini-2.0-flash',
+    model: model,
   });
   const result = await geminiModel.generateContent(prompt);
   return result.response.text().trim() || 'Nuova conversazione';

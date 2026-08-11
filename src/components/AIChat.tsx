@@ -5,15 +5,16 @@ import type { EmailDraft } from '../types';
 
 interface AIChatProps {
   drafts: EmailDraft[];
+  checkApiKey: () => boolean;
 }
 
-export const AIChat = ({ drafts }: AIChatProps) => {
+export const AIChat = ({ drafts, checkApiKey }: AIChatProps) => {
   const [messages, setMessages] = useState<{ id: string; role: 'user' | 'ai'; text: string }[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || !checkApiKey()) return;
 
     const userMessage = input;
     setInput('');
