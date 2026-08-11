@@ -17,7 +17,7 @@ export const SidebarControls = ({ isOpen, draft, onUpdate }: ControlsProps) => {
       className={`${
         isOpen
           ? 'fixed inset-y-0 right-0 z-40 bg-white dark:bg-slate-900 w-full md:w-80 h-full border-l border-slate-200 dark:border-slate-700'
-        : 'fixed inset-y-0 right-0 z-40 w-0 h-full'
+          : 'fixed inset-y-0 right-0 z-40 w-0 h-full'
       } bg-white dark:bg-slate-900 transition-all duration-300 flex flex-col overflow-hidden xl:relative xl:w-80 xl:border-l xl:border-slate-200 xl:dark:border-slate-700`}
     >
       <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 p-4 border-b border-slate-200 dark:border-slate-700">
@@ -41,10 +41,11 @@ export const SidebarControls = ({ isOpen, draft, onUpdate }: ControlsProps) => {
                   onClick={() => {
                     onUpdate({ persona: p.id });
                   }}
-                  className={`cursor-pointer flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${draft.persona === p.id
+                  className={`cursor-pointer flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
+                    draft.persona === p.id
                       ? 'border-blue-600 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200 font-semibold'
-                    : 'border-slate-200 dark:border-slate-600 hover:border-blue-600 text-slate-600 dark:text-slate-400'
-                    }`}
+                      : 'border-slate-200 dark:border-slate-600 hover:border-blue-600 text-slate-600 dark:text-slate-400'
+                  }`}
                   title={p.description}
                 >
                   <span className="text-xl">{p.icon}</span> {p.label}
@@ -66,10 +67,11 @@ export const SidebarControls = ({ isOpen, draft, onUpdate }: ControlsProps) => {
                   type="button"
                   key={t.id}
                   onClick={() => onUpdate({ tone: t.id })}
-                  className={`cursor-pointer px-3 py-1.5 rounded-lg text-sm font-medium border transition-all flex items-center gap-1.5 ${draft.tone === t.id
+                  className={`cursor-pointer px-3 py-1.5 rounded-lg text-sm font-medium border transition-all flex items-center gap-1.5 ${
+                    draft.tone === t.id
                       ? 'bg-blue-600 text-white border-blue-600'
                       : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500'
-                    }`}
+                  }`}
                   title={t.description}
                 >
                   {t.icon} {t.label}
@@ -128,10 +130,11 @@ export const SidebarControls = ({ isOpen, draft, onUpdate }: ControlsProps) => {
                         type="button"
                         key={d.id}
                         onClick={() => onUpdate({ detail: d.id })}
-                        className={`cursor-pointer flex-1 py-1.5 rounded-md text-sm font-medium transition-all ${draft.detail === d.id
+                        className={`cursor-pointer flex-1 py-1.5 rounded-md text-sm font-medium transition-all ${
+                          draft.detail === d.id
                             ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm'
                             : 'text-slate-500 hover:text-blue-600 dark:text-slate-300 hover:bg-white dark:hover:bg-gray-800'
-                          }`}
+                        }`}
                       >
                         {d.label}
                       </button>

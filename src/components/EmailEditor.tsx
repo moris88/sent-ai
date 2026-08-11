@@ -193,7 +193,8 @@ export const EmailEditor = ({
                   onClick={onContinueThread}
                   title="Aggiungi al contesto la bozza e continua il thread"
                 >
-                  <History className="w-3 h-3" /><span className="hidden md:inline">Continua Thread</span>
+                  <History className="w-3 h-3" />
+                  <span className="hidden md:inline">Continua Thread</span>
                 </button>
                 <button
                   type="button"
