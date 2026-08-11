@@ -116,7 +116,7 @@ export const Sidebar = ({
         )}
       </div>
 
-      {import.meta.env.VITE_APP === 'desktop' && (
+      {import.meta.env.VITE_APP !== 'desktop' && (
         <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-center">
           <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">Versione desktop:</p>
           <div className="flex flex-col gap-2">

@@ -70,7 +70,7 @@ export const AIChat = ({ drafts, checkApiKey }: AIChatProps) => {
 
   return (
     <div
-      className={`flex flex-col ${import.meta.env.VITE_APP === 'desktop' ? 'h-[calc(100vh-220px)]' : 'h-[calc(100vh-130px)]'} bg-slate-50 dark:bg-slate-950 p-4 overflow-y-auto`}
+      className={`flex flex-col ${import.meta.env.VITE_APP !== 'desktop' ? 'h-[calc(100vh-220px)]' : 'h-[calc(100vh-130px)]'} bg-slate-50 dark:bg-slate-950 p-4 overflow-y-auto`}
     >
       <p className="italic text-sm text-gray-500">
         Qui puoi chiedere qualsiasi cosa, riguardo alle tue email raffinate. La conversazione non
