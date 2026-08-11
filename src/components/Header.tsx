@@ -1,4 +1,4 @@
-import { History, Mail, Moon, Settings, Sun } from 'lucide-react';
+import { Mail, MenuIcon, Moon, Settings, Sun } from 'lucide-react';
 import { useDarkMode } from '../hooks/useDarkMode';
 
 interface HeaderProps {
@@ -13,11 +13,11 @@ export const Header = ({ isSidebarOpen, toggleSidebar, onOpenSettings }: HeaderP
     <header className="h-16 px-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between bg-white dark:bg-slate-800 shrink-0">
       <div className="flex items-center gap-4">
         <button
-          className="cursor-pointer p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer md:hidden"
+          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer lg:hidden"
           type="button"
           onClick={toggleSidebar}
         >
-          <History
+          <MenuIcon
             className={`w-5 h-5 ${isSidebarOpen ? 'text-blue-600' : 'text-slate-600 dark:text-slate-400'}`}
           />
         </button>
@@ -32,7 +32,7 @@ export const Header = ({ isSidebarOpen, toggleSidebar, onOpenSettings }: HeaderP
       </div>
       <div className="flex items-center gap-2">
         <button
-          className="cursor-pointer p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors cursor-pointer"
+          className="cursor-pointer p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors"
           type="button"
           onClick={toggleTheme}
         >
@@ -43,7 +43,7 @@ export const Header = ({ isSidebarOpen, toggleSidebar, onOpenSettings }: HeaderP
           )}
         </button>
         <button
-          className="cursor-pointer p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors cursor-pointer"
+          className="cursor-pointer p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors"
           type="button"
           onClick={onOpenSettings}
         >

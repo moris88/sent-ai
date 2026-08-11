@@ -52,7 +52,7 @@ const LocalStorageLimitModal = ({ isOpen, onClose, usagePercent }: LocalStorageL
         </div>
         <div className="flex pt-2">
           <button
-            className="cursor-pointer flex-1 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-sm transition-colors cursor-pointer"
+            className="cursor-pointer flex-1 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-sm transition-colors"
             type="button"
             onClick={onClose}
           >

@@ -12,6 +12,7 @@ import { useAppHooks } from './hooks/useAppHooks';
 import { useEmailLogic } from './hooks/useEmailLogic';
 import type { EmailDraft } from './types';
 import { getLocalStorageSize, isLocalStorageApproachingLimit } from './utils/storage';
+import { WrenchIcon } from 'lucide-react';
 
 export default function App() {
   const { drafts, updateDraft, createDraft, deleteDraft, loading } = useAppHooks();
@@ -33,6 +34,7 @@ export default function App() {
   // Web-only storage management
   const [showCleanupModal, setShowCleanupModal] = useState(false);
   const [showStorageModal, setShowStorageModal] = useState(false);
+  const [showSidebarControls, setShowSidebarControls] = useState(false);
   const [expiredDrafts, setExpiredDrafts] = useState<EmailDraft[]>([]);
   const initialCheckDone = useRef(false);
 
@@ -129,30 +131,32 @@ export default function App() {
         onDelete={setDeleteConfirmation}
         updateDraft={updateDraft}
       />
-      <main className="flex-1 flex flex-col h-full overflow-hidden">
+      <main className="flex-1 flex flex-col h-full overflow-hidden relative">
         <Header
           isSidebarOpen={isSidebarOpen}
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           onOpenSettings={() => setIsSettingsOpen(true)}
         />
-        <div className="w-full flex xl:flex-row flex-col xl:justify-center justify-start overflow-y-auto">
-          <div className="order-2 xl:order-1 flex-1">
-            <EmailEditor
-              draft={activeDraft}
-              isLoading={isLoading}
-              onUpdate={(u) => updateDraft(activeId, u)}
-              onRefine={handleRefine}
-              onPaste={pasteFromClipboard}
-              onContinueThread={() => setThreadModalOpen(true)}
-              onCopyResult={copyToClipboard}
-              onDiscard={() => updateDraft(activeId, { result: '' })}
-              onRegenerate={handleRefine}
-            />
-          </div>
-          <div className="order-1 xl:order-2">
-            <SidebarControls draft={activeDraft} onUpdate={(u) => updateDraft(activeId, u)} />
-          </div>
-        </div>
+        <button
+          type="button"
+          className="absolute top-20 right-6 cursor-pointer bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold p-2 rounded-full flex items-center justify-center gap-2 transition-all disabled:cursor-not-allowed"
+          onClick={() => setShowSidebarControls((prev) => !prev)}
+          title="Mostra i controlli della sidebar"
+        >
+          <WrenchIcon className="w-5 h-5" />
+        </button>
+        {showSidebarControls &&(<SidebarControls draft={activeDraft} onUpdate={(u) => updateDraft(activeId, u)} />)}
+        <EmailEditor
+          draft={activeDraft}
+          isLoading={isLoading}
+          onUpdate={(u) => updateDraft(activeId, u)}
+          onRefine={handleRefine}
+          onPaste={pasteFromClipboard}
+          onContinueThread={() => setThreadModalOpen(true)}
+          onCopyResult={copyToClipboard}
+          onDiscard={() => updateDraft(activeId, { result: '' })}
+          onRegenerate={handleRefine}
+        />
       </main>
       <SettingsModal
         isOpen={isSettingsOpen}
@@ -185,6 +189,9 @@ export default function App() {
         onConfirm={handleContinueThread}
         value={clientReply}
         onChange={setClientReply}
+        onPaste={() => {
+          navigator.clipboard.readText().then((text) => setClientReply(text));
+        }}
       />
       <OldDraftsCleanupModal
         isOpen={showCleanupModal}

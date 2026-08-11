@@ -30,7 +30,7 @@ export const Sidebar = ({
     <aside
       className={`${
         isOpen ? 'fixed inset-0 z-40 bg-white dark:bg-slate-900 w-full h-full' : 'w-0'
-      } bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 transition-all duration-300 flex flex-col overflow-hidden md:relative md:w-80`}
+      } bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 transition-all duration-300 flex flex-col overflow-hidden lg:relative lg:w-80`}
     >
       <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between min-w-[320px]">
         <div className="flex items-center gap-2">
@@ -56,8 +56,9 @@ export const Sidebar = ({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            className="cursor-pointer md:hidden p-2 text-slate-700 dark:text-slate-300"
+            className="cursor-pointer lg:hidden p-2 text-slate-700 dark:text-slate-300"
             onClick={onClose}
+            title="Chiudi Sidebar"
           >
             <ChevronDown className="w-6 h-6 rotate-90" />
           </button>
@@ -66,6 +67,7 @@ export const Sidebar = ({
               type="button"
               className="cursor-pointer p-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               onClick={createDraft}
+              title="Crea Nuova Bozza"
             >
               <Plus className="w-4 h-4" />
             </button>

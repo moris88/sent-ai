@@ -115,6 +115,7 @@ export const EmailEditor = ({
                 type="button"
                 onClick={() => setIsContextOpen(!isContextOpen)}
                 className="cursor-pointer flex items-center gap-2 hover:text-blue-600 transition-colors"
+                title={isContextOpen ? 'Chiudi Contesto' : 'Apri Contesto'}
               >
                 {isContextOpen ? (
                   <ChevronUp className="w-4 h-4" />
@@ -129,7 +130,7 @@ export const EmailEditor = ({
                   onClick={() => fileInputRef.current?.click()}
                   className="cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm flex items-center gap-1"
                 >
-                  <FileText className="w-3 h-3" /> PDF
+                  <FileText className="w-3 h-3" /> Incolla da PDF
                 </button>
                 <input
                   type="file"
@@ -140,17 +141,18 @@ export const EmailEditor = ({
                 />
                 <button
                   type="button"
-                  onClick={() => onUpdate({ context: '' })}
-                  className="cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm"
+                  onClick={() => onPaste('context')}
+                  className="cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm flex items-center gap-1"
                 >
-                  Svuota
+                  <Upload className="w-3 h-3" /> Incolla
                 </button>
                 <button
                   type="button"
-                  onClick={() => onPaste('context')}
-                  className="cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm"
+                  onClick={() => onUpdate({ context: '' })}
+                  disabled={!draft.context}
+                  className="cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                 >
-                  Incolla
+                  <Trash2 className="w-3 h-3" /> Svuota
                 </button>
               </div>
             </div>
@@ -176,22 +178,31 @@ export const EmailEditor = ({
                   type="button"
                   className="cursor-pointer flex items-center gap-1 text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 px-2 py-1 rounded shadow-sm"
                   onClick={onContinueThread}
+                  title="Aggiungi al contesto la bozza e continua il thread"
                 >
                   <History className="w-3 h-3" /> Continua Thread
                 </button>
                 <button
                   type="button"
-                  onClick={() => onUpdate({ draft: '' })}
-                  className="cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm"
+                  onClick={() => navigator.clipboard.writeText(draft.draft)}
+                  className="cursor-pointer flex items-center gap-1 text-xs bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm"
                 >
-                  Svuota
+                  <Copy className="w-3 h-3" /> Copia
                 </button>
                 <button
                   type="button"
                   onClick={() => onPaste('draft')}
-                  className="cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm"
+                  className="cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm flex items-center gap-1"
                 >
-                  Incolla
+                  <Upload className="w-3 h-3" /> Incolla
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onUpdate({ draft: '' })}
+                  disabled={!draft.draft}
+                  className="cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                >
+                  <Trash2 className="w-3 h-3" /> Svuota
                 </button>
               </div>
             </div>
@@ -199,16 +210,17 @@ export const EmailEditor = ({
               <textarea
                 value={draft.draft}
                 onChange={(e) => onUpdate({ draft: e.target.value })}
-                placeholder="Scrivi qui la tua bozza di email..."
+                placeholder="Scrivi qui la tua bozza di email, poi clicca su 'Raffina Email' e lascia fare all'AI."
                 className="w-full h-64 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y text-lg text-slate-900 dark:text-white"
               />
             </div>
             <div className="p-4 flex justify-center items-center w-full gap-4">
               <button
                 type="button"
-                className="cursor-pointer bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all"
+                className="cursor-pointer bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all disabled:cursor-not-allowed"
                 onClick={onRefine}
                 disabled={isLoading || !draft.draft}
+                title="Raffina la bozza con l'AI"
               >
                 {isLoading ? (
                   <RefreshCw className="w-5 h-5 animate-spin" />
