@@ -241,30 +241,36 @@ export const EmailEditor = ({
                     <button
                       type="button"
                       onClick={onDiscard}
-                      className="cursor-pointer flex items-center gap-2 text-sm text-red-700 dark:text-red-300 bg-white/50 dark:bg-red-900/50 hover:bg-white dark:hover:bg-red-800 px-3 py-1.5 rounded-md font-medium border border-red-200 dark:border-red-700 transition-colors"
+                      className="cursor-pointer flex items-center justify-center gap-2 text-sm text-red-700 dark:text-red-300 bg-white/50 dark:bg-red-900/50 hover:bg-white dark:hover:bg-red-800 p-2 md:px-3 md:py-1.5 rounded-md font-medium border border-red-200 dark:border-red-700 transition-colors"
+                      title="Scarta"
                     >
-                      <Trash2 className="w-4 h-4" /> Scarta
+                      <Trash2 className="w-4 h-4" /> <span className="hidden md:block">Scarta</span>
                     </button>
                     <button
                       type="button"
                       onClick={onRegenerate}
-                      className="cursor-pointer flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-blue-900/50 hover:bg-white dark:hover:bg-blue-800 px-3 py-1.5 rounded-md font-medium border border-blue-200 dark:border-blue-700 transition-colors"
+                      className="cursor-pointer flex items-center justify-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-blue-900/50 hover:bg-white dark:hover:bg-blue-800 p-2 md:px-3 md:py-1.5 rounded-md font-medium border border-blue-200 dark:border-blue-700 transition-colors"
+                      title="Rigenera"
                     >
-                      <RefreshCw className="w-4 h-4" /> Rigenera
+                      <RefreshCw className="w-4 h-4" />{' '}
+                      <span className="hidden md:block">Rigenera</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => onUpdate({ draft: draft.result })}
-                      className="cursor-pointer flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-blue-900/50 hover:bg-white dark:hover:bg-blue-800 px-3 py-1.5 rounded-md font-medium border border-blue-200 dark:border-blue-700 transition-colors"
+                      className="cursor-pointer flex items-center justify-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-blue-900/50 hover:bg-white dark:hover:bg-blue-800 p-2 md:px-3 md:py-1.5 rounded-md font-medium border border-blue-200 dark:border-blue-700 transition-colors"
+                      title="Aggiorna Bozza"
                     >
-                      <Upload className="w-4 h-4" /> Aggiorna Bozza
+                      <Upload className="w-4 h-4" />{' '}
+                      <span className="hidden md:block">Aggiorna Bozza</span>
                     </button>
                     <button
                       type="button"
                       onClick={onCopyResult}
-                      className="cursor-pointer flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-blue-900/50 hover:bg-white dark:hover:bg-blue-800 px-3 py-1.5 rounded-md font-medium border border-blue-200 dark:border-blue-700 transition-colors"
+                      className="cursor-pointer flex items-center justify-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-blue-900/50 hover:bg-white dark:hover:bg-blue-800 p-2 md:px-3 md:py-1.5 rounded-md font-medium border border-blue-200 dark:border-blue-700 transition-colors"
+                      title="Copia"
                     >
-                      <Copy className="w-4 h-4" /> Copia
+                      <Copy className="w-4 h-4" /> <span className="hidden md:block">Copia</span>
                     </button>
                   </div>
                 </div>

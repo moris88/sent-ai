@@ -42,14 +42,14 @@ const OldDraftsCleanupModal = ({
         </div>
         <div className="flex gap-3 pt-2">
           <button
-            className="cursor-pointer flex-1 py-2 rounded-lg bg-slate-100 dark:bg-gray-700 hover:bg-slate-200 dark:hover:bg-gray-600 text-slate-700 dark:text-slate-200 font-semibold text-sm transition-colors cursor-pointer"
+            className="cursor-pointer flex-1 py-2 rounded-lg bg-slate-100 dark:bg-gray-700 hover:bg-slate-200 dark:hover:bg-gray-600 text-slate-700 dark:text-slate-200 font-semibold text-sm transition-colors"
             type="button"
             onClick={onClose}
           >
             Annulla
           </button>
           <button
-            className="cursor-pointer flex-1 py-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700 font-semibold text-sm transition-colors cursor-pointer"
+            className="cursor-pointer flex items-center justify-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-blue-900/50 hover:bg-white dark:hover:bg-blue-800 p-2 md:px-3 md:py-1.5 rounded-md font-medium border border-blue-200 dark:border-blue-700 transition-colors"
             type="button"
             onClick={onConfirm}
           >
