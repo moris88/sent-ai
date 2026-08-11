@@ -17,10 +17,10 @@ export const SidebarControls = ({ isOpen, draft, onUpdate }: ControlsProps) => {
       className={`${
         isOpen
           ? 'fixed inset-y-0 right-0 z-40 bg-white dark:bg-slate-900 w-full md:w-80 h-full border-l border-slate-200 dark:border-slate-700'
-          : 'w-0'
-      } bg-white dark:bg-slate-900 transition-all duration-300 flex flex-col overflow-hidden xl:relative xl:w-80 xl:border-l xl:border-slate-200 xl:dark:border-slate-700 pt-16`}
+        : 'fixed inset-y-0 right-0 z-40 w-0 h-full'
+      } bg-white dark:bg-slate-900 transition-all duration-300 flex flex-col overflow-hidden xl:relative xl:w-80 xl:border-l xl:border-slate-200 xl:dark:border-slate-700`}
     >
-      <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 p-4 border-b border-slate-200 dark:border-slate-700 mb-4">
+      <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 p-4 border-b border-slate-200 dark:border-slate-700">
         <Bot className="w-5 h-5 text-blue-600" /> Controlli AI
       </h2>
 
