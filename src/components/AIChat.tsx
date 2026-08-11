@@ -1,4 +1,4 @@
-import { Bot, Send, User } from 'lucide-react';
+import { Bot, SendHorizonal, User } from 'lucide-react';
 import { useState } from 'react';
 import { refineEmail } from '../services/ai';
 import type { EmailDraft } from '../types';
@@ -56,7 +56,7 @@ export const AIChat = ({ drafts, checkApiKey }: AIChatProps) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-950 p-4">
+    <div className="flex flex-col h-[calc(100vh-130px)] bg-slate-50 dark:bg-slate-950 p-4 overflow-y-auto">
       <p className="italic text-sm text-gray-500">
         Qui puoi chiedere qualsiasi cosa, riguardo alle tue email raffinate. La conversazione non
         viene salvata, ad ogni caricamento della pagina.
@@ -94,7 +94,7 @@ export const AIChat = ({ drafts, checkApiKey }: AIChatProps) => {
           onClick={handleSend}
           disabled={isLoading}
         >
-          <Send className="w-4 h-4" />
+          <SendHorizonal className="w-4 h-4" />
         </button>
       </div>
     </div>
