@@ -117,7 +117,7 @@ export const SettingsModal = ({
             </p>
           </div>
           <button
-            className="cursor-pointer w-full bg-slate-900 dark:bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-black transition-colors"
+            className="cursor-pointer w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-800 transition-colors"
             type="button"
             onClick={onSave}
           >

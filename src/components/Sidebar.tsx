@@ -26,6 +26,8 @@ export const Sidebar = ({
 }: SidebarProps) => {
   const [view, setView] = useState<'drafts' | 'chat'>('drafts');
 
+  const classNameButton =
+    'cursor-pointer text-xs bg-blue-600 hover:bg-blue-800 px-2 py-1 rounded shadow-sm flex items-center justify-center gap-1 text-white font-bold';
   return (
     <aside
       className={`${
@@ -114,14 +116,14 @@ export const Sidebar = ({
         )}
       </div>
 
-      {import.meta.env.VITE_APP !== 'desktop' && (
+      {import.meta.env.VITE_APP === 'desktop' && (
         <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-center">
           <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">Versione desktop:</p>
           <div className="flex flex-col gap-2">
             <a
               href="https://github.com/moris88/sent-ai/releases"
               download
-              className="text-xs bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-1.5 px-3 rounded-lg font-semibold hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors"
+              className={classNameButton}
             >
               Scarica
             </a>

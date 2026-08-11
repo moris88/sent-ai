@@ -22,9 +22,18 @@ export const AIChat = ({ drafts, checkApiKey }: AIChatProps) => {
     setIsLoading(true);
 
     try {
-      const apiKey = localStorage.getItem('sentai_api_key') || '';
-      const provider = (localStorage.getItem('sentai_provider') as any) || 'gemini';
-      const model = localStorage.getItem('sentai_model') || '';
+      const apiKey = localStorage.getItem('sentai_api_key');
+      const provider = (localStorage.getItem('sentai_provider') as any);
+      const model = localStorage.getItem('sentai_model');
+
+      if (!apiKey || !provider || !model) {
+        setMessages((prev) => [
+          ...prev,
+          { id: crypto.randomUUID(), role: 'ai', text: 'Errore: API key, provider o modello non configurati.' },
+        ]);
+        setIsLoading(false);
+        return;
+      }
 
       const context = drafts
         .map((d) => `Title: ${d.title}\nDraft: ${d.draft}\nResult: ${d.result}\n---`)
@@ -56,7 +65,7 @@ export const AIChat = ({ drafts, checkApiKey }: AIChatProps) => {
   };
 
   return (
-    <div className={`flex flex-col ${import.meta.env.VITE_APP !== 'desktop' ? 'h-[calc(100vh-220px)]' : 'h-[calc(100vh-130px)]'} bg-slate-50 dark:bg-slate-950 p-4 overflow-y-auto`}>
+    <div className={`flex flex-col ${import.meta.env.VITE_APP === 'desktop' ? 'h-[calc(100vh-220px)]' : 'h-[calc(100vh-130px)]'} bg-slate-50 dark:bg-slate-950 p-4 overflow-y-auto`}>
       <p className="italic text-sm text-gray-500">
         Qui puoi chiedere qualsiasi cosa, riguardo alle tue email raffinate. La conversazione non
         viene salvata, ad ogni caricamento della pagina.
