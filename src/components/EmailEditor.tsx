@@ -83,7 +83,7 @@ export const EmailEditor = ({
   };
 
   return (
-    <div className="flex-1 p-4 w-full min-w-125">
+    <div className="flex-1 p-4 w-full min-w-125 overflow-y-auto">
       <div className="max-w-5xl mx-auto space-y-6 w-full pb-8">
         <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 flex items-center gap-2">
           <input

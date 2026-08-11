@@ -39,7 +39,7 @@ export const SettingsModal = ({
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold dark:text-white">Impostazioni</h2>
             <button
-              className="cursor-pointer text-slate-400 hover:text-slate-600 dark:text-slate-300 cursor-pointer"
+              className="cursor-pointer text-slate-400 hover:text-slate-600 dark:text-slate-300"
               type="button"
               onClick={onClose}
             >
@@ -118,7 +118,7 @@ export const SettingsModal = ({
             </p>
           </div>
           <button
-            className="cursor-pointer w-full bg-slate-900 dark:bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-black transition-colors cursor-pointer"
+            className="cursor-pointer w-full bg-slate-900 dark:bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-black transition-colors"
             type="button"
             onClick={onSave}
           >

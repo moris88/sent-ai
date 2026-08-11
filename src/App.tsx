@@ -131,7 +131,7 @@ export default function App() {
         onDelete={setDeleteConfirmation}
         updateDraft={updateDraft}
       />
-      <main className="flex-1 flex flex-col h-full relative overflow-y-auto">
+      <main className="flex-1 flex flex-col h-full relative">
         <Header
           isSidebarOpen={isSidebarOpen}
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -145,7 +145,7 @@ export default function App() {
         >
           <WrenchIcon className="w-5 h-5" />
         </button>
-        {showSidebarControls &&(<SidebarControls draft={activeDraft} onUpdate={(u) => updateDraft(activeId, u)} />)}
+        {showSidebarControls &&(<SidebarControls draft={activeDraft} onUpdate={(u) => updateDraft(activeId, u)} onClose={() => setShowSidebarControls(false)}/>)}
         <EmailEditor
           draft={activeDraft}
           isLoading={isLoading}

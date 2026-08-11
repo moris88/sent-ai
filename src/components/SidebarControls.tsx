@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, X } from 'lucide-react';
 import { useState } from 'react';
 import type { EmailDraft } from '../types';
 import { DETAIL_LEVELS, LANGUAGES, PERSONAS, TONES } from '../types';
@@ -6,14 +6,22 @@ import { DETAIL_LEVELS, LANGUAGES, PERSONAS, TONES } from '../types';
 interface ControlsProps {
   draft: EmailDraft;
   onUpdate: (updates: Partial<EmailDraft>) => void;
+  onClose?: () => void;
 }
 
-export const SidebarControls = ({ draft, onUpdate }: ControlsProps) => {
+export const SidebarControls = ({ draft, onUpdate, onClose }: ControlsProps) => {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   return (
-    <aside className="flex-1 p-4 w-full min-w-125">
-      <div className="max-w-5xl mx-auto space-y-6 w-full pb-8">
+    <aside className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+      <div className="max-w-5xl mx-auto space-y-6 w-full pb-8 relative overflow-y-auto">
+        <button
+          className="absolute top-5 right-5 cursor-pointer text-slate-400 hover:text-slate-600 dark:text-slate-300"
+          type="button"
+          onClick={onClose}
+        >
+          <X className="w-6 h-6" />
+        </button>
         <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 space-y-6">
           <div>
             <label
@@ -29,8 +37,8 @@ export const SidebarControls = ({ draft, onUpdate }: ControlsProps) => {
                   key={p.id}
                   onClick={() => onUpdate({ persona: p.id })}
                   className={`cursor-pointer flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${draft.persona === p.id
-                      ? 'border-blue-600 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200 font-semibold'
-                      : 'border-slate-100 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-slate-600 dark:text-slate-400'
+                    ? 'border-blue-600 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200 font-semibold'
+                    : 'border-slate-100 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-slate-600 dark:text-slate-400'
                     }`}
                 >
                   <span className="text-xl">{p.icon}</span> {p.label}
@@ -53,8 +61,8 @@ export const SidebarControls = ({ draft, onUpdate }: ControlsProps) => {
                   key={t.id}
                   onClick={() => onUpdate({ tone: t.id })}
                   className={`cursor-pointer px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${draft.tone === t.id
-                      ? 'bg-slate-800 dark:bg-blue-600 text-white border-slate-800 dark:border-blue-600'
-                      : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500'
+                    ? 'bg-slate-800 dark:bg-blue-600 text-white border-slate-800 dark:border-blue-600'
+                    : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500'
                     }`}
                 >
                   {t.label}
@@ -114,8 +122,8 @@ export const SidebarControls = ({ draft, onUpdate }: ControlsProps) => {
                         key={d.id}
                         onClick={() => onUpdate({ detail: d.id })}
                         className={`cursor-pointer flex-1 py-1.5 rounded-md text-sm font-medium transition-all ${draft.detail === d.id
-                            ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm'
-                            : 'text-slate-500 hover:text-blue-600 dark:text-slate-300 hover:bg-white dark:hover:bg-gray-800'
+                          ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm'
+                          : 'text-slate-500 hover:text-blue-600 dark:text-slate-300 hover:bg-white dark:hover:bg-gray-800'
                           }`}
                       >
                         {d.label}
