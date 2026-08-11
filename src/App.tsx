@@ -131,7 +131,7 @@ export default function App() {
         onDelete={setDeleteConfirmation}
         updateDraft={updateDraft}
       />
-      <main className="flex-1 flex flex-col h-full overflow-hidden relative">
+      <main className="flex-1 flex flex-col h-full relative overflow-y-auto">
         <Header
           isSidebarOpen={isSidebarOpen}
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
