@@ -4,9 +4,6 @@ import OpenAI from 'openai';
 
 export type Provider = 'gemini' | 'openai' | 'anthropic';
 
-export const getProvider = (): Provider =>
-  (localStorage.getItem('sentai_provider') as Provider) || 'gemini';
-
 type RefineOptions = {
   persona: string;
   tone: string;
@@ -128,3 +125,46 @@ export async function getModels(provider: Provider, apiKey: string): Promise<str
       return [];
     });
 }
+
+export const generateTitle = async (
+  context: string,
+  draft: string,
+  provider: Provider,
+  apiKey: string,
+  model?: string
+): Promise<string> => {
+  const prompt = `
+  Analyze the following email context and draft and generate a concise, descriptive title for the conversation.
+  Return ONLY the title text, no quotes or additional formatting.
+  
+  <context>${context || 'No context provided.'}</context>
+  <draft>${draft || 'No draft provided.'}</draft>
+  `;
+
+  if (provider === 'openai') {
+    const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
+    const completion = await openai.chat.completions.create({
+      model: model || 'gpt-4o',
+      messages: [{ role: 'user', content: prompt }],
+    });
+    return completion.choices[0].message.content?.trim() || 'Nuova conversazione';
+  }
+
+  if (provider === 'anthropic') {
+    const anthropic = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+    const message = await anthropic.messages.create({
+      model: model || 'claude-3-5-sonnet-20241022',
+      max_tokens: 100,
+      messages: [{ role: 'user', content: prompt }],
+    });
+    // @ts-expect-error
+    return message.content[0].text?.trim() || 'Nuova conversazione';
+  }
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const geminiModel = genAI.getGenerativeModel({
+    model: model || 'gemini-2.0-flash',
+  });
+  const result = await geminiModel.generateContent(prompt);
+  return result.response.text().trim() || 'Nuova conversazione';
+};

@@ -1,5 +1,17 @@
-import { ChevronDown, ChevronUp, Copy, FileText, History, RefreshCw, Sparkles } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  FileText,
+  History,
+  RefreshCw,
+  Sparkles,
+  Trash2,
+  Upload,
+  Wand2,
+} from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { generateTitle } from '../services/ai';
 import type { EmailDraft } from '../types';
 import { extractTextFromPDF } from '../utils/pdf';
 
@@ -11,6 +23,8 @@ interface EditorProps {
   onPaste: (target: 'context' | 'draft') => void;
   onContinueThread: () => void;
   onCopyResult: () => void;
+  onDiscard: () => void;
+  onRegenerate: () => void;
 }
 
 export const EmailEditor = ({
@@ -21,9 +35,12 @@ export const EmailEditor = ({
   onPaste,
   onContinueThread,
   onCopyResult,
+  onDiscard,
+  onRegenerate,
 }: EditorProps) => {
   const resultSectionRef = useRef<HTMLOptionElement>(null);
-  const [isContextOpen, setIsContextOpen] = useState(true);
+  const [isContextOpen, setIsContextOpen] = useState(false);
+  const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -31,6 +48,22 @@ export const EmailEditor = ({
       resultSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [draft.result]);
+
+  const handleGenerateTitle = async () => {
+    setIsGeneratingTitle(true);
+    try {
+      const apiKey = localStorage.getItem('sentai_api_key') || '';
+      const provider = (localStorage.getItem('sentai_provider') as any) || 'gemini';
+      const model = localStorage.getItem('sentai_model') || undefined;
+
+      const title = await generateTitle(draft.context, draft.draft, provider, apiKey, model);
+      onUpdate({ title });
+    } catch (error) {
+      console.error('Error generating title:', error);
+    } finally {
+      setIsGeneratingTitle(false);
+    }
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -52,14 +85,27 @@ export const EmailEditor = ({
   return (
     <div className="flex-1 p-4 w-full min-w-125">
       <div className="max-w-5xl mx-auto space-y-6 w-full pb-8">
-        <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4">
+        <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 flex items-center gap-2">
           <input
             type="text"
             value={draft.title}
             onChange={(e) => onUpdate({ title: e.target.value })}
             placeholder="Titolo della conversazione email..."
-            className="w-full text-xl font-bold text-slate-900 dark:text-white outline-none placeholder:text-slate-400 bg-transparent"
+            className="flex-1 text-xl font-bold text-slate-900 dark:text-white outline-none placeholder:text-slate-400 bg-transparent"
           />
+          <button
+            type="button"
+            className="cursor-pointer p-2 text-slate-400 hover:text-blue-600 transition-colors"
+            onClick={handleGenerateTitle}
+            disabled={isGeneratingTitle}
+            title="Genera titolo con AI"
+          >
+            {isGeneratingTitle ? (
+              <RefreshCw className="w-5 h-5 animate-spin" />
+            ) : (
+              <Wand2 className="w-5 h-5" />
+            )}
+          </button>
         </section>
 
         <div className="flex flex-col gap-6 w-full">
@@ -68,7 +114,7 @@ export const EmailEditor = ({
               <button
                 type="button"
                 onClick={() => setIsContextOpen(!isContextOpen)}
-                className="flex items-center gap-2 hover:text-blue-600 transition-colors"
+                className="cursor-pointer flex items-center gap-2 hover:text-blue-600 transition-colors"
               >
                 {isContextOpen ? (
                   <ChevronUp className="w-4 h-4" />
@@ -81,7 +127,7 @@ export const EmailEditor = ({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm flex items-center gap-1"
+                  className="cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm flex items-center gap-1"
                 >
                   <FileText className="w-3 h-3" /> PDF
                 </button>
@@ -95,14 +141,14 @@ export const EmailEditor = ({
                 <button
                   type="button"
                   onClick={() => onUpdate({ context: '' })}
-                  className="text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm"
+                  className="cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm"
                 >
                   Svuota
                 </button>
                 <button
                   type="button"
                   onClick={() => onPaste('context')}
-                  className="text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm"
+                  className="cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm"
                 >
                   Incolla
                 </button>
@@ -128,15 +174,22 @@ export const EmailEditor = ({
               <div className="flex items-center gap-2">
                 <button
                   type="button"
+                  className="cursor-pointer flex items-center gap-1 text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 px-2 py-1 rounded shadow-sm"
+                  onClick={onContinueThread}
+                >
+                  <History className="w-3 h-3" /> Continua Thread
+                </button>
+                <button
+                  type="button"
                   onClick={() => onUpdate({ draft: '' })}
-                  className="text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm"
+                  className="cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm"
                 >
                   Svuota
                 </button>
                 <button
                   type="button"
                   onClick={() => onPaste('draft')}
-                  className="text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm"
+                  className="cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm"
                 >
                   Incolla
                 </button>
@@ -153,9 +206,9 @@ export const EmailEditor = ({
             <div className="p-4 flex justify-center items-center w-full gap-4">
               <button
                 type="button"
+                className="cursor-pointer bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all"
                 onClick={onRefine}
                 disabled={isLoading || !draft.draft}
-                className=" bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all"
               >
                 {isLoading ? (
                   <RefreshCw className="w-5 h-5 animate-spin" />
@@ -187,15 +240,29 @@ export const EmailEditor = ({
                   <div className="flex gap-2">
                     <button
                       type="button"
-                      onClick={onContinueThread}
-                      className="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-blue-900/50 hover:bg-white dark:hover:bg-blue-800 px-3 py-1.5 rounded-md font-medium border border-blue-200 dark:border-blue-700 transition-colors"
+                      onClick={onDiscard}
+                      className="cursor-pointer flex items-center gap-2 text-sm text-red-700 dark:text-red-300 bg-white/50 dark:bg-red-900/50 hover:bg-white dark:hover:bg-red-800 px-3 py-1.5 rounded-md font-medium border border-red-200 dark:border-red-700 transition-colors"
                     >
-                      <History className="w-4 h-4" /> Continua Thread
+                      <Trash2 className="w-4 h-4" /> Scarta
+                    </button>
+                    <button
+                      type="button"
+                      onClick={onRegenerate}
+                      className="cursor-pointer flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-blue-900/50 hover:bg-white dark:hover:bg-blue-800 px-3 py-1.5 rounded-md font-medium border border-blue-200 dark:border-blue-700 transition-colors"
+                    >
+                      <RefreshCw className="w-4 h-4" /> Rigenera
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onUpdate({ draft: draft.result })}
+                      className="cursor-pointer flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-blue-900/50 hover:bg-white dark:hover:bg-blue-800 px-3 py-1.5 rounded-md font-medium border border-blue-200 dark:border-blue-700 transition-colors"
+                    >
+                      <Upload className="w-4 h-4" /> Aggiorna Bozza
                     </button>
                     <button
                       type="button"
                       onClick={onCopyResult}
-                      className="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-blue-900/50 hover:bg-white dark:hover:bg-blue-800 px-3 py-1.5 rounded-md font-medium border border-blue-200 dark:border-blue-700 transition-colors"
+                      className="cursor-pointer flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-blue-900/50 hover:bg-white dark:hover:bg-blue-800 px-3 py-1.5 rounded-md font-medium border border-blue-200 dark:border-blue-700 transition-colors"
                     >
                       <Copy className="w-4 h-4" /> Copia
                     </button>

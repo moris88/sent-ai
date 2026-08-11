@@ -1,13 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { DeleteConfirmationModal } from './components/DeleteConfirmationModal';
 import { EmailEditor } from './components/EmailEditor';
 import { Header } from './components/Header';
+import LocalStorageLimitModal from './components/LocalStorageLimitModal';
+import OldDraftsCleanupModal from './components/OldDraftsCleanupModal';
 import { SettingsModal } from './components/SettingsModal';
 import { Sidebar } from './components/Sidebar';
 import { SidebarControls } from './components/SidebarControls';
 import { ThreadModal } from './components/ThreadModal';
 import { useAppHooks } from './hooks/useAppHooks';
 import { useEmailLogic } from './hooks/useEmailLogic';
+import type { EmailDraft } from './types';
+import { getLocalStorageSize, isLocalStorageApproachingLimit } from './utils/storage';
 
 export default function App() {
   const { drafts, updateDraft, createDraft, deleteDraft, loading } = useAppHooks();
@@ -25,6 +29,38 @@ export default function App() {
   const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(null);
   const [threadModalOpen, setThreadModalOpen] = useState(false);
   const [clientReply, setClientReply] = useState('');
+
+  // Web-only storage management
+  const [showCleanupModal, setShowCleanupModal] = useState(false);
+  const [showStorageModal, setShowStorageModal] = useState(false);
+  const [expiredDrafts, setExpiredDrafts] = useState<EmailDraft[]>([]);
+  const initialCheckDone = useRef(false);
+
+  useEffect(() => {
+    if (initialCheckDone.current || import.meta.env.VITE_APP === 'desktop' || !drafts.length)
+      return;
+    initialCheckDone.current = true;
+
+    // Check old drafts
+    const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const expired = drafts.filter((d) => d.updatedAt < oneWeekAgo);
+    if (expired.length > 0) {
+      setExpiredDrafts(expired);
+      setShowCleanupModal(true);
+    }
+
+    // Check storage size (4MB threshold)
+    if (isLocalStorageApproachingLimit(4 * 1024 * 1024)) {
+      setShowStorageModal(true);
+    }
+  }, [drafts]);
+
+  const handleConfirmCleanup = () => {
+    for (const d of expiredDrafts) {
+      deleteDraft(d.id);
+    }
+    setShowCleanupModal(false);
+  };
 
   const activeDraft = drafts.find((d) => d.id === activeId) ||
     drafts[0] || {
@@ -109,6 +145,8 @@ export default function App() {
               onPaste={pasteFromClipboard}
               onContinueThread={() => setThreadModalOpen(true)}
               onCopyResult={copyToClipboard}
+              onDiscard={() => updateDraft(activeId, { result: '' })}
+              onRegenerate={handleRefine}
             />
           </div>
           <div className="order-1 xl:order-2">
@@ -147,6 +185,17 @@ export default function App() {
         onConfirm={handleContinueThread}
         value={clientReply}
         onChange={setClientReply}
+      />
+      <OldDraftsCleanupModal
+        isOpen={showCleanupModal}
+        onClose={() => setShowCleanupModal(false)}
+        onConfirm={handleConfirmCleanup}
+        expiredCount={expiredDrafts.length}
+      />
+      <LocalStorageLimitModal
+        isOpen={showStorageModal}
+        onClose={() => setShowStorageModal(false)}
+        usagePercent={(getLocalStorageSize() / (5 * 1024 * 1024)) * 100}
       />
     </div>
   );
