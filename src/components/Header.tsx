@@ -26,7 +26,7 @@ export const Header = ({ isSidebarOpen, toggleSidebar, onOpenSettings }: HeaderP
             <Mail className="text-white w-5 h-5" />
           </div>
           <h1 className="text-xl font-bold tracking-tight hidden sm:block text-slate-900 dark:text-white">
-            SentAI
+            SentAI (⚠️ Beta version)
           </h1>
         </div>
       </div>
