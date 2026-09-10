@@ -78,25 +78,32 @@ export default function App() {
 
   const activeDraft = drafts.find((d) => d.id === activeId) ||
     drafts[0] || {
-      id: 'placeholder',
-      title: '',
-      context: '',
-      draft: '',
-      result: '',
-      persona: 'dev',
-      tone: 'professional',
-      detail: 'balanced',
-      temperature: 0.5,
-      keywords: '',
-      generateSubject: false,
-      updatedAt: Date.now(),
-    };
+    id: 'placeholder',
+    title: '',
+    context: '',
+    draft: '',
+    result: '',
+    subject: '',
+    persona: 'dev',
+    tone: 'formal',
+    detail: 'balanced',
+    temperature: 0.5,
+    keywords: '',
+    generateSubject: false,
+    updatedAt: Date.now(),
+  };
 
-  const { isLoading, handleRefine, copyToClipboard, pasteFromClipboard } = useEmailLogic(
-    activeDraft,
-    (updates) => updateDraft(activeId, updates),
-    setIsSettingsOpen
-  );
+  const {
+    isLoading,
+    isGeneratingSubject,
+    isModifying,
+    handleRefine,
+    handleGenerateSubject,
+    handleModifyResult,
+    copyToClipboard,
+    copySubjectToClipboard,
+    pasteFromClipboard,
+  } = useEmailLogic(activeDraft, (updates) => updateDraft(activeId, updates), setIsSettingsOpen);
 
   if (loading) {
     return <div className="flex h-screen items-center justify-center">Caricamento...</div>;
@@ -125,7 +132,9 @@ export default function App() {
   };
   const handleContinueThread = () => {
     const timestamp = new Date().toLocaleString();
-    const newContext = `${activeDraft.context}\n\n[Email Precedente (AI)]:\n${activeDraft.result}\n\n[Risposta Cliente - ${timestamp}]:\n${clientReply}`;
+    // Usa il risultato raffinato se presente, altrimenti la bozza scritta manualmente, per non perdere il testo
+    const previousEmail = activeDraft.result || activeDraft.draft;
+    const newContext = `${activeDraft.context}\n\n[Email Precedente]:\n${previousEmail}\n\n[Risposta Cliente - ${timestamp}]:\n${clientReply}`;
     updateDraft(activeId, { context: newContext, draft: '', result: '' });
     setClientReply('');
     setThreadModalOpen(false);
@@ -154,6 +163,8 @@ export default function App() {
             <EmailEditor
               draft={activeDraft}
               isLoading={isLoading}
+              isGeneratingSubject={isGeneratingSubject}
+              isModifying={isModifying}
               onUpdate={(u) => updateDraft(activeId, u)}
               onRefine={() => checkApiKey() && handleRefine()}
               onPaste={pasteFromClipboard}
@@ -161,6 +172,9 @@ export default function App() {
               onCopyResult={copyToClipboard}
               onDiscard={() => updateDraft(activeId, { result: '' })}
               onRegenerate={() => checkApiKey() && handleRefine()}
+              onGenerateSubject={() => checkApiKey() && handleGenerateSubject()}
+              onCopySubject={copySubjectToClipboard}
+              onModifyResult={handleModifyResult}
               checkApiKey={checkApiKey}
             />
           </div>

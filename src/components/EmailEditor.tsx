@@ -1,23 +1,41 @@
 import {
+  CheckCircle2,
   ChevronDown,
   ChevronUp,
+  ClipboardPaste,
   Copy,
+  Edit3,
   FileText,
   History,
+  LayoutTemplate,
+  Mail,
+  Plus,
   RefreshCw,
+  Send,
   Sparkles,
   Trash2,
-  Upload,
   Wand2,
+  X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { generateTitle } from '../services/ai';
 import type { EmailDraft } from '../types';
 import { extractTextFromPDF } from '../utils/pdf';
 
+type Snippet = { id: string; label: string; text: string };
+
+const DEFAULT_SNIPPETS: Snippet[] = [
+  { id: 'greeting', label: 'Saluto', text: 'Buongiorno,\n\n' },
+  { id: 'thanks', label: 'Ringraziamento', text: 'Grazie per la tua risposta.\n\n' },
+  { id: 'follow-up', label: 'Attesa riscontro', text: 'Resto in attesa di un tuo riscontro.\n\n' },
+  { id: 'closing', label: 'Chiusura', text: 'Cordiali saluti,\n' },
+];
+
 interface EditorProps {
   draft: EmailDraft;
   isLoading: boolean;
+  isGeneratingSubject: boolean;
+  isModifying: boolean;
   onUpdate: (updates: Partial<EmailDraft>) => void;
   onRefine: () => void;
   onPaste: (target: 'context' | 'draft') => void;
@@ -25,12 +43,17 @@ interface EditorProps {
   onCopyResult: () => void;
   onDiscard: () => void;
   onRegenerate: () => void;
+  onGenerateSubject: () => void;
+  onCopySubject: () => void;
+  onModifyResult: (instructions: string) => void;
   checkApiKey: () => boolean;
 }
 
 export const EmailEditor = ({
   draft,
   isLoading,
+  isGeneratingSubject,
+  isModifying,
   onUpdate,
   onRefine,
   onPaste,
@@ -38,18 +61,119 @@ export const EmailEditor = ({
   onCopyResult,
   onDiscard,
   onRegenerate,
+  onGenerateSubject,
+  onCopySubject,
+  onModifyResult,
   checkApiKey,
 }: EditorProps) => {
   const resultSectionRef = useRef<HTMLOptionElement>(null);
+  const modifyTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [isContextOpen, setIsContextOpen] = useState(false);
   const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
+  const [isModifyFormOpen, setIsModifyFormOpen] = useState(false);
+  const [modifyInstructions, setModifyInstructions] = useState('');
+  const wasModifyingRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const draftFileInputRef = useRef<HTMLInputElement>(null);
+  const [isTemplateFormOpen, setIsTemplateFormOpen] = useState(false);
+  const [templateClientName, setTemplateClientName] = useState('');
+  const [templateSenderName, setTemplateSenderName] = useState(
+    () => localStorage.getItem('sentai_sender_name') || ''
+  );
+  const draftTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const [customSnippets, setCustomSnippets] = useState<Snippet[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('sentai_custom_snippets') || '[]');
+    } catch {
+      return [];
+    }
+  });
+  const [isSnippetFormOpen, setIsSnippetFormOpen] = useState(false);
+  const [newSnippetLabel, setNewSnippetLabel] = useState('');
+  const [newSnippetText, setNewSnippetText] = useState('');
+
+  const insertSnippetAtCursor = (text: string) => {
+    const textarea = draftTextareaRef.current;
+    const start = textarea?.selectionStart ?? draft.draft.length;
+    const end = textarea?.selectionEnd ?? draft.draft.length;
+    const newValue = draft.draft.slice(0, start) + text + draft.draft.slice(end);
+    onUpdate({ draft: newValue });
+    requestAnimationFrame(() => {
+      if (textarea) {
+        const cursorPos = start + text.length;
+        textarea.focus();
+        textarea.setSelectionRange(cursorPos, cursorPos);
+      }
+    });
+  };
+
+  const handleAddCustomSnippet = () => {
+    if (!newSnippetLabel.trim() || !newSnippetText.trim()) return;
+    const updated = [
+      ...customSnippets,
+      { id: crypto.randomUUID(), label: newSnippetLabel.trim(), text: newSnippetText },
+    ];
+    setCustomSnippets(updated);
+    localStorage.setItem('sentai_custom_snippets', JSON.stringify(updated));
+    setNewSnippetLabel('');
+    setNewSnippetText('');
+    setIsSnippetFormOpen(false);
+  };
+
+  const handleDeleteCustomSnippet = (id: string) => {
+    const updated = customSnippets.filter((s) => s.id !== id);
+    setCustomSnippets(updated);
+    localStorage.setItem('sentai_custom_snippets', JSON.stringify(updated));
+  };
+
+  useEffect(() => {
+    console.debug('[EmailEditor] Risultato Raffinato:', {
+      isLoading,
+      isModifying,
+      isGeneratingSubject,
+      resultLength: draft.result?.length ?? 0,
+      resultPreview: draft.result?.slice(0, 200),
+      willRenderSection: Boolean(draft.result || isLoading),
+    });
+  }, [draft.result, isLoading, isModifying, isGeneratingSubject]);
 
   useEffect(() => {
     if (draft.result && resultSectionRef.current) {
       resultSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [draft.result]);
+
+  useEffect(() => {
+    if (isModifyFormOpen && modifyTextareaRef.current) {
+      modifyTextareaRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      modifyTextareaRef.current.focus();
+    }
+  }, [isModifyFormOpen]);
+
+  useEffect(() => {
+    if (wasModifyingRef.current && !isModifying) {
+      setIsModifyFormOpen(false);
+      setModifyInstructions('');
+    }
+    wasModifyingRef.current = isModifying;
+  }, [isModifying]);
+
+  useEffect(() => {
+    setIsModifyFormOpen(false);
+    setModifyInstructions('');
+    setIsTemplateFormOpen(false);
+    setTemplateClientName('');
+  }, [draft.id]);
+
+  const handleInsertTemplate = () => {
+    const clientName = templateClientName.trim() || '[nome Cliente]';
+    const senderName = templateSenderName.trim() || '[mio nome]';
+    const body = draft.draft || '[testo]';
+    onUpdate({ draft: `Ciao ${clientName}\n\n${body}\n\nBuona giornata,\n${senderName}` });
+    localStorage.setItem('sentai_sender_name', senderName === '[mio nome]' ? '' : senderName);
+    setIsTemplateFormOpen(false);
+    setTemplateClientName('');
+  };
 
   const handleGenerateTitle = async () => {
     if (!checkApiKey()) return;
@@ -73,20 +197,35 @@ export const EmailEditor = ({
     }
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    target: 'context' | 'draft'
+  ) => {
     const file = e.target.files?.[0];
-    if (file && file.type === 'application/pdf') {
-      try {
-        const text = await extractTextFromPDF(file);
-        onUpdate({
-          context: draft.context
-            ? `${draft.context}\n\n[PDF: ${file.name}]\n${text}`
-            : `[PDF: ${file.name}]\n${text}`,
-        });
-      } catch (error) {
-        console.error('Error extracting text from PDF:', error);
-        alert('Impossibile estrarre il testo dal PDF.');
+    if (!file) return;
+
+    try {
+      let text = '';
+      let label = '';
+
+      if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+        text = await extractTextFromPDF(file);
+        label = `[PDF: ${file.name}]`;
+      } else if (file.name.toLowerCase().endsWith('.md') || file.type === 'text/markdown') {
+        text = await file.text();
+        label = `[MD: ${file.name}]`;
+      } else {
+        alert('Formato file non supportato. Carica un file PDF o Markdown (.md).');
+        return;
       }
+
+      const current = draft[target];
+      onUpdate({ [target]: current ? `${current}\n\n${label}\n${text}` : `${label}\n${text}` });
+    } catch (error) {
+      console.error('Error extracting text from file:', error);
+      alert('Impossibile estrarre il testo dal file.');
+    } finally {
+      e.target.value = '';
     }
   };
 
@@ -119,6 +258,58 @@ export const EmailEditor = ({
           </button>
         </section>
 
+        {draft.generateSubject && (
+          <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex items-center justify-between font-semibold text-slate-700 dark:text-slate-300">
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-blue-600" /> Oggetto Email
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={onGenerateSubject}
+                  disabled={isGeneratingSubject}
+                  className={classNameButton}
+                  title="Genera oggetto con AI"
+                >
+                  {isGeneratingSubject ? (
+                    <RefreshCw className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <Wand2 className="w-3 h-3" />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={onCopySubject}
+                  disabled={!draft.subject}
+                  className={classNameButton}
+                  title="Copia l'oggetto negli appunti"
+                >
+                  <Copy className="w-3 h-3" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onUpdate({ subject: '' })}
+                  disabled={!draft.subject}
+                  className={classNameButton}
+                  title="Elimina l'oggetto"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              </div>
+            </div>
+            <div className="p-4">
+              <input
+                type="text"
+                value={draft.subject}
+                onChange={(e) => onUpdate({ subject: e.target.value })}
+                placeholder="Oggetto dell'email..."
+                className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-lg text-slate-900 dark:text-white"
+              />
+            </div>
+          </section>
+        )}
+
         <div className="flex flex-col gap-6 w-full">
           <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
             <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex items-center justify-between font-semibold text-slate-700 dark:text-slate-300">
@@ -140,15 +331,15 @@ export const EmailEditor = ({
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   className={classNameButton}
-                  title="Incolla da PDF"
+                  title="Incolla da PDF o Markdown"
                 >
                   <FileText className="w-3 h-3" />
                 </button>
                 <input
                   type="file"
                   ref={fileInputRef}
-                  onChange={handleFileChange}
-                  accept=".pdf"
+                  onChange={(e) => handleFileChange(e, 'context')}
+                  accept=".pdf,.md,text/markdown"
                   className="hidden"
                 />
                 <button
@@ -157,7 +348,7 @@ export const EmailEditor = ({
                   className={classNameButton}
                   title="Incolla da appunti"
                 >
-                  <Upload className="w-3 h-3" />
+                  <ClipboardPaste className="w-3 h-3" />
                 </button>
                 <button
                   type="button"
@@ -189,15 +380,6 @@ export const EmailEditor = ({
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="cursor-pointer flex items-center gap-1 text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 px-2 py-1 rounded shadow-sm border border-slate-200 dark:border-slate-600"
-                  onClick={onContinueThread}
-                  title="Aggiungi al contesto la bozza e continua il thread"
-                >
-                  <History className="w-3 h-3" />
-                  <span className="hidden md:inline">Continua Thread</span>
-                </button>
-                <button
-                  type="button"
                   onClick={() => navigator.clipboard.writeText(draft.draft)}
                   disabled={!draft.draft}
                   className={classNameButton}
@@ -207,11 +389,34 @@ export const EmailEditor = ({
                 </button>
                 <button
                   type="button"
+                  onClick={() => draftFileInputRef.current?.click()}
+                  className={classNameButton}
+                  title="Incolla da PDF o Markdown"
+                >
+                  <FileText className="w-3 h-3" />
+                </button>
+                <input
+                  type="file"
+                  ref={draftFileInputRef}
+                  onChange={(e) => handleFileChange(e, 'draft')}
+                  accept=".pdf,.md,text/markdown"
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => setIsTemplateFormOpen((prev) => !prev)}
+                  className={classNameButton}
+                  title="Inserisci header e footer"
+                >
+                  <LayoutTemplate className="w-3 h-3" />
+                </button>
+                <button
+                  type="button"
                   onClick={() => onPaste('draft')}
                   className={classNameButton}
                   title="Incolla da appunti"
                 >
-                  <Upload className="w-3 h-3" />
+                  <ClipboardPaste className="w-3 h-3" />
                 </button>
                 <button
                   type="button"
@@ -224,15 +429,156 @@ export const EmailEditor = ({
                 </button>
               </div>
             </div>
+            {isTemplateFormOpen && (
+              <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label
+                      htmlFor="template-client-name"
+                      className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1"
+                    >
+                      Nome Cliente
+                    </label>
+                    <input
+                      id="template-client-name"
+                      type="text"
+                      value={templateClientName}
+                      onChange={(e) => setTemplateClientName(e.target.value)}
+                      placeholder="Es: Mario Rossi"
+                      className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm text-slate-900 dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="template-sender-name"
+                      className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1"
+                    >
+                      Il tuo nome
+                    </label>
+                    <input
+                      id="template-sender-name"
+                      type="text"
+                      value={templateSenderName}
+                      onChange={(e) => setTemplateSenderName(e.target.value)}
+                      placeholder="Es: Maurizio"
+                      className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm text-slate-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsTemplateFormOpen(false);
+                      setTemplateClientName('');
+                    }}
+                    className="cursor-pointer text-sm text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-md font-medium border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    Annulla
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleInsertTemplate}
+                    className="cursor-pointer flex items-center gap-2 text-sm text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-md font-medium transition-colors"
+                  >
+                    <LayoutTemplate className="w-4 h-4" />
+                    Inserisci
+                  </button>
+                </div>
+              </div>
+            )}
+            <div className="px-4 pt-3 flex flex-wrap items-center gap-2">
+              {[...DEFAULT_SNIPPETS, ...customSnippets].map((snippet) => (
+                <span key={snippet.id} className="inline-flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => insertSnippetAtCursor(snippet.text)}
+                    className="cursor-pointer text-xs bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 px-2 py-1 rounded-l-full rounded-r-full border border-slate-200 dark:border-slate-600"
+                    title={`Inserisci: "${snippet.text.trim()}"`}
+                  >
+                    {snippet.label}
+                  </button>
+                  {customSnippets.some((s) => s.id === snippet.id) && (
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteCustomSnippet(snippet.id)}
+                      className="cursor-pointer -ml-2 z-10 bg-slate-300 dark:bg-slate-600 hover:bg-red-200 dark:hover:bg-red-800 text-slate-600 dark:text-slate-200 rounded-full p-0.5"
+                      title="Elimina frase"
+                    >
+                      <X className="w-2.5 h-2.5" />
+                    </button>
+                  )}
+                </span>
+              ))}
+              <button
+                type="button"
+                onClick={() => setIsSnippetFormOpen((prev) => !prev)}
+                className="cursor-pointer text-xs flex items-center gap-1 bg-white dark:bg-slate-700 border border-dashed border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 px-2 py-1 rounded-full"
+                title="Aggiungi una frase personalizzata"
+              >
+                <Plus className="w-3 h-3" />
+                Nuova frase
+              </button>
+            </div>
+            {isSnippetFormOpen && (
+              <div className="mx-4 mt-3 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg space-y-2">
+                <input
+                  type="text"
+                  value={newSnippetLabel}
+                  onChange={(e) => setNewSnippetLabel(e.target.value)}
+                  placeholder="Nome breve (es: Preventivo in corso)"
+                  className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm text-slate-900 dark:text-white"
+                />
+                <textarea
+                  value={newSnippetText}
+                  onChange={(e) => setNewSnippetText(e.target.value)}
+                  placeholder="Testo da inserire nella bozza..."
+                  className="w-full h-20 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y text-sm text-slate-900 dark:text-white"
+                />
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSnippetFormOpen(false);
+                      setNewSnippetLabel('');
+                      setNewSnippetText('');
+                    }}
+                    className="cursor-pointer text-sm text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-md font-medium border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    Annulla
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAddCustomSnippet}
+                    disabled={!newSnippetLabel.trim() || !newSnippetText.trim()}
+                    className="cursor-pointer flex items-center gap-2 text-sm text-white bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 px-3 py-1.5 rounded-md font-medium transition-colors disabled:cursor-not-allowed"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Salva frase
+                  </button>
+                </div>
+              </div>
+            )}
             <div className="p-4">
               <textarea
+                ref={draftTextareaRef}
                 value={draft.draft}
+                disabled={isLoading}
                 onChange={(e) => onUpdate({ draft: e.target.value })}
                 placeholder="Scrivi qui la tua bozza di email, poi clicca su 'Raffina Email' e lascia fare all'AI."
                 className="w-full h-64 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y text-lg text-slate-900 dark:text-white"
               />
             </div>
-            <div className="p-4 flex justify-center items-center w-full gap-4">
+            <div className="p-4 flex justify-center items-center w-full gap-3">
+              <button
+                type="button"
+                className="cursor-pointer bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 font-semibold px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-all border border-blue-200 dark:border-blue-700"
+                onClick={onContinueThread}
+                title="Aggiungi al contesto la bozza e continua il thread"
+              >
+                <History className="w-4 h-4" />
+                Continua Thread
+              </button>
               <button
                 type="button"
                 className="cursor-pointer bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-all disabled:cursor-not-allowed"
@@ -286,14 +632,6 @@ export const EmailEditor = ({
                     </button>
                     <button
                       type="button"
-                      onClick={() => onUpdate({ draft: draft.result })}
-                      className="cursor-pointer flex items-center justify-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-blue-900/50 hover:bg-white dark:hover:bg-blue-800 p-2 custom-lg:px-3 custom-lg:py-1.5 rounded-md font-medium border border-blue-200 dark:border-blue-700 transition-colors"
-                      title="Aggiorna Bozza"
-                    >
-                      <Upload className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
                       onClick={onCopyResult}
                       className="cursor-pointer flex items-center justify-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-blue-900/50 hover:bg-white dark:hover:bg-blue-800 p-2 custom-lg:px-3 custom-lg:py-1.5 rounded-md font-medium border border-blue-200 dark:border-blue-700 transition-colors"
                       title="Copia"
@@ -305,6 +643,67 @@ export const EmailEditor = ({
                 <div className="p-5 bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-800 rounded-lg whitespace-pre-wrap text-slate-800 dark:text-slate-200 shadow-inner">
                   {draft.result}
                 </div>
+                <div className="flex justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsModifyFormOpen((prev) => !prev)}
+                    className="cursor-pointer flex items-center justify-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 font-semibold px-4 py-2 rounded-lg transition-colors border border-blue-200 dark:border-blue-700"
+                    title="Modifica o sostituisci la bozza dell'AI"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                    Modifica Bozza
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onUpdate({ draft: draft.result })}
+                    className="cursor-pointer flex items-center justify-center gap-2 text-sm text-white bg-blue-600 hover:bg-blue-700 font-bold px-4 py-2 rounded-lg transition-colors"
+                    title="Sostituisci la tua bozza con la bozza dell'AI!"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    Approva Bozza
+                  </button>
+                </div>
+                {isModifyFormOpen && (
+                  <div className="p-4 bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-800 rounded-lg space-y-3">
+                    <textarea
+                      ref={modifyTextareaRef}
+                      value={modifyInstructions}
+                      onChange={(e) => setModifyInstructions(e.target.value)}
+                      placeholder="Descrivi la modifica da applicare al testo (es: 'rendilo più breve', 'aggiungi un saluto finale'...)"
+                      disabled={isModifying}
+                      className="w-full h-24 p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y text-sm text-slate-900 dark:text-white disabled:opacity-60"
+                    />
+                    <div className="flex justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsModifyFormOpen(false);
+                          setModifyInstructions('');
+                        }}
+                        disabled={isModifying}
+                        className="cursor-pointer text-sm text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-md font-medium border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        Annulla
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!checkApiKey()) return;
+                          onModifyResult(modifyInstructions);
+                        }}
+                        disabled={isModifying || !modifyInstructions.trim()}
+                        className="cursor-pointer flex items-center gap-2 text-sm text-white bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 px-3 py-1.5 rounded-md font-medium transition-colors disabled:cursor-not-allowed"
+                      >
+                        {isModifying ? (
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Send className="w-4 h-4" />
+                        )}
+                        {isModifying ? 'Modifico...' : 'Applica Modifica'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </section>

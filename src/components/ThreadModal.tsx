@@ -1,4 +1,4 @@
-import { Upload } from 'lucide-react';
+import { ClipboardPaste } from 'lucide-react';
 
 export const ThreadModal = ({ isOpen, onClose, onConfirm, value, onChange, onPaste }: any) =>
   isOpen && (
@@ -13,7 +13,7 @@ export const ThreadModal = ({ isOpen, onClose, onConfirm, value, onChange, onPas
             onClick={() => onPaste('context')}
             className="cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm flex items-center gap-1"
           >
-            <Upload className="w-3 h-3" /> Incolla
+            <ClipboardPaste className="w-3 h-3" /> Incolla
           </button>
         </div>
         <textarea
