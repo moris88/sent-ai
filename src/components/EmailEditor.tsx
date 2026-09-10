@@ -593,6 +593,19 @@ export const EmailEditor = ({
                 )}
                 {isLoading ? 'Raffinando...' : 'Raffina Email'}
               </button>
+              {draft.result && (
+                <button
+                  type="button"
+                  className="cursor-pointer bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 font-semibold px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-all border border-blue-200 dark:border-blue-700"
+                  onClick={() => {
+                    window.location.href = `mailto:?subject=${encodeURIComponent(draft.subject || '')}&body=${encodeURIComponent(draft.result)}`;
+                  }}
+                  title="Apri il client di posta con oggetto e testo precompilati"
+                >
+                  <Mail className="w-4 h-4" />
+                  Invia Email
+                </button>
+              )}
             </div>
           </section>
         </div>
