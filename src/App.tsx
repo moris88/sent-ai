@@ -1,8 +1,9 @@
 import { Bot } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ApiKeyModal from './components/ApiKeyModal';
 import { DeleteConfirmationModal } from './components/DeleteConfirmationModal';
 import { EmailEditor } from './components/EmailEditor';
+import { ErrorModal } from './components/ErrorModal';
 import { Header } from './components/Header';
 import LocalStorageLimitModal from './components/LocalStorageLimitModal';
 import OldDraftsCleanupModal from './components/OldDraftsCleanupModal';
@@ -23,6 +24,9 @@ export default function App() {
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [provider, setProvider] = useState(localStorage.getItem('sentai_provider') || 'gemini');
   const [apiKey, setApiKey] = useState(localStorage.getItem('sentai_api_key') || '');
+  const [lmStudioUrl, setLmStudioUrl] = useState(
+    localStorage.getItem('sentai_lmstudio_url') || 'http://localhost:1234/v1'
+  );
   const [modelName, setModelName] = useState(
     localStorage.getItem('sentai_model') || 'gemini-2.0-flash'
   );
@@ -32,6 +36,7 @@ export default function App() {
   const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(null);
   const [threadModalOpen, setThreadModalOpen] = useState(false);
   const [clientReply, setClientReply] = useState('');
+  const [aiError, setAiError] = useState<string | null>(null);
 
   // Web-only storage management
   const [showCleanupModal, setShowCleanupModal] = useState(false);
@@ -68,13 +73,17 @@ export default function App() {
 
   const checkApiKey = useMemo(() => {
     return () => {
-      if (!apiKey) {
+      if (!apiKey && provider !== 'lmstudio') {
         setIsApiKeyModalOpen(true);
         return false;
       }
       return true;
     };
-  }, [apiKey]);
+  }, [apiKey, provider]);
+
+  const handleAiError = useCallback((message: string) => {
+    setAiError(message);
+  }, []);
 
   const activeDraft = drafts.find((d) => d.id === activeId) ||
     drafts[0] || {
@@ -103,7 +112,12 @@ export default function App() {
     copyToClipboard,
     copySubjectToClipboard,
     pasteFromClipboard,
-  } = useEmailLogic(activeDraft, (updates) => updateDraft(activeId, updates), setIsSettingsOpen);
+  } = useEmailLogic(
+    activeDraft,
+    (updates) => updateDraft(activeId, updates),
+    setIsSettingsOpen,
+    handleAiError,
+  );
 
   if (loading) {
     return <div className="flex h-screen items-center justify-center">Caricamento...</div>;
@@ -126,6 +140,7 @@ export default function App() {
   const saveSettings = () => {
     localStorage.setItem('sentai_provider', provider);
     localStorage.setItem('sentai_api_key', apiKey);
+    localStorage.setItem('sentai_lmstudio_url', lmStudioUrl);
     localStorage.setItem('sentai_model', modelName);
     localStorage.setItem('sentai_additional_prompt', additionalPrompt);
     setIsSettingsOpen(false);
@@ -158,6 +173,7 @@ export default function App() {
             onDelete={setDeleteConfirmation}
             updateDraft={updateDraft}
             checkApiKey={checkApiKey}
+            onAiError={handleAiError}
           />
           <div className="flex-1 overflow-y-auto">
             <EmailEditor
@@ -176,6 +192,7 @@ export default function App() {
               onCopySubject={copySubjectToClipboard}
               onModifyResult={handleModifyResult}
               checkApiKey={checkApiKey}
+              onAiError={handleAiError}
             />
           </div>
           <SidebarControls
@@ -211,9 +228,13 @@ export default function App() {
         onSave={saveSettings}
         setProvider={setProvider}
         provider={provider}
+        lmStudioUrl={lmStudioUrl}
+        setLmStudioUrl={setLmStudioUrl}
+        onAiError={handleAiError}
         additionalPrompt={additionalPrompt}
         setAdditionalPrompt={setAdditionalPrompt}
       />
+      <ErrorModal message={aiError} onClose={() => setAiError(null)} />
       <DeleteConfirmationModal
         isOpen={!!deleteConfirmation}
         onClose={() => setDeleteConfirmation(null)}

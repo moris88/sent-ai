@@ -6,6 +6,7 @@ export const useEmailLogic = (
   activeDraft: EmailDraft,
   updateActiveDraft: (updates: Partial<EmailDraft>) => void,
   setIsSettingsOpen: (open: boolean) => void,
+  onAiError: (message: string) => void,
 ) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingSubject, setIsGeneratingSubject] = useState(false);
@@ -35,7 +36,11 @@ export const useEmailLogic = (
       updateActiveDraft({ result: refinedText });
     } catch (error: any) {
       console.error("Error refining email:", error);
-      alert(error.message || "Errore durante la generazione dell'email.");
+      onAiError(
+        error instanceof Error
+          ? error.message
+          : "Errore durante la generazione dell'email.",
+      );
       if (error.message.includes("Key non trovata")) {
         setIsSettingsOpen(true);
       }
@@ -61,6 +66,11 @@ export const useEmailLogic = (
         updateActiveDraft({ subject });
       } catch (error) {
         console.error("Error generating subject:", error);
+        onAiError(
+          error instanceof Error
+            ? error.message
+            : "Errore durante la generazione dell'oggetto.",
+        );
       } finally {
         setIsGeneratingSubject(false);
       }
@@ -83,7 +93,11 @@ export const useEmailLogic = (
       updateActiveDraft({ subject });
     } catch (error: any) {
       console.error("Error generating subject:", error);
-      alert(error.message || "Errore durante la generazione dell'oggetto.");
+      onAiError(
+        error instanceof Error
+          ? error.message
+          : "Errore durante la generazione dell'oggetto.",
+      );
     } finally {
       setIsGeneratingSubject(false);
     }
@@ -106,7 +120,11 @@ export const useEmailLogic = (
       updateActiveDraft({ result: revisedText });
     } catch (error: any) {
       console.error("Error modifying email:", error);
-      alert(error.message || "Errore durante la modifica dell'email.");
+      onAiError(
+        error instanceof Error
+          ? error.message
+          : "Errore durante la modifica dell'email.",
+      );
     } finally {
       setIsModifying(false);
     }

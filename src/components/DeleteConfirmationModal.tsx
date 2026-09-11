@@ -8,14 +8,14 @@ export const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm }: any) =>
         </p>
         <div className="flex gap-3 pt-2">
           <button
-            className="cursor-pointer flex-1 py-2 rounded-lg bg-slate-100 dark:bg-gray-700 hover:bg-slate-200 dark:hover:bg-gray-600 font-semibold cursor-pointer"
+            className="cursor-pointer flex-1 py-2 rounded-lg bg-slate-100 dark:bg-gray-700 hover:bg-slate-200 dark:hover:bg-gray-600 font-semibold"
             type="button"
             onClick={onClose}
           >
             Annulla
           </button>
           <button
-            className="cursor-pointer flex-1 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-semibold cursor-pointer"
+            className="cursor-pointer flex-1 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-semibold"
             type="button"
             onClick={onConfirm}
           >

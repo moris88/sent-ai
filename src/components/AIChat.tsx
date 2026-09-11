@@ -6,9 +6,10 @@ import type { EmailDraft } from '../types';
 interface AIChatProps {
   drafts: EmailDraft[];
   checkApiKey: () => boolean;
+  onAiError: (message: string) => void;
 }
 
-export const AIChat = ({ drafts, checkApiKey }: AIChatProps) => {
+export const AIChat = ({ drafts, checkApiKey, onAiError }: AIChatProps) => {
   const [messages, setMessages] = useState<{ id: string; role: 'user' | 'ai'; text: string }[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -22,11 +23,11 @@ export const AIChat = ({ drafts, checkApiKey }: AIChatProps) => {
     setIsLoading(true);
 
     try {
-      const apiKey = localStorage.getItem('sentai_api_key');
+      const apiKey = localStorage.getItem('sentai_api_key') || '';
       const provider = localStorage.getItem('sentai_provider') as any;
       const model = localStorage.getItem('sentai_model');
 
-      if (!apiKey || !provider || !model) {
+      if ((!apiKey && provider !== 'lmstudio') || !provider || !model) {
         setMessages((prev) => [
           ...prev,
           {
@@ -59,6 +60,7 @@ export const AIChat = ({ drafts, checkApiKey }: AIChatProps) => {
       setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: 'ai', text: response }]);
     } catch (error) {
       console.error(error);
+      onAiError(error instanceof Error ? error.message : 'Errore nel generare la risposta.');
       setMessages((prev) => [
         ...prev,
         { id: crypto.randomUUID(), role: 'ai', text: 'Errore nel generare la risposta.' },

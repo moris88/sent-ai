@@ -53,6 +53,7 @@ interface EditorProps {
   onCopySubject: () => void;
   onModifyResult: (instructions: string) => void;
   checkApiKey: () => boolean;
+  onAiError: (message: string) => void;
 }
 
 export const EmailEditor = ({
@@ -71,6 +72,7 @@ export const EmailEditor = ({
   onCopySubject,
   onModifyResult,
   checkApiKey,
+  onAiError,
 }: EditorProps) => {
   const resultSectionRef = useRef<HTMLOptionElement>(null);
   const modifyTextareaRef = useRef<HTMLTextAreaElement>(null);
@@ -98,6 +100,7 @@ export const EmailEditor = ({
   const [newSnippetLabel, setNewSnippetLabel] = useState('');
   const [newSnippetText, setNewSnippetText] = useState('');
   const [isSendFormOpen, setIsSendFormOpen] = useState(false);
+  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
   const [toRecipients, setToRecipients] = useState<string[]>([]);
   const [ccRecipients, setCcRecipients] = useState<string[]>([]);
   const [toInput, setToInput] = useState('');
@@ -167,10 +170,20 @@ export const EmailEditor = ({
     const pendingCc = normalizeRecipients(ccInput);
     const allTo = [...toRecipients, ...pendingTo.filter((recipient) => !toRecipients.includes(recipient))];
     const allCc = [...ccRecipients, ...pendingCc.filter((recipient) => !ccRecipients.includes(recipient))];
+    const emailBody = draft.result || draft.draft;
+
+    if (emailBody.trim() === '') {
+      alert('Il contenuto dell\'email non può essere vuoto.');
+      return;
+    }
+    if (draft.subject.trim() === '') {
+      alert('L\'oggetto dell\'email non può essere vuoto.');
+      return;
+    }
 
     const params = new URLSearchParams({
       subject: draft.subject,
-      body: draft.result,
+      body: emailBody,
     });
     if (allCc.length > 0) params.set('cc', allCc.join(','));
     window.location.href = `mailto:${allTo.join(',')}?${params.toString()}`;
@@ -230,11 +243,11 @@ export const EmailEditor = ({
     if (!checkApiKey()) return;
     setIsGeneratingTitle(true);
     try {
-      const apiKey = localStorage.getItem('sentai_api_key');
+      const apiKey = localStorage.getItem('sentai_api_key') || '';
       const provider = localStorage.getItem('sentai_provider') as any;
       const model = localStorage.getItem('sentai_model');
 
-      if (!apiKey || !provider || !model) {
+      if ((!apiKey && provider !== 'lmstudio') || !provider || !model) {
         setIsGeneratingTitle(false);
         return;
       }
@@ -243,6 +256,7 @@ export const EmailEditor = ({
       onUpdate({ title });
     } catch (error) {
       console.error('Error generating title:', error);
+      onAiError(error instanceof Error ? error.message : 'Errore durante la generazione del titolo.');
     } finally {
       setIsGeneratingTitle(false);
     }
@@ -644,19 +658,17 @@ export const EmailEditor = ({
                 )}
                 {isLoading ? 'Raffinando...' : 'Raffina Email'}
               </button>
-              {draft.result && (
-                <button
-                  type="button"
-                  className="cursor-pointer bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 font-semibold px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-all border border-blue-200 dark:border-blue-700"
-                  onClick={() => {
-                    setIsSendFormOpen(true);
-                  }}
-                  title="Apri il client di posta con oggetto e testo precompilati"
-                >
-                  <Mail className="w-4 h-4" />
-                  Invia Email
-                </button>
-              )}
+              <button
+                type="button"
+                className="cursor-pointer bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 font-semibold px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-all border border-blue-200 dark:border-blue-700"
+                onClick={() => {
+                  setIsSendFormOpen(true);
+                }}
+                title="Apri il client di posta con oggetto e testo precompilati"
+              >
+                <Mail className="w-4 h-4" />
+                Invia Email
+              </button>
             </div>
           </section>
         </div>
@@ -719,7 +731,10 @@ export const EmailEditor = ({
                   </button>
                   <button
                     type="button"
-                    onClick={() => onUpdate({ draft: draft.result })}
+                    onClick={() => {
+                      onUpdate({ draft: draft.result, result: '' });
+                      setIsApprovalModalOpen(true);
+                    }}
                     className="cursor-pointer flex items-center justify-center gap-2 text-sm text-white bg-blue-600 hover:bg-blue-700 font-bold px-4 py-2 rounded-lg transition-colors"
                     title="Sostituisci la tua bozza con la bozza dell'AI!"
                   >
@@ -806,7 +821,7 @@ export const EmailEditor = ({
 
             <div className="space-y-1">
               <label htmlFor="email-to" className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
-                A <span className="text-red-500">*</span>
+                A
               </label>
               <div className="flex flex-wrap items-center gap-2 min-h-11 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus-within:ring-2 focus-within:ring-blue-500">
                 {toRecipients.map((recipient) => (
@@ -864,12 +879,12 @@ export const EmailEditor = ({
 
             <div className="space-y-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Oggetto</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Oggetto <span className="text-red-500">*</span></p>
                 <div className="mt-1 rounded-lg bg-slate-50 dark:bg-slate-900 p-3 text-slate-800 dark:text-slate-200 whitespace-pre-wrap">{draft.subject || 'Nessun oggetto'}</div>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Contenuto</p>
-                <div className="mt-1 max-h-40 overflow-y-auto rounded-lg bg-slate-50 dark:bg-slate-900 p-3 text-sm text-slate-800 dark:text-slate-200 whitespace-pre-wrap">{draft.result || 'Nessun contenuto'}</div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Contenuto <span className="text-red-500">*</span></p>
+                <div className="mt-1 max-h-40 overflow-y-auto rounded-lg bg-slate-50 dark:bg-slate-900 p-3 text-sm text-slate-800 dark:text-slate-200 whitespace-pre-wrap">{draft.result || draft.draft || 'Nessun contenuto'}</div>
               </div>
             </div>
 
@@ -889,6 +904,44 @@ export const EmailEditor = ({
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {isApprovalModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setIsApprovalModalOpen(false);
+          }}
+        >
+          <div
+            className="w-full max-w-md rounded-xl bg-white dark:bg-slate-800 border border-green-200 dark:border-green-900 shadow-2xl p-5 space-y-4"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="approval-modal-title"
+          >
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="w-6 h-6 shrink-0 text-green-600 dark:text-green-400" />
+              <div>
+                <h2 id="approval-modal-title" className="text-lg font-bold text-slate-900 dark:text-white">
+                  Bozza approvata
+                </h2>
+                <p className="mt-2 text-sm text-slate-700 dark:text-slate-200">
+                  Il testo è stato spostato nella bozza, sostituendo quello dell&apos;utente.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setIsApprovalModalOpen(false)}
+                className="cursor-pointer rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
+              >
+                Chiudi
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

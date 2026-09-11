@@ -11,17 +11,30 @@ export const SettingsModal = ({
   setModelName,
   provider,
   setProvider,
+  lmStudioUrl,
+  setLmStudioUrl,
+  onAiError,
   onSave,
   additionalPrompt,
   setAdditionalPrompt,
 }: any) => {
   const [availableModels, setAvailableModels] = React.useState<string[]>([]);
+  const [isLoadingModels, setIsLoadingModels] = React.useState(false);
 
   React.useEffect(() => {
-    getModels(provider, apiKey).then((models) => {
-      setAvailableModels(models);
-    });
-  }, [provider, apiKey]);
+    if (!isOpen || (provider !== 'lmstudio' && !apiKey)) {
+      setAvailableModels([]);
+      return;
+    }
+    setIsLoadingModels(true);
+    getModels(provider, apiKey, lmStudioUrl)
+      .then(setAvailableModels)
+      .catch((error) => {
+        setAvailableModels([]);
+        onAiError(error instanceof Error ? error.message : 'Impossibile caricare i modelli AI.');
+      })
+      .finally(() => setIsLoadingModels(false));
+  }, [isOpen, provider, apiKey, lmStudioUrl, onAiError]);
 
   const options = availableModels.map((model) => (
     <option key={model} value={model}>
@@ -29,7 +42,7 @@ export const SettingsModal = ({
     </option>
   ));
 
-  const disabledOptions = availableModels.length === 0 || !apiKey;
+  const requiresApiKey = provider !== 'lmstudio';
 
   return (
     isOpen && (
@@ -62,14 +75,33 @@ export const SettingsModal = ({
                 <option value="gemini">Google Gemini</option>
                 <option value="openai">OpenAI</option>
                 <option value="anthropic">Anthropic</option>
+                <option value="lmstudio">LM Studio (locale)</option>
               </select>
             </div>
+            {provider === 'lmstudio' && (
+              <div>
+                <label
+                  htmlFor="lmstudio-url"
+                  className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
+                >
+                  URL LM Studio
+                </label>
+                <input
+                  id="lmstudio-url"
+                  type="url"
+                  value={lmStudioUrl}
+                  onChange={(e) => setLmStudioUrl(e.target.value)}
+                  placeholder="http://localhost:1234/v1"
+                  className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                />
+              </div>
+            )}
             <div>
               <label
                 htmlFor="api-key"
                 className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
               >
-                API Key
+                API Key {provider === 'lmstudio' && '(opzionale)'}
               </label>
               <input
                 id="api-key"
@@ -87,15 +119,22 @@ export const SettingsModal = ({
               >
                 Modello
               </label>
-              <select
+              <input
                 id="model-name"
-                disabled={disabledOptions}
                 value={modelName}
                 onChange={(e) => setModelName(e.target.value)}
+                list="available-models"
+                placeholder={isLoadingModels ? 'Caricamento modelli...' : 'Scrivi o seleziona un modello'}
                 className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
-              >
-                {options}
-              </select>
+              />
+              <datalist id="available-models">{options}</datalist>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                {provider === 'lmstudio'
+                  ? 'I modelli installati vengono letti da LM Studio. Puoi anche inserire manualmente il model ID.'
+                  : requiresApiKey && availableModels.length === 0
+                    ? 'Inserisci la API key per caricare i modelli, oppure scrivi il modello manualmente.'
+                    : 'Puoi selezionare un modello dall’elenco o inserirlo manualmente.'}
+              </p>
             </div>
             <div>
               <label

@@ -2,7 +2,38 @@ import Anthropic from "@anthropic-ai/sdk";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import OpenAI from "openai";
 
-export type Provider = "gemini" | "openai" | "anthropic";
+export type Provider = "gemini" | "openai" | "anthropic" | "lmstudio";
+
+const getLmStudioBaseUrl = (baseUrl?: string) =>
+  (
+    baseUrl ||
+    localStorage.getItem("sentai_lmstudio_url") ||
+    "http://localhost:1234/v1"
+  ).replace(/\/$/, "");
+
+const completeWithLmStudio = async (
+  model: string,
+  apiKey: string,
+  prompt: string,
+  temperature?: number,
+) => {
+  const response = await fetch(`${getLmStudioBaseUrl()}/chat/completions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+    },
+    body: JSON.stringify({
+      model,
+      messages: [{ role: "user", content: prompt }],
+      temperature,
+    }),
+  });
+  if (!response.ok)
+    throw new Error(`LM Studio ha restituito l'errore ${response.status}.`);
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content?.trim() || "";
+};
 
 type RefineOptions = {
   persona: string;
@@ -62,6 +93,10 @@ export const refineEmail = async (options: RefineOptions): Promise<string> => {
     return message.content[0].text || "";
   }
 
+  if (provider === "lmstudio") {
+    return completeWithLmStudio(model, apiKey, prompt, opts.temperature);
+  }
+
   // Default to Gemini
   const genAI = new GoogleGenerativeAI(apiKey);
   const geminiModel = genAI.getGenerativeModel({
@@ -77,7 +112,27 @@ export const refineEmail = async (options: RefineOptions): Promise<string> => {
 export async function getModels(
   provider: Provider,
   apiKey: string,
+  lmStudioUrl?: string,
 ): Promise<string[]> {
+  if (provider === "lmstudio") {
+    return fetch(`${getLmStudioBaseUrl(lmStudioUrl)}/models`)
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(
+            data.error?.message ||
+              `LM Studio ha restituito l'errore ${response.status}.`,
+          );
+        }
+        return (data.data || []).map((model: { id: string }) => model.id);
+      })
+      .catch((error) => {
+        throw error instanceof Error
+          ? error
+          : new Error("Impossibile raggiungere LM Studio.");
+      });
+  }
+
   if (provider === "openai") {
     const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
     return openai.models
@@ -100,8 +155,15 @@ export async function getModels(
   return await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`,
   )
-    .then((response) => {
-      return response.json();
+    .then(async (response) => {
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(
+          data.error?.message ||
+            `Google Gemini ha restituito l'errore ${response.status}.`,
+        );
+      }
+      return data;
     })
     .then((data) => {
       OriginalModels = data;
@@ -122,7 +184,7 @@ export async function getModels(
     })
     .catch((error) => {
       console.error(error);
-      return [];
+      throw error;
     });
 }
 
@@ -161,6 +223,10 @@ export const generateTitle = async (
     });
     // @ts-expect-error
     return message.content[0].text?.trim() || "Nuova conversazione";
+  }
+
+  if (provider === "lmstudio") {
+    return completeWithLmStudio(model, apiKey, prompt);
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
@@ -213,6 +279,10 @@ export const generateSubject = async (
     });
     // @ts-expect-error
     return message.content[0].text?.trim() || "";
+  }
+
+  if (provider === "lmstudio") {
+    return completeWithLmStudio(model, apiKey, prompt);
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
@@ -275,6 +345,12 @@ export const reviseEmail = async (
     });
     // @ts-expect-error
     return message.content[0].text?.trim() || result;
+  }
+
+  if (provider === "lmstudio") {
+    return (
+      (await completeWithLmStudio(model, apiKey, prompt, temperature)) || result
+    );
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
