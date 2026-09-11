@@ -24,6 +24,12 @@ import { extractTextFromPDF } from '../utils/pdf';
 
 type Snippet = { id: string; label: string; text: string };
 
+const normalizeRecipients = (value: string) =>
+  value
+    .split(/[;,\s]+/)
+    .map((recipient) => recipient.trim())
+    .filter(Boolean);
+
 const DEFAULT_SNIPPETS: Snippet[] = [
   { id: 'greeting', label: 'Saluto', text: 'Buongiorno,\n\n' },
   { id: 'thanks', label: 'Ringraziamento', text: 'Grazie per la tua risposta.\n\n' },
@@ -91,6 +97,11 @@ export const EmailEditor = ({
   const [isSnippetFormOpen, setIsSnippetFormOpen] = useState(false);
   const [newSnippetLabel, setNewSnippetLabel] = useState('');
   const [newSnippetText, setNewSnippetText] = useState('');
+  const [isSendFormOpen, setIsSendFormOpen] = useState(false);
+  const [toRecipients, setToRecipients] = useState<string[]>([]);
+  const [ccRecipients, setCcRecipients] = useState<string[]>([]);
+  const [toInput, setToInput] = useState('');
+  const [ccInput, setCcInput] = useState('');
 
   const insertSnippetAtCursor = (text: string) => {
     const textarea = draftTextareaRef.current;
@@ -124,6 +135,46 @@ export const EmailEditor = ({
     const updated = customSnippets.filter((s) => s.id !== id);
     setCustomSnippets(updated);
     localStorage.setItem('sentai_custom_snippets', JSON.stringify(updated));
+  };
+
+  const addRecipients = (
+    value: string,
+    current: string[],
+    update: (recipients: string[]) => void
+  ) => {
+    const recipients = normalizeRecipients(value).filter(
+      (recipient) => !current.includes(recipient)
+    );
+    if (recipients.length > 0) update([...current, ...recipients]);
+  };
+
+  const handleRecipientKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement>,
+    value: string,
+    current: string[],
+    update: (recipients: string[]) => void,
+    clear: () => void
+  ) => {
+    if (event.key === 'Enter' || event.key === ',' || event.key === ';') {
+      event.preventDefault();
+      addRecipients(value, current, update);
+      clear();
+    }
+  };
+
+  const handleSendEmail = () => {
+    const pendingTo = normalizeRecipients(toInput);
+    const pendingCc = normalizeRecipients(ccInput);
+    const allTo = [...toRecipients, ...pendingTo.filter((recipient) => !toRecipients.includes(recipient))];
+    const allCc = [...ccRecipients, ...pendingCc.filter((recipient) => !ccRecipients.includes(recipient))];
+
+    const params = new URLSearchParams({
+      subject: draft.subject,
+      body: draft.result,
+    });
+    if (allCc.length > 0) params.set('cc', allCc.join(','));
+    window.location.href = `mailto:${allTo.join(',')}?${params.toString()}`;
+    setIsSendFormOpen(false);
   };
 
   useEffect(() => {
@@ -598,7 +649,7 @@ export const EmailEditor = ({
                   type="button"
                   className="cursor-pointer bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 font-semibold px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-all border border-blue-200 dark:border-blue-700"
                   onClick={() => {
-                    window.location.href = `mailto:?subject=${encodeURIComponent(draft.subject || '')}&body=${encodeURIComponent(draft.result)}`;
+                    setIsSendFormOpen(true);
                   }}
                   title="Apri il client di posta con oggetto e testo precompilati"
                 >
@@ -722,6 +773,124 @@ export const EmailEditor = ({
           </section>
         )}
       </div>
+
+      {isSendFormOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setIsSendFormOpen(false);
+          }}
+        >
+          <form
+            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-white dark:bg-slate-800 shadow-2xl border border-slate-200 dark:border-slate-700 p-5 space-y-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              handleSendEmail();
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Invia Email</h2>
+              <button
+                type="button"
+                onClick={() => setIsSendFormOpen(false)}
+                className="cursor-pointer p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white"
+                title="Chiudi"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              Inserisci gli indirizzi qui, oppure lasciali vuoti e aggiungili direttamente nel client di posta che si aprirà.
+            </p>
+
+            <div className="space-y-1">
+              <label htmlFor="email-to" className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                A <span className="text-red-500">*</span>
+              </label>
+              <div className="flex flex-wrap items-center gap-2 min-h-11 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus-within:ring-2 focus-within:ring-blue-500">
+                {toRecipients.map((recipient) => (
+                  <span key={recipient} className="flex items-center gap-1 rounded-md bg-blue-100 dark:bg-blue-900/50 px-2 py-1 text-sm text-blue-800 dark:text-blue-200">
+                    {recipient}
+                    <button
+                      type="button"
+                      onClick={() => setToRecipients(toRecipients.filter((item) => item !== recipient))}
+                      className="cursor-pointer text-blue-500 hover:text-blue-800 dark:hover:text-blue-100"
+                      title={`Rimuovi ${recipient}`}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+                <input
+                  id="email-to"
+                  type="text"
+                  value={toInput}
+                  onChange={(event) => setToInput(event.target.value)}
+                  onKeyDown={(event) => handleRecipientKeyDown(event, toInput, toRecipients, setToRecipients, () => setToInput(''))}
+                  placeholder={toRecipients.length === 0 ? 'email@esempio.it (Invio per aggiungere)' : 'Aggiungi destinatario'}
+                  className="min-w-48 flex-1 bg-transparent outline-none text-sm text-slate-900 dark:text-white"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label htmlFor="email-cc" className="block text-sm font-semibold text-slate-700 dark:text-slate-200">CC</label>
+              <div className="flex flex-wrap items-center gap-2 min-h-11 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus-within:ring-2 focus-within:ring-blue-500">
+                {ccRecipients.map((recipient) => (
+                  <span key={recipient} className="flex items-center gap-1 rounded-md bg-slate-100 dark:bg-slate-700 px-2 py-1 text-sm text-slate-700 dark:text-slate-200">
+                    {recipient}
+                    <button
+                      type="button"
+                      onClick={() => setCcRecipients(ccRecipients.filter((item) => item !== recipient))}
+                      className="cursor-pointer text-slate-400 hover:text-slate-700 dark:hover:text-white"
+                      title={`Rimuovi ${recipient}`}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+                <input
+                  id="email-cc"
+                  type="text"
+                  value={ccInput}
+                  onChange={(event) => setCcInput(event.target.value)}
+                  onKeyDown={(event) => handleRecipientKeyDown(event, ccInput, ccRecipients, setCcRecipients, () => setCcInput(''))}
+                  placeholder={ccRecipients.length === 0 ? 'Aggiungi destinatari in copia' : 'Aggiungi destinatario'}
+                  className="min-w-48 flex-1 bg-transparent outline-none text-sm text-slate-900 dark:text-white"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Oggetto</p>
+                <div className="mt-1 rounded-lg bg-slate-50 dark:bg-slate-900 p-3 text-slate-800 dark:text-slate-200 whitespace-pre-wrap">{draft.subject || 'Nessun oggetto'}</div>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Contenuto</p>
+                <div className="mt-1 max-h-40 overflow-y-auto rounded-lg bg-slate-50 dark:bg-slate-900 p-3 text-sm text-slate-800 dark:text-slate-200 whitespace-pre-wrap">{draft.result || 'Nessun contenuto'}</div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setIsSendFormOpen(false)}
+                className="cursor-pointer rounded-lg border border-slate-200 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
+              >
+                Annulla
+              </button>
+              <button
+                type="submit"
+                className="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700"
+              >
+                Apri client email
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 };

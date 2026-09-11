@@ -45,6 +45,7 @@ jobs:
         run: |
           pnpm build:electron
         env:
+          VITE_APP: desktop
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Release
