@@ -25,7 +25,7 @@ export default function App() {
   const [provider, setProvider] = useState(localStorage.getItem('sentai_provider') || 'gemini');
   const [apiKey, setApiKey] = useState(localStorage.getItem('sentai_api_key') || '');
   const [lmStudioUrl, setLmStudioUrl] = useState(
-    localStorage.getItem('sentai_lmstudio_url') || 'http://localhost:1234/v1'
+    localStorage.getItem('sentai_lmstudio_url') || 'http://localhost:1234/api/v1'
   );
   const [modelName, setModelName] = useState(
     localStorage.getItem('sentai_model') || 'gemini-2.0-flash'

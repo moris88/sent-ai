@@ -1,4 +1,4 @@
-import { X } from 'lucide-react';
+import { ClipboardPaste, Eye, EyeOff, X } from 'lucide-react';
 import React from 'react';
 import { getModels } from '../services/ai';
 
@@ -20,9 +20,22 @@ export const SettingsModal = ({
 }: any) => {
   const [availableModels, setAvailableModels] = React.useState<string[]>([]);
   const [isLoadingModels, setIsLoadingModels] = React.useState(false);
+  const [showApiKey, setShowApiKey] = React.useState(false);
+
+  const handlePasteApiKey = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        setApiKey(text.trim());
+      }
+    } catch (err) {
+      console.error('Impossibile leggere dagli appunti', err);
+    }
+  };
 
   React.useEffect(() => {
-    if (!isOpen || (provider !== 'lmstudio' && !apiKey)) {
+    const isSupportedProvider = provider === 'gemini' || provider === 'openai' || provider === 'anthropic';
+    if (!isOpen || provider === 'lmstudio' || !isSupportedProvider || !apiKey) {
       setAvailableModels([]);
       return;
     }
@@ -91,7 +104,7 @@ export const SettingsModal = ({
                   type="url"
                   value={lmStudioUrl}
                   onChange={(e) => setLmStudioUrl(e.target.value)}
-                  placeholder="http://localhost:1234/v1"
+                  placeholder="http://localhost:1234/api/v1"
                   className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
                 />
               </div>
@@ -103,14 +116,34 @@ export const SettingsModal = ({
               >
                 API Key {provider === 'lmstudio' && '(opzionale)'}
               </label>
-              <input
-                id="api-key"
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Incolla qui la tua API Key..."
-                className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
-              />
+              <div className="relative">
+                <input
+                  id="api-key"
+                  type={showApiKey ? 'text' : 'password'}
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder="Incolla qui la tua API Key..."
+                  className="w-full p-3 pr-20 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center space-x-1.5 text-slate-400">
+                  <button
+                    type="button"
+                    onClick={handlePasteApiKey}
+                    className="hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1"
+                    title="Incolla dagli appunti"
+                  >
+                    <ClipboardPaste className="w-5 h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowApiKey(!showApiKey)}
+                    className="hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1"
+                    title={showApiKey ? 'Nascondi API Key' : 'Mostra API Key'}
+                  >
+                    {showApiKey ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
             </div>
             <div>
               <label
@@ -130,7 +163,7 @@ export const SettingsModal = ({
               <datalist id="available-models">{options}</datalist>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 {provider === 'lmstudio'
-                  ? 'I modelli installati vengono letti da LM Studio. Puoi anche inserire manualmente il model ID.'
+                  ? 'Inserisci manualmente il nome del modello caricato su LM Studio (es. google/gemma-4-e4b).'
                   : requiresApiKey && availableModels.length === 0
                     ? 'Inserisci la API key per caricare i modelli, oppure scrivi il modello manualmente.'
                     : 'Puoi selezionare un modello dall’elenco o inserirlo manualmente.'}
@@ -147,7 +180,7 @@ export const SettingsModal = ({
                 id="additional-prompt"
                 value={additionalPrompt}
                 onChange={(e) => setAdditionalPrompt(e.target.value)}
-                placeholder="Istruzioni aggiuntive per l'AI..."
+                placeholder="Istruzioni aggiuntive per l'AI per la raffinazione del testo dell'email..."
                 className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 dark:text-white h-24"
               />
             </div>

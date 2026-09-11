@@ -4,35 +4,98 @@ import OpenAI from "openai";
 
 export type Provider = "gemini" | "openai" | "anthropic" | "lmstudio";
 
-const getLmStudioBaseUrl = (baseUrl?: string) =>
-  (
+const getLmStudioBaseUrl = (baseUrl?: string) => {
+  let url = (
     baseUrl ||
     localStorage.getItem("sentai_lmstudio_url") ||
-    "http://localhost:1234/v1"
-  ).replace(/\/$/, "");
+    "http://localhost:1234/api/v1"
+  )
+    .trim()
+    .replace(/\/$/, "");
+
+  if (url.endsWith("/chat/completions")) {
+    url = url.slice(0, -"/chat/completions".length);
+  } else if (url.endsWith("/chat")) {
+    url = url.slice(0, -"/chat".length);
+  } else if (url.endsWith("/models")) {
+    url = url.slice(0, -"/models".length);
+  }
+
+  url = url.replace(/\/$/, "");
+
+  if (url.endsWith("/v1") && !url.endsWith("/api/v1")) {
+    url = `${url.slice(0, -3)}/api/v1`;
+  } else if (!url.endsWith("/api/v1")) {
+    url = `${url}/api/v1`;
+  }
+
+  return url;
+};
+
+const getLmStudioContent = (data: any): string => {
+  if (Array.isArray(data?.output)) {
+    const msg =
+      data.output.find((o: any) => o?.type === "message") || data.output[0];
+    if (typeof msg?.content === "string") return msg.content;
+    if (typeof msg === "string") return msg;
+  }
+  if (typeof data?.output === "string") return data.output;
+  if (data?.choices?.[0]?.message?.content)
+    return data.choices[0].message.content;
+  if (typeof data?.content === "string") return data.content;
+  if (typeof data?.response === "string") return data.response;
+  return "";
+};
 
 const completeWithLmStudio = async (
   model: string,
   apiKey: string,
   prompt: string,
   temperature?: number,
+  systemPrompt?: string,
+  lmStudioUrl?: string,
 ) => {
-  const response = await fetch(`${getLmStudioBaseUrl()}/chat/completions`, {
+  const baseUrl = getLmStudioBaseUrl(lmStudioUrl);
+  const myHeaders = new Headers();
+  myHeaders.append("Content-Type", "application/json");
+  if (apiKey) {
+    myHeaders.append("Authorization", `Bearer ${apiKey}`);
+  }
+
+  const payload: Record<string, any> = {
+    model: model,
+    input: prompt,
+  };
+
+  if (systemPrompt) {
+    payload.system_prompt = systemPrompt;
+  }
+
+  if (typeof temperature === "number") {
+    payload.temperature = temperature;
+  }
+
+  const raw = JSON.stringify(payload);
+
+  const requestOptions: RequestInit = {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
-    },
-    body: JSON.stringify({
-      model,
-      messages: [{ role: "user", content: prompt }],
-      temperature,
-    }),
-  });
-  if (!response.ok)
-    throw new Error(`LM Studio ha restituito l'errore ${response.status}.`);
+    headers: myHeaders,
+    body: raw,
+    redirect: "follow",
+  };
+
+  const response = await fetch(`${baseUrl}/chat`, requestOptions);
+  if (!response.ok) {
+    const errText = await response.text().catch(() => "");
+    throw new Error(
+      `LM Studio ha restituito l'errore ${response.status}${
+        errText ? `: ${errText}` : "."
+      }`,
+    );
+  }
+
   const data = await response.json();
-  return data.choices?.[0]?.message?.content?.trim() || "";
+  return getLmStudioContent(data).trim();
 };
 
 type RefineOptions = {
@@ -94,7 +157,13 @@ export const refineEmail = async (options: RefineOptions): Promise<string> => {
   }
 
   if (provider === "lmstudio") {
-    return completeWithLmStudio(model, apiKey, prompt, opts.temperature);
+    return completeWithLmStudio(
+      model,
+      apiKey,
+      prompt,
+      opts.temperature,
+      "You are an AI assistant specialized in writing professional emails.",
+    );
   }
 
   // Default to Gemini
@@ -124,7 +193,15 @@ export async function getModels(
               `LM Studio ha restituito l'errore ${response.status}.`,
           );
         }
-        return (data.data || []).map((model: { id: string }) => model.id);
+        const modelList = data.data || data.models || data;
+        if (Array.isArray(modelList)) {
+          return modelList.map((m: any) =>
+            typeof m === "string"
+              ? m
+              : m.id || m.name || m.model_instance_id || String(m),
+          );
+        }
+        return [];
       })
       .catch((error) => {
         throw error instanceof Error
@@ -349,7 +426,13 @@ export const reviseEmail = async (
 
   if (provider === "lmstudio") {
     return (
-      (await completeWithLmStudio(model, apiKey, prompt, temperature)) || result
+      (await completeWithLmStudio(
+        model,
+        apiKey,
+        prompt,
+        temperature,
+        "You are an AI assistant specialized in editing professional emails.",
+      )) || result
     );
   }
 
