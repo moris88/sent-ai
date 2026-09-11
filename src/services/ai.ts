@@ -1,31 +1,31 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import OpenAI from "openai";
+import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import OpenAI from 'openai';
 
-export type Provider = "gemini" | "openai" | "anthropic" | "lmstudio";
+export type Provider = 'gemini' | 'openai' | 'anthropic' | 'lmstudio';
 
 const getLmStudioBaseUrl = (baseUrl?: string) => {
   let url = (
     baseUrl ||
-    localStorage.getItem("sentai_lmstudio_url") ||
-    "http://localhost:1234/api/v1"
+    localStorage.getItem('sentai_lmstudio_url') ||
+    'http://localhost:1234/api/v1'
   )
     .trim()
-    .replace(/\/$/, "");
+    .replace(/\/$/, '');
 
-  if (url.endsWith("/chat/completions")) {
-    url = url.slice(0, -"/chat/completions".length);
-  } else if (url.endsWith("/chat")) {
-    url = url.slice(0, -"/chat".length);
-  } else if (url.endsWith("/models")) {
-    url = url.slice(0, -"/models".length);
+  if (url.endsWith('/chat/completions')) {
+    url = url.slice(0, -'/chat/completions'.length);
+  } else if (url.endsWith('/chat')) {
+    url = url.slice(0, -'/chat'.length);
+  } else if (url.endsWith('/models')) {
+    url = url.slice(0, -'/models'.length);
   }
 
-  url = url.replace(/\/$/, "");
+  url = url.replace(/\/$/, '');
 
-  if (url.endsWith("/v1") && !url.endsWith("/api/v1")) {
+  if (url.endsWith('/v1') && !url.endsWith('/api/v1')) {
     url = `${url.slice(0, -3)}/api/v1`;
-  } else if (!url.endsWith("/api/v1")) {
+  } else if (!url.endsWith('/api/v1')) {
     url = `${url}/api/v1`;
   }
 
@@ -34,17 +34,15 @@ const getLmStudioBaseUrl = (baseUrl?: string) => {
 
 const getLmStudioContent = (data: any): string => {
   if (Array.isArray(data?.output)) {
-    const msg =
-      data.output.find((o: any) => o?.type === "message") || data.output[0];
-    if (typeof msg?.content === "string") return msg.content;
-    if (typeof msg === "string") return msg;
+    const msg = data.output.find((o: any) => o?.type === 'message') || data.output[0];
+    if (typeof msg?.content === 'string') return msg.content;
+    if (typeof msg === 'string') return msg;
   }
-  if (typeof data?.output === "string") return data.output;
-  if (data?.choices?.[0]?.message?.content)
-    return data.choices[0].message.content;
-  if (typeof data?.content === "string") return data.content;
-  if (typeof data?.response === "string") return data.response;
-  return "";
+  if (typeof data?.output === 'string') return data.output;
+  if (data?.choices?.[0]?.message?.content) return data.choices[0].message.content;
+  if (typeof data?.content === 'string') return data.content;
+  if (typeof data?.response === 'string') return data.response;
+  return '';
 };
 
 const completeWithLmStudio = async (
@@ -53,13 +51,13 @@ const completeWithLmStudio = async (
   prompt: string,
   temperature?: number,
   systemPrompt?: string,
-  lmStudioUrl?: string,
+  lmStudioUrl?: string
 ) => {
   const baseUrl = getLmStudioBaseUrl(lmStudioUrl);
   const myHeaders = new Headers();
-  myHeaders.append("Content-Type", "application/json");
+  myHeaders.append('Content-Type', 'application/json');
   if (apiKey) {
-    myHeaders.append("Authorization", `Bearer ${apiKey}`);
+    myHeaders.append('Authorization', `Bearer ${apiKey}`);
   }
 
   const payload: Record<string, any> = {
@@ -71,26 +69,24 @@ const completeWithLmStudio = async (
     payload.system_prompt = systemPrompt;
   }
 
-  if (typeof temperature === "number") {
+  if (typeof temperature === 'number') {
     payload.temperature = temperature;
   }
 
   const raw = JSON.stringify(payload);
 
   const requestOptions: RequestInit = {
-    method: "POST",
+    method: 'POST',
     headers: myHeaders,
     body: raw,
-    redirect: "follow",
+    redirect: 'follow',
   };
 
   const response = await fetch(`${baseUrl}/chat`, requestOptions);
   if (!response.ok) {
-    const errText = await response.text().catch(() => "");
+    const errText = await response.text().catch(() => '');
     throw new Error(
-      `LM Studio ha restituito l'errore ${response.status}${
-        errText ? `: ${errText}` : "."
-      }`,
+      `LM Studio ha restituito l'errore ${response.status}${errText ? `: ${errText}` : '.'}`
     );
   }
 
@@ -126,43 +122,43 @@ export const refineEmail = async (options: RefineOptions): Promise<string> => {
   <detail>${opts.detail}</detail>
   <language>${opts.language}</language>
   <structure>${opts.structure}</structure>
-  ${opts.keywords ? `<keywords>${opts.keywords}</keywords>` : ""}
+  ${opts.keywords ? `<keywords>${opts.keywords}</keywords>` : ''}
 
-  <context>${opts.context || "No context provided."}</context>
+  <context>${opts.context || 'No context provided.'}</context>
   <draft>${opts.draft}</draft>
-  ${opts.prompt ? `<additional_prompt>${opts.prompt}</additional_prompt>` : ""}
+  ${opts.prompt ? `<additional_prompt>${opts.prompt}</additional_prompt>` : ''}
 
   Write ONLY the email text in ${opts.language}.`;
 
-  if (provider === "openai") {
+  if (provider === 'openai') {
     const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
     const completion = await openai.chat.completions.create({
       model: model,
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: 'user', content: prompt }],
       temperature: opts.temperature,
     });
-    return completion.choices[0].message.content || "";
+    return completion.choices[0].message.content || '';
   }
 
-  if (provider === "anthropic") {
+  if (provider === 'anthropic') {
     const anthropic = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
     const message = await anthropic.messages.create({
       model: model,
       max_tokens: 1024,
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: 'user', content: prompt }],
       temperature: opts.temperature,
     });
     // @ts-expect-error
-    return message.content[0].text || "";
+    return message.content[0].text || '';
   }
 
-  if (provider === "lmstudio") {
+  if (provider === 'lmstudio') {
     return completeWithLmStudio(
       model,
       apiKey,
       prompt,
       opts.temperature,
-      "You are an AI assistant specialized in writing professional emails.",
+      'You are an AI assistant specialized in writing professional emails.'
     );
   }
 
@@ -172,56 +168,108 @@ export const refineEmail = async (options: RefineOptions): Promise<string> => {
     model: model,
   });
   const result = await geminiModel.generateContent({
-    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
     generationConfig: { temperature: opts.temperature },
   });
   return result.response.text();
 };
 
+type QuerySavedEmailsOptions = {
+  question: string;
+  emails: string;
+  provider: Provider;
+  apiKey: string;
+  model: string;
+  temperature?: number;
+};
+
+export const querySavedEmails = async (options: QuerySavedEmailsOptions): Promise<string> => {
+  const { question, emails, provider, apiKey, model, temperature } = options;
+  const prompt = `
+You are an AI assistant answering questions about the user's saved emails.
+Use only the email data provided below. If the answer is not present, say so clearly.
+Answer the user's question directly in Italian. Do not write or rewrite an email unless explicitly asked.
+
+<saved_emails>${emails || 'No saved emails.'}</saved_emails>
+<question>${question}</question>
+`;
+
+  if (provider === 'openai') {
+    const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
+    const completion = await openai.chat.completions.create({
+      model,
+      messages: [{ role: 'user', content: prompt }],
+      temperature,
+    });
+    return completion.choices[0].message.content?.trim() || '';
+  }
+
+  if (provider === 'anthropic') {
+    const anthropic = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+    const message = await anthropic.messages.create({
+      model,
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: prompt }],
+      temperature,
+    });
+    // @ts-expect-error
+    return message.content[0].text?.trim() || '';
+  }
+
+  if (provider === 'lmstudio') {
+    return completeWithLmStudio(
+      model,
+      apiKey,
+      prompt,
+      temperature,
+      'You are an AI assistant answering questions about saved emails.'
+    );
+  }
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const geminiModel = genAI.getGenerativeModel({ model });
+  const result = await geminiModel.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: { temperature },
+  });
+  return result.response.text().trim();
+};
+
 export async function getModels(
   provider: Provider,
   apiKey: string,
-  lmStudioUrl?: string,
+  lmStudioUrl?: string
 ): Promise<string[]> {
-  if (provider === "lmstudio") {
+  if (provider === 'lmstudio') {
     return fetch(`${getLmStudioBaseUrl(lmStudioUrl)}/models`)
       .then(async (response) => {
         const data = await response.json();
         if (!response.ok) {
           throw new Error(
-            data.error?.message ||
-              `LM Studio ha restituito l'errore ${response.status}.`,
+            data.error?.message || `LM Studio ha restituito l'errore ${response.status}.`
           );
         }
         const modelList = data.data || data.models || data;
         if (Array.isArray(modelList)) {
           return modelList.map((m: any) =>
-            typeof m === "string"
-              ? m
-              : m.id || m.name || m.model_instance_id || String(m),
+            typeof m === 'string' ? m : m.id || m.name || m.model_instance_id || String(m)
           );
         }
         return [];
       })
       .catch((error) => {
-        throw error instanceof Error
-          ? error
-          : new Error("Impossibile raggiungere LM Studio.");
+        throw error instanceof Error ? error : new Error('Impossibile raggiungere LM Studio.');
       });
   }
 
-  if (provider === "openai") {
+  if (provider === 'openai') {
     const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
-    return openai.models
-      .list()
-      .then((res) => res.data.map((model) => model.id));
+    return openai.models.list().then((res) => res.data.map((model) => model.id));
   }
 
-  if (provider === "anthropic") {
+  if (provider === 'anthropic') {
     const anthropic = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
-    return anthropic.models
-      .list()
-      .then((res) => res.data.map((model) => model.display_name));
+    return anthropic.models.list().then((res) => res.data.map((model) => model.display_name));
   }
 
   let OriginalModels: any = {};
@@ -229,15 +277,12 @@ export async function getModels(
   const realModelNames: string[] = [];
 
   // gemini api
-  return await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`,
-  )
+  return await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`)
     .then(async (response) => {
       const data = await response.json();
       if (!response.ok) {
         throw new Error(
-          data.error?.message ||
-            `Google Gemini ha restituito l'errore ${response.status}.`,
+          data.error?.message || `Google Gemini ha restituito l'errore ${response.status}.`
         );
       }
       return data;
@@ -253,7 +298,7 @@ export async function getModels(
       // get the real model name
 
       nameOnlyList.forEach((model) => {
-        const name = model.split("/")[1];
+        const name = model.split('/')[1];
         realModelNames.push(name);
       });
 
@@ -270,39 +315,37 @@ export const generateTitle = async (
   draft: string,
   provider: Provider,
   apiKey: string,
-  model: string,
+  model: string
 ): Promise<string> => {
   const prompt = `
   Analyze the following email context and draft and generate a concise, descriptive title for the conversation.
   Return ONLY the title text, no quotes or additional formatting.
   
-  <context>${context || "No context provided."}</context>
-  <draft>${draft || "No draft provided."}</draft>
+  <context>${context || 'No context provided.'}</context>
+  <draft>${draft || 'No draft provided.'}</draft>
   `;
 
-  if (provider === "openai") {
+  if (provider === 'openai') {
     const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
     const completion = await openai.chat.completions.create({
       model: model,
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: 'user', content: prompt }],
     });
-    return (
-      completion.choices[0].message.content?.trim() || "Nuova conversazione"
-    );
+    return completion.choices[0].message.content?.trim() || 'Nuova conversazione';
   }
 
-  if (provider === "anthropic") {
+  if (provider === 'anthropic') {
     const anthropic = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
     const message = await anthropic.messages.create({
       model: model,
       max_tokens: 100,
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: 'user', content: prompt }],
     });
     // @ts-expect-error
-    return message.content[0].text?.trim() || "Nuova conversazione";
+    return message.content[0].text?.trim() || 'Nuova conversazione';
   }
 
-  if (provider === "lmstudio") {
+  if (provider === 'lmstudio') {
     return completeWithLmStudio(model, apiKey, prompt);
   }
 
@@ -311,7 +354,7 @@ export const generateTitle = async (
     model: model,
   });
   const result = await geminiModel.generateContent(prompt);
-  return result.response.text().trim() || "Nuova conversazione";
+  return result.response.text().trim() || 'Nuova conversazione';
 };
 
 type GenerateSubjectOptions = {
@@ -324,41 +367,39 @@ type GenerateSubjectOptions = {
   model: string;
 };
 
-export const generateSubject = async (
-  options: GenerateSubjectOptions,
-): Promise<string> => {
+export const generateSubject = async (options: GenerateSubjectOptions): Promise<string> => {
   const { provider, apiKey, model, context, draft, result, language } = options;
 
   const prompt = `
   Analyze the following email context and text and generate ONLY a concise, professional email subject line in ${language}.
   Return ONLY the subject text, without quotes, prefixes (like "Oggetto:" or "Subject:") or additional formatting.
 
-  <context>${context || "No context provided."}</context>
-  <draft>${draft || "No draft provided."}</draft>
-  ${result ? `<refined_email>${result}</refined_email>` : ""}
+  <context>${context || 'No context provided.'}</context>
+  <draft>${draft || 'No draft provided.'}</draft>
+  ${result ? `<refined_email>${result}</refined_email>` : ''}
   `;
 
-  if (provider === "openai") {
+  if (provider === 'openai') {
     const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
     const completion = await openai.chat.completions.create({
       model: model,
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: 'user', content: prompt }],
     });
-    return completion.choices[0].message.content?.trim() || "";
+    return completion.choices[0].message.content?.trim() || '';
   }
 
-  if (provider === "anthropic") {
+  if (provider === 'anthropic') {
     const anthropic = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
     const message = await anthropic.messages.create({
       model: model,
       max_tokens: 100,
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: 'user', content: prompt }],
     });
     // @ts-expect-error
-    return message.content[0].text?.trim() || "";
+    return message.content[0].text?.trim() || '';
   }
 
-  if (provider === "lmstudio") {
+  if (provider === 'lmstudio') {
     return completeWithLmStudio(model, apiKey, prompt);
   }
 
@@ -367,7 +408,7 @@ export const generateSubject = async (
     model: model,
   });
   const result_ = await geminiModel.generateContent(prompt);
-  return result_.response.text().trim() || "";
+  return result_.response.text().trim() || '';
 };
 
 type ReviseEmailOptions = {
@@ -380,18 +421,8 @@ type ReviseEmailOptions = {
   temperature?: number;
 };
 
-export const reviseEmail = async (
-  options: ReviseEmailOptions,
-): Promise<string> => {
-  const {
-    provider,
-    apiKey,
-    model,
-    result,
-    instructions,
-    language,
-    temperature,
-  } = options;
+export const reviseEmail = async (options: ReviseEmailOptions): Promise<string> => {
+  const { provider, apiKey, model, result, instructions, language, temperature } = options;
 
   const prompt = `
   You are an AI assistant specialized in editing professional emails.
@@ -402,36 +433,36 @@ export const reviseEmail = async (
   <requested_changes>${instructions}</requested_changes>
   `;
 
-  if (provider === "openai") {
+  if (provider === 'openai') {
     const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
     const completion = await openai.chat.completions.create({
       model: model,
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: 'user', content: prompt }],
       temperature,
     });
     return completion.choices[0].message.content?.trim() || result;
   }
 
-  if (provider === "anthropic") {
+  if (provider === 'anthropic') {
     const anthropic = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
     const message = await anthropic.messages.create({
       model: model,
       max_tokens: 1024,
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: 'user', content: prompt }],
       temperature,
     });
     // @ts-expect-error
     return message.content[0].text?.trim() || result;
   }
 
-  if (provider === "lmstudio") {
+  if (provider === 'lmstudio') {
     return (
       (await completeWithLmStudio(
         model,
         apiKey,
         prompt,
         temperature,
-        "You are an AI assistant specialized in editing professional emails.",
+        'You are an AI assistant specialized in editing professional emails.'
       )) || result
     );
   }
@@ -441,7 +472,7 @@ export const reviseEmail = async (
     model: model,
   });
   const result_ = await geminiModel.generateContent({
-    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
     generationConfig: { temperature },
   });
   return result_.response.text().trim() || result;

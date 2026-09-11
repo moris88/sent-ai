@@ -1,6 +1,6 @@
 import { Bot, SendHorizonal, User } from 'lucide-react';
 import { useState } from 'react';
-import { refineEmail } from '../services/ai';
+import { querySavedEmails } from '../services/ai';
 import type { EmailDraft } from '../types';
 
 interface AIChatProps {
@@ -41,17 +41,15 @@ export const AIChat = ({ drafts, checkApiKey, onAiError }: AIChatProps) => {
       }
 
       const context = drafts
-        .map((d) => `Title: ${d.title}\nDraft: ${d.draft}\nResult: ${d.result}\n---`)
+        .map(
+          (d) =>
+            `Title: ${d.title}\nContext: ${d.context}\nSubject: ${d.subject}\nOriginal email: ${d.draft}\nRefined email: ${d.result}\n---`
+        )
         .join('\n');
 
-      const response = await refineEmail({
-        persona: 'assistant',
-        tone: 'professional',
-        detail: 'concise',
-        language: 'it',
-        structure: 'text',
-        context: `Here is the user's email history:\n${context}`,
-        draft: `Question: ${userMessage}`,
+      const response = await querySavedEmails({
+        question: userMessage,
+        emails: context,
         provider,
         apiKey,
         model,
