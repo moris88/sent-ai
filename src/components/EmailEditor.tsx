@@ -100,6 +100,8 @@ export const EmailEditor = ({
   const [newSnippetLabel, setNewSnippetLabel] = useState('');
   const [newSnippetText, setNewSnippetText] = useState('');
   const [isSendFormOpen, setIsSendFormOpen] = useState(false);
+  const [sendSubject, setSendSubject] = useState('');
+  const [sendBody, setSendBody] = useState('');
   const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
   const [toRecipients, setToRecipients] = useState<string[]>([]);
   const [ccRecipients, setCcRecipients] = useState<string[]>([]);
@@ -170,19 +172,19 @@ export const EmailEditor = ({
     const pendingCc = normalizeRecipients(ccInput);
     const allTo = [...toRecipients, ...pendingTo.filter((recipient) => !toRecipients.includes(recipient))];
     const allCc = [...ccRecipients, ...pendingCc.filter((recipient) => !ccRecipients.includes(recipient))];
-    const emailBody = draft.result || draft.draft;
+    const emailBody = sendBody;
 
     if (emailBody.trim() === '') {
       alert('Il contenuto dell\'email non può essere vuoto.');
       return;
     }
-    if (draft.subject.trim() === '') {
+    if (sendSubject.trim() === '') {
       alert('L\'oggetto dell\'email non può essere vuoto.');
       return;
     }
 
     const params = new URLSearchParams({
-      subject: draft.subject,
+      subject: sendSubject,
       body: emailBody,
     });
     if (allCc.length > 0) params.set('cc', allCc.join(','));
@@ -662,6 +664,8 @@ export const EmailEditor = ({
                 type="button"
                 className="cursor-pointer bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 font-semibold px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-all border border-blue-200 dark:border-blue-700"
                 onClick={() => {
+                  setSendSubject(draft.subject);
+                  setSendBody(draft.result || draft.draft);
                   setIsSendFormOpen(true);
                 }}
                 title="Apri il client di posta con oggetto e testo precompilati"
@@ -879,12 +883,25 @@ export const EmailEditor = ({
 
             <div className="space-y-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Oggetto <span className="text-red-500">*</span></p>
-                <div className="mt-1 rounded-lg bg-slate-50 dark:bg-slate-900 p-3 text-slate-800 dark:text-slate-200 whitespace-pre-wrap">{draft.subject || 'Nessun oggetto'}</div>
+                <label htmlFor="email-subject" className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Oggetto <span className="text-red-500">*</span></label>
+                <input
+                  id="email-subject"
+                  type="text"
+                  value={sendSubject}
+                  onChange={(event) => setSendSubject(event.target.value)}
+                  placeholder="Oggetto dell'email"
+                  className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-3 text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Contenuto <span className="text-red-500">*</span></p>
-                <div className="mt-1 max-h-40 overflow-y-auto rounded-lg bg-slate-50 dark:bg-slate-900 p-3 text-sm text-slate-800 dark:text-slate-200 whitespace-pre-wrap">{draft.result || draft.draft || 'Nessun contenuto'}</div>
+                <label htmlFor="email-body" className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Contenuto <span className="text-red-500">*</span></label>
+                <textarea
+                  id="email-body"
+                  value={sendBody}
+                  onChange={(event) => setSendBody(event.target.value)}
+                  placeholder="Contenuto dell'email"
+                  className="mt-1 h-40 w-full resize-y rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-3 text-sm text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
             </div>
 

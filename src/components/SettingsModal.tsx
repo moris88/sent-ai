@@ -152,7 +152,7 @@ export const SettingsModal = ({
               />
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Le credenziali vengono salvate solo nel tuo browser.
+              Le credenziali vengono salvate solo nel tuo browser/pc.
             </p>
           </div>
           <button

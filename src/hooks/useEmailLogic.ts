@@ -157,7 +157,7 @@ export const useEmailLogic = (
     } catch (error) {
       console.error("Error accessing clipboard:", error);
       alert(
-        "Impossibile accedere agli appunti. Verifica i permessi del browser.",
+        "Impossibile accedere agli appunti. Verifica i permessi del browser/pc.",
       );
     }
   };
