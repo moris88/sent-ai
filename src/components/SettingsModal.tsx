@@ -195,6 +195,9 @@ export const SettingsModal = ({
           >
             Salva Impostazioni
           </button>
+          <footer className="mx-auto max-w-7xl px-4 py-2 text-center text-slate-400 text-sm sm:px-6 lg:px-8 dark:text-slate-500">
+            <p>© 2026 AI Project Estimator - Powered by Maurizio Tolomeo</p>
+          </footer>
         </div>
       </div>
     )
