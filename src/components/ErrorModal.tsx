@@ -9,15 +9,15 @@ export const ErrorModal = ({ message, onClose }: ErrorModalProps) => {
   if (!message) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-60 flex items-center justify-center bg-slate-950/50 p-4"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
-    >
+    <div className="fixed inset-0 z-60 flex items-center justify-center p-4" role="presentation">
+      <button
+        type="button"
+        aria-label="Chiudi finestra"
+        className="absolute inset-0 cursor-default bg-slate-950/50"
+        onClick={onClose}
+      />
       <div
-        className="w-full max-w-lg rounded-xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900 shadow-2xl p-5 space-y-4"
+        className="relative w-full max-w-lg rounded-xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900 shadow-2xl p-5 space-y-4"
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="ai-error-title"

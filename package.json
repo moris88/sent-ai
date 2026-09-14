@@ -36,8 +36,8 @@
     }
   },
   "scripts": {
-    "lint": "biome check .",
-    "dev": "node scripts/start.js",
+    "lint": "biome check ./src",
+    "dev": "node --env-file=.env scripts/start.js",
     "dev:web": "vite --port 3000",
     "dev:electron": "electron-vite dev -- --ozone-platform=x11",
     "preview": "vite preview",

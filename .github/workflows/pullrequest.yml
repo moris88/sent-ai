@@ -1,0 +1,40 @@
+name: "Pull Request Checks"
+
+on:
+  pull_request:
+    branches:
+      - '**'
+    types: [opened, synchronize, reopened]
+permissions: {}
+
+jobs:
+  biome-build:
+    name: "Code Quality and Build"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: 'Installazione dipendenze'
+        run: pnpm install
+
+      - name: 'Check qualità codice'
+        run: pnpm check
+
+      - name: 'TypeScript type check'
+        run: pnpm tsc --noEmit
+
+      - name: 'Build test'
+        run: pnpm build

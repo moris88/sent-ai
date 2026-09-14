@@ -87,20 +87,20 @@ export default function App() {
 
   const activeDraft = drafts.find((d) => d.id === activeId) ||
     drafts[0] || {
-    id: 'placeholder',
-    title: '',
-    context: '',
-    draft: '',
-    result: '',
-    subject: '',
-    persona: 'dev',
-    tone: 'formal',
-    detail: 'balanced',
-    temperature: 0.5,
-    keywords: '',
-    generateSubject: false,
-    updatedAt: Date.now(),
-  };
+      id: 'placeholder',
+      title: '',
+      context: '',
+      draft: '',
+      result: '',
+      subject: '',
+      persona: 'dev',
+      tone: 'formal',
+      detail: 'balanced',
+      temperature: 0.5,
+      keywords: '',
+      generateSubject: false,
+      updatedAt: Date.now(),
+    };
 
   const {
     isLoading,
@@ -116,7 +116,7 @@ export default function App() {
     activeDraft,
     (updates) => updateDraft(activeId, updates),
     setIsSettingsOpen,
-    handleAiError,
+    handleAiError
   );
 
   if (loading) {

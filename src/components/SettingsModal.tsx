@@ -34,7 +34,8 @@ export const SettingsModal = ({
   };
 
   React.useEffect(() => {
-    const isSupportedProvider = provider === 'gemini' || provider === 'openai' || provider === 'anthropic';
+    const isSupportedProvider =
+      provider === 'gemini' || provider === 'openai' || provider === 'anthropic';
     if (!isOpen || provider === 'lmstudio' || !isSupportedProvider || !apiKey) {
       setAvailableModels([]);
       return;
@@ -157,7 +158,9 @@ export const SettingsModal = ({
                 value={modelName}
                 onChange={(e) => setModelName(e.target.value)}
                 list="available-models"
-                placeholder={isLoadingModels ? 'Caricamento modelli...' : 'Scrivi o seleziona un modello'}
+                placeholder={
+                  isLoadingModels ? 'Caricamento modelli...' : 'Scrivi o seleziona un modello'
+                }
                 className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
               />
               <datalist id="available-models">{options}</datalist>

@@ -170,16 +170,22 @@ export const EmailEditor = ({
   const handleSendEmail = () => {
     const pendingTo = normalizeRecipients(toInput);
     const pendingCc = normalizeRecipients(ccInput);
-    const allTo = [...toRecipients, ...pendingTo.filter((recipient) => !toRecipients.includes(recipient))];
-    const allCc = [...ccRecipients, ...pendingCc.filter((recipient) => !ccRecipients.includes(recipient))];
+    const allTo = [
+      ...toRecipients,
+      ...pendingTo.filter((recipient) => !toRecipients.includes(recipient)),
+    ];
+    const allCc = [
+      ...ccRecipients,
+      ...pendingCc.filter((recipient) => !ccRecipients.includes(recipient)),
+    ];
     const emailBody = sendBody;
 
     if (emailBody.trim() === '') {
-      alert('Il contenuto dell\'email non può essere vuoto.');
+      alert("Il contenuto dell'email non può essere vuoto.");
       return;
     }
     if (sendSubject.trim() === '') {
-      alert('L\'oggetto dell\'email non può essere vuoto.');
+      alert("L'oggetto dell'email non può essere vuoto.");
       return;
     }
 
@@ -258,7 +264,9 @@ export const EmailEditor = ({
       onUpdate({ title });
     } catch (error) {
       console.error('Error generating title:', error);
-      onAiError(error instanceof Error ? error.message : 'Errore durante la generazione del titolo.');
+      onAiError(
+        error instanceof Error ? error.message : 'Errore durante la generazione del titolo.'
+      );
     } finally {
       setIsGeneratingTitle(false);
     }
@@ -794,15 +802,14 @@ export const EmailEditor = ({
       </div>
 
       {isSendFormOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4"
-          role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setIsSendFormOpen(false);
-          }}
-        >
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-slate-950/50"
+            aria-hidden="true"
+            onClick={() => setIsSendFormOpen(false)}
+          />
           <form
-            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-white dark:bg-slate-800 shadow-2xl border border-slate-200 dark:border-slate-700 p-5 space-y-4"
+            className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-white dark:bg-slate-800 shadow-2xl border border-slate-200 dark:border-slate-700 p-5 space-y-4"
             onSubmit={(event) => {
               event.preventDefault();
               handleSendEmail();
@@ -820,20 +827,29 @@ export const EmailEditor = ({
               </button>
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-300">
-              Inserisci gli indirizzi qui, oppure lasciali vuoti e aggiungili direttamente nel client di posta che si aprirà.
+              Inserisci gli indirizzi qui, oppure lasciali vuoti e aggiungili direttamente nel
+              client di posta che si aprirà.
             </p>
 
             <div className="space-y-1">
-              <label htmlFor="email-to" className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+              <label
+                htmlFor="email-to"
+                className="block text-sm font-semibold text-slate-700 dark:text-slate-200"
+              >
                 A
               </label>
               <div className="flex flex-wrap items-center gap-2 min-h-11 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus-within:ring-2 focus-within:ring-blue-500">
                 {toRecipients.map((recipient) => (
-                  <span key={recipient} className="flex items-center gap-1 rounded-md bg-blue-100 dark:bg-blue-900/50 px-2 py-1 text-sm text-blue-800 dark:text-blue-200">
+                  <span
+                    key={recipient}
+                    className="flex items-center gap-1 rounded-md bg-blue-100 dark:bg-blue-900/50 px-2 py-1 text-sm text-blue-800 dark:text-blue-200"
+                  >
                     {recipient}
                     <button
                       type="button"
-                      onClick={() => setToRecipients(toRecipients.filter((item) => item !== recipient))}
+                      onClick={() =>
+                        setToRecipients(toRecipients.filter((item) => item !== recipient))
+                      }
                       className="cursor-pointer text-blue-500 hover:text-blue-800 dark:hover:text-blue-100"
                       title={`Rimuovi ${recipient}`}
                     >
@@ -846,22 +862,40 @@ export const EmailEditor = ({
                   type="text"
                   value={toInput}
                   onChange={(event) => setToInput(event.target.value)}
-                  onKeyDown={(event) => handleRecipientKeyDown(event, toInput, toRecipients, setToRecipients, () => setToInput(''))}
-                  placeholder={toRecipients.length === 0 ? 'email@esempio.it (Invio per aggiungere)' : 'Aggiungi destinatario'}
+                  onKeyDown={(event) =>
+                    handleRecipientKeyDown(event, toInput, toRecipients, setToRecipients, () =>
+                      setToInput('')
+                    )
+                  }
+                  placeholder={
+                    toRecipients.length === 0
+                      ? 'email@esempio.it (Invio per aggiungere)'
+                      : 'Aggiungi destinatario'
+                  }
                   className="min-w-48 flex-1 bg-transparent outline-none text-sm text-slate-900 dark:text-white"
                 />
               </div>
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="email-cc" className="block text-sm font-semibold text-slate-700 dark:text-slate-200">CC</label>
+              <label
+                htmlFor="email-cc"
+                className="block text-sm font-semibold text-slate-700 dark:text-slate-200"
+              >
+                CC
+              </label>
               <div className="flex flex-wrap items-center gap-2 min-h-11 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus-within:ring-2 focus-within:ring-blue-500">
                 {ccRecipients.map((recipient) => (
-                  <span key={recipient} className="flex items-center gap-1 rounded-md bg-slate-100 dark:bg-slate-700 px-2 py-1 text-sm text-slate-700 dark:text-slate-200">
+                  <span
+                    key={recipient}
+                    className="flex items-center gap-1 rounded-md bg-slate-100 dark:bg-slate-700 px-2 py-1 text-sm text-slate-700 dark:text-slate-200"
+                  >
                     {recipient}
                     <button
                       type="button"
-                      onClick={() => setCcRecipients(ccRecipients.filter((item) => item !== recipient))}
+                      onClick={() =>
+                        setCcRecipients(ccRecipients.filter((item) => item !== recipient))
+                      }
                       className="cursor-pointer text-slate-400 hover:text-slate-700 dark:hover:text-white"
                       title={`Rimuovi ${recipient}`}
                     >
@@ -874,8 +908,16 @@ export const EmailEditor = ({
                   type="text"
                   value={ccInput}
                   onChange={(event) => setCcInput(event.target.value)}
-                  onKeyDown={(event) => handleRecipientKeyDown(event, ccInput, ccRecipients, setCcRecipients, () => setCcInput(''))}
-                  placeholder={ccRecipients.length === 0 ? 'Aggiungi destinatari in copia' : 'Aggiungi destinatario'}
+                  onKeyDown={(event) =>
+                    handleRecipientKeyDown(event, ccInput, ccRecipients, setCcRecipients, () =>
+                      setCcInput('')
+                    )
+                  }
+                  placeholder={
+                    ccRecipients.length === 0
+                      ? 'Aggiungi destinatari in copia'
+                      : 'Aggiungi destinatario'
+                  }
                   className="min-w-48 flex-1 bg-transparent outline-none text-sm text-slate-900 dark:text-white"
                 />
               </div>
@@ -883,7 +925,12 @@ export const EmailEditor = ({
 
             <div className="space-y-3">
               <div>
-                <label htmlFor="email-subject" className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Oggetto <span className="text-red-500">*</span></label>
+                <label
+                  htmlFor="email-subject"
+                  className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                >
+                  Oggetto <span className="text-red-500">*</span>
+                </label>
                 <input
                   id="email-subject"
                   type="text"
@@ -894,7 +941,12 @@ export const EmailEditor = ({
                 />
               </div>
               <div>
-                <label htmlFor="email-body" className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Contenuto <span className="text-red-500">*</span></label>
+                <label
+                  htmlFor="email-body"
+                  className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                >
+                  Contenuto <span className="text-red-500">*</span>
+                </label>
                 <textarea
                   id="email-body"
                   value={sendBody}
@@ -928,9 +980,6 @@ export const EmailEditor = ({
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4"
           role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setIsApprovalModalOpen(false);
-          }}
         >
           <div
             className="w-full max-w-md rounded-xl bg-white dark:bg-slate-800 border border-green-200 dark:border-green-900 shadow-2xl p-5 space-y-4"
@@ -941,7 +990,10 @@ export const EmailEditor = ({
             <div className="flex items-start gap-3">
               <CheckCircle2 className="w-6 h-6 shrink-0 text-green-600 dark:text-green-400" />
               <div>
-                <h2 id="approval-modal-title" className="text-lg font-bold text-slate-900 dark:text-white">
+                <h2
+                  id="approval-modal-title"
+                  className="text-lg font-bold text-slate-900 dark:text-white"
+                >
                   Bozza approvata
                 </h2>
                 <p className="mt-2 text-sm text-slate-700 dark:text-slate-200">

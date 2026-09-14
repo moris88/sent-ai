@@ -32,8 +32,9 @@ export const Sidebar = ({
     'cursor-pointer text-xs bg-blue-600 hover:bg-blue-800 px-2 py-1 rounded shadow-sm flex items-center justify-center gap-1 text-white font-bold';
   return (
     <aside
-      className={`${isOpen ? 'fixed inset-0 z-40 bg-white dark:bg-slate-900 w-full h-full' : 'w-0'
-        } bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 transition-all duration-300 flex flex-col overflow-hidden lg:relative lg:w-80 z-50 lg:mt-0 mt-16`}
+      className={`${
+        isOpen ? 'fixed inset-0 z-40 bg-white dark:bg-slate-900 w-full h-full' : 'w-0'
+      } bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 transition-all duration-300 flex flex-col overflow-hidden lg:relative lg:w-80 z-50 lg:mt-0 mt-16`}
     >
       <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between min-w-[320px]">
         <div className="flex items-center gap-2">
@@ -78,10 +79,11 @@ export const Sidebar = ({
               type="button"
               key={d.id}
               onClick={() => setActiveId(d.id)}
-              className={`w-full text-left p-4 border-b border-slate-100 dark:border-slate-800 cursor-pointer transition-colors group ${activeId === d.id
+              className={`w-full text-left p-4 border-b border-slate-100 dark:border-slate-800 cursor-pointer transition-colors group ${
+                activeId === d.id
                   ? 'bg-blue-50 dark:bg-slate-800 border-l-4 border-l-blue-600 dark:border-l-blue-600 text-blue-900 font-semibold'
                   : 'hover:bg-slate-50 dark:hover:bg-slate-800'
-                }`}
+              }`}
             >
               <div className="flex items-center justify-between mb-1">
                 <div className="truncate w-full" title={d.title || d.id}>
