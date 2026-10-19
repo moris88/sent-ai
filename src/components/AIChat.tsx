@@ -69,14 +69,12 @@ export const AIChat = ({ drafts, checkApiKey, onAiError }: AIChatProps) => {
   };
 
   return (
-    <div
-      className={`flex flex-col ${import.meta.env.VITE_APP !== 'desktop' ? 'h-[calc(100vh-220px)]' : 'h-[calc(100vh-130px)]'} bg-slate-50 dark:bg-slate-950 p-4 overflow-y-auto`}
-    >
+    <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-950 p-4">
       <p className="italic text-sm text-gray-500">
         Qui puoi chiedere qualsiasi cosa, riguardo alle tue email raffinate. La conversazione non
         viene salvata, ad ogni caricamento della pagina.
       </p>
-      <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-4 my-4">
         {messages.map((m) => (
           <div
             key={m.id}
@@ -100,7 +98,7 @@ export const AIChat = ({ drafts, checkApiKey, onAiError }: AIChatProps) => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Chiedi qualcosa sulle tue email..."
-          className="flex-1 p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="flex-1 min-w-0 p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
         />
         <button

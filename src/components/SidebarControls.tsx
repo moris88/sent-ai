@@ -1,4 +1,4 @@
-import { Bot, ChevronDown, ChevronUp } from 'lucide-react';
+import { Bot, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { useState } from 'react';
 import type { EmailDraft } from '../types';
 import { DETAIL_LEVELS, LANGUAGES, PERSONAS, TONES } from '../types';
@@ -7,24 +7,35 @@ interface ControlsProps {
   isOpen: boolean;
   draft: EmailDraft;
   onUpdate: (updates: Partial<EmailDraft>) => void;
+  onClose: () => void;
 }
 
-export const SidebarControls = ({ isOpen, draft, onUpdate }: ControlsProps) => {
+export const SidebarControls = ({ isOpen, draft, onUpdate, onClose }: ControlsProps) => {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   return (
     <aside
       className={`${
         isOpen
-          ? 'fixed inset-y-0 right-0 z-40 bg-white dark:bg-slate-900 w-full md:w-80 h-full border-l border-slate-200 dark:border-slate-700'
-          : 'fixed inset-y-0 right-0 z-40 w-0 h-full'
-      } bg-white dark:bg-slate-900 transition-all duration-300 flex flex-col overflow-hidden xl:relative xl:w-80 xl:border-l xl:border-slate-200 xl:dark:border-slate-700`}
+          ? 'w-full md:w-80 border-l border-slate-200 dark:border-slate-700 shadow-xl xl:shadow-none'
+          : 'w-0'
+      } fixed top-16 bottom-0 right-0 z-40 bg-white dark:bg-slate-900 transition-all duration-300 flex flex-col overflow-hidden xl:static xl:w-80 xl:shrink-0 xl:border-l xl:border-slate-200 xl:dark:border-slate-700`}
     >
-      <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 p-4 border-b border-slate-200 dark:border-slate-700">
-        <Bot className="w-5 h-5 text-blue-600" /> Controlli AI
-      </h2>
+      <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 min-w-[280px]">
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <Bot className="w-5 h-5 text-blue-600" /> Controlli AI
+        </h2>
+        <button
+          type="button"
+          onClick={onClose}
+          className="xl:hidden cursor-pointer p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+          title="Chiudi"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-6 min-w-[320px]">
+      <div className="flex-1 overflow-y-auto p-4 pb-24 xl:pb-4 space-y-6 min-w-[280px]">
         <section className="space-y-6">
           <div>
             <label

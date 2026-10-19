@@ -28,15 +28,13 @@ export const Sidebar = ({
 }: SidebarProps) => {
   const [view, setView] = useState<'drafts' | 'chat'>('drafts');
 
-  const classNameButton =
-    'cursor-pointer text-xs bg-blue-600 hover:bg-blue-800 px-2 py-1 rounded shadow-sm flex items-center justify-center gap-1 text-white font-bold';
   return (
     <aside
       className={`${
-        isOpen ? 'fixed inset-0 z-40 bg-white dark:bg-slate-900 w-full h-full' : 'w-0'
-      } bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 transition-all duration-300 flex flex-col overflow-hidden lg:relative lg:w-80 z-50 lg:mt-0 mt-16`}
+        isOpen ? 'w-full' : 'w-0'
+      } fixed top-16 bottom-0 left-0 z-40 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 transition-all duration-300 flex flex-col overflow-hidden lg:static lg:w-80 lg:shrink-0`}
     >
-      <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between min-w-[320px]">
+      <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between min-w-[280px]">
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -65,14 +63,14 @@ export const Sidebar = ({
               onClick={createDraft}
               title="Crea Nuova Bozza"
             >
-              <span className="hidden md:inline tetx-xs">Nuova Bozza Email</span>
+              <span className="hidden md:inline text-xs">Nuova Bozza Email</span>
               <Plus className="w-4 h-4" />
             </button>
           )}
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto min-w-[320px]">
+      <div className="flex-1 min-h-0 overflow-y-auto min-w-[280px]">
         {view === 'drafts' ? (
           drafts.map((d) => (
             <button
@@ -100,7 +98,7 @@ export const Sidebar = ({
                     e.stopPropagation();
                     onDelete(d.id);
                   }}
-                  className="cursor-pointer opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400 transition-all"
+                  className="cursor-pointer lg:opacity-0 lg:group-hover:opacity-100 p-1 text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400 transition-all"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -117,21 +115,6 @@ export const Sidebar = ({
           <AIChat drafts={drafts} checkApiKey={checkApiKey} onAiError={onAiError} />
         )}
       </div>
-
-      {import.meta.env.VITE_APP !== 'desktop' && (
-        <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-center">
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">Versione desktop:</p>
-          <div className="flex flex-col gap-2">
-            <a
-              href="https://github.com/moris88/sent-ai/releases"
-              download
-              className={classNameButton}
-            >
-              Scarica
-            </a>
-          </div>
-        </div>
-      )}
     </aside>
   );
 };

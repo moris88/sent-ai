@@ -305,18 +305,18 @@ export const EmailEditor = ({
   };
 
   const classNameButton =
-    'cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 px-2 py-1 rounded shadow-sm flex items-center gap-1';
+    'cursor-pointer text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 p-2 md:px-2 md:py-1 rounded shadow-sm flex items-center gap-1';
 
   return (
-    <div className="flex-1 md:p-4 p-1 w-full overflow-y-auto">
-      <div className="max-w-5xl mx-auto space-y-6 w-full pb-8">
-        <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 flex items-center gap-2">
+    <div className="flex-1 md:p-4 p-2 w-full overflow-y-auto">
+      <div className="max-w-5xl mx-auto space-y-4 md:space-y-6 w-full pb-24 xl:pb-8">
+        <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-3 md:p-4 flex items-center gap-2">
           <input
             type="text"
             value={draft.title}
             onChange={(e) => onUpdate({ title: e.target.value })}
             placeholder="Titolo della conversazione email..."
-            className="flex-1 text-xl font-bold text-slate-900 dark:text-white outline-none placeholder:text-slate-400 bg-transparent"
+            className="flex-1 min-w-0 text-lg md:text-xl font-bold text-slate-900 dark:text-white outline-none placeholder:text-slate-400 bg-transparent"
           />
           <button
             type="button"
@@ -335,11 +335,11 @@ export const EmailEditor = ({
 
         {draft.generateSubject && (
           <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-            <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex items-center justify-between font-semibold text-slate-700 dark:text-slate-300">
+            <div className="p-3 md:p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex flex-wrap items-center justify-between gap-2 font-semibold text-slate-700 dark:text-slate-300">
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-blue-600" /> Oggetto Email
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-1.5 md:gap-2">
                 <button
                   type="button"
                   onClick={onGenerateSubject}
@@ -373,7 +373,7 @@ export const EmailEditor = ({
                 </button>
               </div>
             </div>
-            <div className="p-4">
+            <div className="p-3 md:p-4">
               <input
                 type="text"
                 value={draft.subject}
@@ -387,7 +387,7 @@ export const EmailEditor = ({
 
         <div className="flex flex-col gap-6 w-full">
           <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-            <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex items-center justify-between font-semibold text-slate-700 dark:text-slate-300">
+            <div className="p-3 md:p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex flex-wrap items-center justify-between gap-2 font-semibold text-slate-700 dark:text-slate-300">
               <button
                 type="button"
                 onClick={() => setIsContextOpen(!isContextOpen)}
@@ -401,7 +401,7 @@ export const EmailEditor = ({
                 )}
                 <History className="w-4 h-4 text-blue-600" /> Contesto
               </button>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-1.5 md:gap-2">
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
@@ -436,23 +436,23 @@ export const EmailEditor = ({
               </div>
             </div>
             {isContextOpen && (
-              <div className="p-4">
+              <div className="p-3 md:p-4">
                 <textarea
                   value={draft.context}
                   placeholder="Incolla qui il contesto della conversazione o carica un PDF..."
                   onChange={(e) => onUpdate({ context: e.target.value })}
-                  className="w-full h-64 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y text-lg text-slate-900 dark:text-white"
+                  className="w-full h-56 md:h-64 p-3 md:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y text-base md:text-lg text-slate-900 dark:text-white"
                 />
               </div>
             )}
           </section>
 
           <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-            <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex items-center justify-between font-semibold text-slate-700 dark:text-slate-300">
+            <div className="p-3 md:p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex flex-wrap items-center justify-between gap-2 font-semibold text-slate-700 dark:text-slate-300">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-blue-600" /> La tua bozza
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-1.5 md:gap-2">
                 <button
                   type="button"
                   onClick={() => navigator.clipboard.writeText(draft.draft)}
@@ -562,7 +562,7 @@ export const EmailEditor = ({
                 </div>
               </div>
             )}
-            <div className="px-4 pt-3 flex flex-wrap items-center gap-2">
+            <div className="px-3 md:px-4 pt-3 flex flex-wrap items-center gap-2">
               {[...DEFAULT_SNIPPETS, ...customSnippets].map((snippet) => (
                 <span key={snippet.id} className="inline-flex items-center">
                   <button
@@ -596,7 +596,7 @@ export const EmailEditor = ({
               </button>
             </div>
             {isSnippetFormOpen && (
-              <div className="mx-4 mt-3 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg space-y-2">
+              <div className="mx-3 md:mx-4 mt-3 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg space-y-2">
                 <input
                   type="text"
                   value={newSnippetLabel}
@@ -634,20 +634,20 @@ export const EmailEditor = ({
                 </div>
               </div>
             )}
-            <div className="p-4">
+            <div className="p-3 md:p-4">
               <textarea
                 ref={draftTextareaRef}
                 value={draft.draft}
                 disabled={isLoading}
                 onChange={(e) => onUpdate({ draft: e.target.value })}
                 placeholder="Scrivi qui la tua bozza di email, poi clicca su 'Raffina Email' e lascia fare all'AI."
-                className="w-full h-64 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y text-lg text-slate-900 dark:text-white"
+                className="w-full h-56 md:h-64 p-3 md:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y text-base md:text-lg text-slate-900 dark:text-white"
               />
             </div>
-            <div className="p-4 flex justify-center items-center w-full gap-3">
+            <div className="p-3 md:p-4 flex flex-wrap justify-center items-center w-full gap-2 md:gap-3">
               <button
                 type="button"
-                className="cursor-pointer bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 font-semibold px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-all border border-blue-200 dark:border-blue-700"
+                className="cursor-pointer bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 font-semibold text-xs md:text-base px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg flex shrink-0 whitespace-nowrap items-center justify-center gap-1.5 md:gap-2 transition-all border border-blue-200 dark:border-blue-700"
                 onClick={onContinueThread}
                 title="Aggiungi al contesto la bozza e continua il thread"
               >
@@ -656,21 +656,21 @@ export const EmailEditor = ({
               </button>
               <button
                 type="button"
-                className="cursor-pointer bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-all disabled:cursor-not-allowed"
+                className="cursor-pointer bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold text-xs md:text-base px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg flex shrink-0 whitespace-nowrap items-center justify-center gap-1.5 md:gap-2 transition-all disabled:cursor-not-allowed"
                 onClick={onRefine}
                 disabled={isLoading || !draft.draft}
                 title="Raffina la bozza con l'AI"
               >
                 {isLoading ? (
-                  <RefreshCw className="w-5 h-5 animate-spin" />
+                  <RefreshCw className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
                 ) : (
-                  <Sparkles className="w-5 h-5" />
+                  <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
                 )}
                 {isLoading ? 'Raffinando...' : 'Raffina Email'}
               </button>
               <button
                 type="button"
-                className="cursor-pointer bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 font-semibold px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-all border border-blue-200 dark:border-blue-700"
+                className="cursor-pointer bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 font-semibold text-xs md:text-base px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg flex shrink-0 whitespace-nowrap items-center justify-center gap-1.5 md:gap-2 transition-all border border-blue-200 dark:border-blue-700"
                 onClick={() => {
                   setSendSubject(draft.subject);
                   setSendBody(draft.result || draft.draft);
@@ -688,7 +688,7 @@ export const EmailEditor = ({
         {(draft.result || isLoading) && (
           <section
             ref={resultSectionRef}
-            className="bg-blue-50 dark:bg-blue-950/30 rounded-xl shadow-sm border-2 border-blue-500 dark:border-blue-600 p-6 space-y-4 animate-in fade-in zoom-in duration-300"
+            className="bg-blue-50 dark:bg-blue-950/30 rounded-xl shadow-sm border-2 border-blue-500 dark:border-blue-600 p-3 md:p-6 space-y-4 animate-in fade-in zoom-in duration-300"
           >
             {isLoading ? (
               <div className="animate-pulse space-y-4">
@@ -697,7 +697,7 @@ export const EmailEditor = ({
               </div>
             ) : (
               <>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <p className="font-bold md:text-lg text-sm text-blue-800 dark:text-blue-300 flex items-center gap-2">
                     <Sparkles className="w-5 h-5" /> Risultato Raffinato
                   </p>
@@ -728,10 +728,10 @@ export const EmailEditor = ({
                     </button>
                   </div>
                 </div>
-                <div className="p-5 bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-800 rounded-lg whitespace-pre-wrap text-slate-800 dark:text-slate-200 shadow-inner">
+                <div className="p-3 md:p-5 break-words bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-800 rounded-lg whitespace-pre-wrap text-slate-800 dark:text-slate-200 shadow-inner">
                   {draft.result}
                 </div>
-                <div className="flex justify-center gap-3">
+                <div className="flex flex-wrap justify-center gap-2 md:gap-3">
                   <button
                     type="button"
                     onClick={() => setIsModifyFormOpen((prev) => !prev)}
@@ -809,7 +809,7 @@ export const EmailEditor = ({
             onClick={() => setIsSendFormOpen(false)}
           />
           <form
-            className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-white dark:bg-slate-800 shadow-2xl border border-slate-200 dark:border-slate-700 p-5 space-y-4"
+            className="relative z-10 w-full max-w-2xl max-h-[90dvh] overflow-y-auto rounded-xl bg-white dark:bg-slate-800 shadow-2xl border border-slate-200 dark:border-slate-700 p-5 space-y-4"
             onSubmit={(event) => {
               event.preventDefault();
               handleSendEmail();
@@ -872,7 +872,7 @@ export const EmailEditor = ({
                       ? 'email@esempio.it (Invio per aggiungere)'
                       : 'Aggiungi destinatario'
                   }
-                  className="min-w-48 flex-1 bg-transparent outline-none text-sm text-slate-900 dark:text-white"
+                  className="min-w-32 flex-1 bg-transparent outline-none text-sm text-slate-900 dark:text-white"
                 />
               </div>
             </div>
@@ -918,7 +918,7 @@ export const EmailEditor = ({
                       ? 'Aggiungi destinatari in copia'
                       : 'Aggiungi destinatario'
                   }
-                  className="min-w-48 flex-1 bg-transparent outline-none text-sm text-slate-900 dark:text-white"
+                  className="min-w-32 flex-1 bg-transparent outline-none text-sm text-slate-900 dark:text-white"
                 />
               </div>
             </div>

@@ -2,6 +2,7 @@ import { Bot } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ApiKeyModal from './components/ApiKeyModal';
 import { DeleteConfirmationModal } from './components/DeleteConfirmationModal';
+import { DesktopAppToast } from './components/DesktopAppToast';
 import { EmailEditor } from './components/EmailEditor';
 import { ErrorModal } from './components/ErrorModal';
 import { Header } from './components/Header';
@@ -19,7 +20,9 @@ import { getLocalStorageSize, isLocalStorageApproachingLimit } from './utils/sto
 export default function App() {
   const { drafts, updateDraft, createDraft, deleteDraft, loading } = useAppHooks();
   const [activeId, setActiveId] = useState<string>(drafts[0]?.id || '1');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(
+    () => window.matchMedia('(min-width: 1024px)').matches
+  );
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [provider, setProvider] = useState(localStorage.getItem('sentai_provider') || 'gemini');
@@ -156,7 +159,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans overflow-hidden">
+    <div className="flex h-dvh bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans overflow-hidden">
       <main className="flex-1 flex flex-col h-full relative overflow-hidden">
         <Header
           isSidebarOpen={isSidebarOpen}
@@ -168,14 +171,20 @@ export default function App() {
             drafts={drafts}
             activeId={activeId}
             isOpen={isSidebarOpen}
-            setActiveId={setActiveId}
-            createDraft={() => setActiveId(createDraft())}
+            setActiveId={(id) => {
+              setActiveId(id);
+              if (!window.matchMedia('(min-width: 1024px)').matches) setIsSidebarOpen(false);
+            }}
+            createDraft={() => {
+              setActiveId(createDraft());
+              if (!window.matchMedia('(min-width: 1024px)').matches) setIsSidebarOpen(false);
+            }}
             onDelete={setDeleteConfirmation}
             updateDraft={updateDraft}
             checkApiKey={checkApiKey}
             onAiError={handleAiError}
           />
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 min-w-0 overflow-y-auto">
             <EmailEditor
               draft={activeDraft}
               isLoading={isLoading}
@@ -199,16 +208,18 @@ export default function App() {
             isOpen={showSidebarControls}
             draft={activeDraft}
             onUpdate={(u) => updateDraft(activeId, u)}
+            onClose={() => setShowSidebarControls(false)}
           />
         </div>
         <button
           type="button"
-          className="xl:hidden absolute bottom-6 right-6 z-40 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-bold p-3 rounded-full flex items-center justify-center gap-2 transition-all shadow-lg"
+          className="xl:hidden absolute bottom-4 right-4 sm:bottom-6 sm:right-6 z-30 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-bold p-3 rounded-full flex items-center justify-center gap-2 transition-all shadow-lg"
           onClick={() => setShowSidebarControls((prev) => !prev)}
           title="Mostra i controlli AI"
         >
           <Bot className="w-5 h-5" />
         </button>
+        <DesktopAppToast />
       </main>
       <ApiKeyModal
         isOpen={isApiKeyModalOpen}

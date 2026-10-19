@@ -10,8 +10,8 @@ interface HeaderProps {
 export const Header = ({ isSidebarOpen, toggleSidebar, onOpenSettings }: HeaderProps) => {
   const { isDark, toggleTheme } = useDarkMode(); // Hook per gestire il tema scuro
   return (
-    <header className="h-16 px-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between bg-white dark:bg-slate-800 shrink-0 z-50">
-      <div className="flex items-center gap-4">
+    <header className="h-16 px-3 sm:px-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between bg-white dark:bg-slate-800 shrink-0 relative z-50">
+      <div className="flex items-center gap-2 sm:gap-4 min-w-0">
         <button
           className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer lg:hidden"
           type="button"
