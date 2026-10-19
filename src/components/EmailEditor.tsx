@@ -1,4 +1,5 @@
 import {
+  Check,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
@@ -107,6 +108,18 @@ export const EmailEditor = ({
   const [ccRecipients, setCcRecipients] = useState<string[]>([]);
   const [toInput, setToInput] = useState('');
   const [ccInput, setCcInput] = useState('');
+  const [isDraftCopied, setIsDraftCopied] = useState(false);
+
+  const handleCopyDraft = async () => {
+    try {
+      await navigator.clipboard.writeText(draft.draft);
+      setIsDraftCopied(true);
+      setTimeout(() => setIsDraftCopied(false), 2000);
+    } catch (error) {
+      console.error('Error copying draft:', error);
+      alert('Impossibile copiare la bozza negli appunti.');
+    }
+  };
 
   const insertSnippetAtCursor = (text: string) => {
     const textarea = draftTextareaRef.current;
@@ -455,12 +468,13 @@ export const EmailEditor = ({
               <div className="flex flex-wrap items-center gap-1.5 md:gap-2">
                 <button
                   type="button"
-                  onClick={() => navigator.clipboard.writeText(draft.draft)}
+                  onClick={handleCopyDraft}
                   disabled={!draft.draft}
-                  className={classNameButton}
-                  title="Copia la bozza negli appunti"
+                  className={`${classNameButton} ${isDraftCopied ? 'text-green-600 dark:text-green-400 border-green-400 dark:border-green-600' : ''}`}
+                  title={isDraftCopied ? 'Copiato!' : 'Copia la bozza negli appunti'}
                 >
-                  <Copy className="w-3 h-3" />
+                  {isDraftCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                  {isDraftCopied && <span className="text-xs">Copiato!</span>}
                 </button>
                 <button
                   type="button"

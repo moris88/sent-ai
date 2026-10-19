@@ -26,7 +26,7 @@ export const DesktopAppToast = () => {
   return (
     <div
       role="status"
-      className="fixed bottom-4 left-4 right-20 sm:right-auto sm:max-w-sm z-30 flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg animate-in fade-in slide-in-from-bottom-2"
+      className="fixed bottom-4 left-4 right-20 sm:right-auto sm:max-w-sm z-45 flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg animate-in fade-in slide-in-from-bottom-2"
     >
       <div className="bg-blue-600 p-2 rounded-lg shrink-0">
         <Download className="w-4 h-4 text-white" />

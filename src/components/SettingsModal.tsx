@@ -1,4 +1,4 @@
-import { ClipboardPaste, Eye, EyeOff, X } from 'lucide-react';
+import { ClipboardPaste, Download, Eye, EyeOff, X } from 'lucide-react';
 import React from 'react';
 import { getModels } from '../services/ai';
 
@@ -190,6 +190,21 @@ export const SettingsModal = ({
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Le credenziali vengono salvate solo nel tuo browser/pc.
             </p>
+            {import.meta.env.VITE_APP !== 'desktop' && (
+              <a
+                href="https://github.com/moris88/sent-ai/releases"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-between gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 hover:border-blue-500 transition-colors"
+              >
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Versione desktop
+                </span>
+                <span className="flex items-center gap-1 text-sm font-semibold text-blue-600 dark:text-blue-400">
+                  <Download className="w-4 h-4" /> Scarica
+                </span>
+              </a>
+            )}
           </div>
           <button
             className="cursor-pointer w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-800 transition-colors"
