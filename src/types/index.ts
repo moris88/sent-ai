@@ -10,10 +10,12 @@ export interface EmailDraft {
   detail: string;
   language: string;
   structure: string;
-  temperature: number;
   keywords: string;
   generateSubject: boolean;
   updatedAt: number;
+  // Istruzioni per la scrittura da zero e modalità con cui è stato prodotto il risultato.
+  writeInstructions?: string;
+  resultSource?: 'refine' | 'write';
 }
 
 export const PERSONAS = [

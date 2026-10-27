@@ -1,5 +1,11 @@
 import { useState } from 'react';
-import { generateSubject, refineEmail, reviseEmail } from '../services/ai';
+import {
+  generateSubject,
+  type Provider,
+  refineEmail,
+  reviseEmail,
+  writeEmail,
+} from '../services/ai';
 import type { EmailDraft } from '../types';
 
 export const useEmailLogic = (
@@ -11,6 +17,7 @@ export const useEmailLogic = (
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingSubject, setIsGeneratingSubject] = useState(false);
   const [isModifying, setIsModifying] = useState(false);
+  const [isWriting, setIsWriting] = useState(false);
 
   const getAiConfig = () => ({
     provider: (localStorage.getItem('sentai_provider') as any) || 'gemini',
@@ -18,44 +25,21 @@ export const useEmailLogic = (
     model: localStorage.getItem('sentai_model') || '',
   });
 
-  const handleRefine = async () => {
-    if (!activeDraft.draft) return;
-    setIsLoading(true);
-    const { provider, apiKey, model } = getAiConfig();
-    let refinedText = '';
-    try {
-      const prompt = localStorage.getItem('sentai_additional_prompt') || '';
-
-      refinedText = await refineEmail({
-        ...activeDraft,
-        provider,
-        apiKey,
-        model,
-        prompt,
-      });
-      updateActiveDraft({ result: refinedText });
-    } catch (error: any) {
-      console.error('Error refining email:', error);
-      onAiError(
-        error instanceof Error ? error.message : "Errore durante la generazione dell'email."
-      );
-      if (error.message.includes('Key non trovata')) {
-        setIsSettingsOpen(true);
-      }
-      return;
-    } finally {
-      setIsLoading(false);
-    }
-
-    // Richiesta separata: non deve tenere bloccato lo skeleton del risultato appena raffinato.
-    // Genera l'oggetto solo se richiesto e non ancora presente: non deve essere rigenerato ad ogni raffinazione.
+  // Richiesta separata: non deve tenere bloccato lo skeleton del risultato appena generato.
+  // Genera l'oggetto solo se richiesto e non ancora presente: non deve essere rigenerato ad ogni generazione.
+  const generateSubjectAfter = async (
+    text: string,
+    provider: Provider,
+    apiKey: string,
+    model: string
+  ) => {
     if (activeDraft.generateSubject && !activeDraft.subject) {
       setIsGeneratingSubject(true);
       try {
         const subject = await generateSubject({
           context: activeDraft.context,
           draft: activeDraft.draft,
-          result: refinedText,
+          result: text,
           language: activeDraft.language,
           provider,
           apiKey,
@@ -72,6 +56,73 @@ export const useEmailLogic = (
       }
     }
   };
+
+  const handleRefine = async () => {
+    if (!activeDraft.draft) return;
+    setIsLoading(true);
+    const { provider, apiKey, model } = getAiConfig();
+    let refinedText = '';
+    try {
+      const prompt = localStorage.getItem('sentai_additional_prompt') || '';
+
+      refinedText = await refineEmail({
+        ...activeDraft,
+        provider,
+        apiKey,
+        model,
+        prompt,
+      });
+      updateActiveDraft({ result: refinedText, resultSource: 'refine' });
+    } catch (error: any) {
+      console.error('Error refining email:', error);
+      onAiError(
+        error instanceof Error ? error.message : "Errore durante la generazione dell'email."
+      );
+      if (error.message.includes('Key non trovata')) {
+        setIsSettingsOpen(true);
+      }
+      return;
+    } finally {
+      setIsLoading(false);
+    }
+
+    await generateSubjectAfter(refinedText, provider, apiKey, model);
+  };
+
+  const handleWrite = async () => {
+    const instructions = activeDraft.writeInstructions?.trim();
+    if (!instructions) return;
+    setIsLoading(true);
+    setIsWriting(true);
+    const { provider, apiKey, model } = getAiConfig();
+    let writtenText = '';
+    try {
+      const prompt = localStorage.getItem('sentai_additional_prompt') || '';
+
+      writtenText = await writeEmail({
+        ...activeDraft,
+        instructions,
+        provider,
+        apiKey,
+        model,
+        prompt,
+      });
+      updateActiveDraft({ result: writtenText, resultSource: 'write' });
+    } catch (error) {
+      console.error('Error writing email:', error);
+      onAiError(error instanceof Error ? error.message : "Errore durante la scrittura dell'email.");
+      return;
+    } finally {
+      setIsLoading(false);
+      setIsWriting(false);
+    }
+
+    await generateSubjectAfter(writtenText, provider, apiKey, model);
+  };
+
+  // Rigenera con la stessa modalità che ha prodotto il risultato corrente.
+  const handleRegenerate = () =>
+    activeDraft.resultSource === 'write' ? handleWrite() : handleRefine();
 
   const handleGenerateSubject = async () => {
     setIsGeneratingSubject(true);
@@ -106,7 +157,6 @@ export const useEmailLogic = (
         result: activeDraft.result,
         instructions,
         language: activeDraft.language,
-        temperature: activeDraft.temperature,
         provider,
         apiKey,
         model,
@@ -152,7 +202,10 @@ export const useEmailLogic = (
     isLoading,
     isGeneratingSubject,
     isModifying,
+    isWriting,
     handleRefine,
+    handleWrite,
+    handleRegenerate,
     handleGenerateSubject,
     handleModifyResult,
     copyToClipboard,

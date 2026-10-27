@@ -10,6 +10,7 @@ import {
   History,
   LayoutTemplate,
   Mail,
+  PenLine,
   Plus,
   RefreshCw,
   Send,
@@ -43,8 +44,10 @@ interface EditorProps {
   isLoading: boolean;
   isGeneratingSubject: boolean;
   isModifying: boolean;
+  isWriting: boolean;
   onUpdate: (updates: Partial<EmailDraft>) => void;
   onRefine: () => void;
+  onWrite: () => void;
   onPaste: (target: 'context' | 'draft') => void;
   onContinueThread: () => void;
   onCopyResult: () => void;
@@ -62,8 +65,10 @@ export const EmailEditor = ({
   isLoading,
   isGeneratingSubject,
   isModifying,
+  isWriting,
   onUpdate,
   onRefine,
+  onWrite,
   onPaste,
   onContinueThread,
   onCopyResult,
@@ -78,6 +83,8 @@ export const EmailEditor = ({
   const resultSectionRef = useRef<HTMLOptionElement>(null);
   const modifyTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [isContextOpen, setIsContextOpen] = useState(false);
+  const contextSectionRef = useRef<HTMLElement>(null);
+  const [isWriteOpen, setIsWriteOpen] = useState(false);
   const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
   const [isModifyFormOpen, setIsModifyFormOpen] = useState(false);
   const [modifyInstructions, setModifyInstructions] = useState('');
@@ -248,7 +255,15 @@ export const EmailEditor = ({
     setModifyInstructions('');
     setIsTemplateFormOpen(false);
     setTemplateClientName('');
+    setIsWriteOpen(false);
   }, [draft.id]);
+
+  const handleReviewContext = () => {
+    setIsContextOpen(true);
+    requestAnimationFrame(() =>
+      contextSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    );
+  };
 
   const handleInsertTemplate = () => {
     const clientName = templateClientName.trim() || '[nome Cliente]';
@@ -399,7 +414,10 @@ export const EmailEditor = ({
         )}
 
         <div className="flex flex-col gap-6 w-full">
-          <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <section
+            ref={contextSectionRef}
+            className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
+          >
             <div className="p-3 md:p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex flex-wrap items-center justify-between gap-2 font-semibold text-slate-700 dark:text-slate-300">
               <button
                 type="button"
@@ -675,12 +693,12 @@ export const EmailEditor = ({
                 disabled={isLoading || !draft.draft}
                 title="Raffina la bozza con l'AI"
               >
-                {isLoading ? (
+                {isLoading && !isWriting ? (
                   <RefreshCw className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
                 ) : (
                   <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
                 )}
-                {isLoading ? 'Raffinando...' : 'Raffina Email'}
+                {isLoading && !isWriting ? 'Raffinando...' : 'Raffina Email'}
               </button>
               <button
                 type="button"
@@ -697,6 +715,72 @@ export const EmailEditor = ({
               </button>
             </div>
           </section>
+
+          {!draft.draft.trim() && (
+            <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-dashed border-slate-300 dark:border-slate-600 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setIsWriteOpen((prev) => !prev)}
+                aria-expanded={isWriteOpen}
+                className="cursor-pointer w-full p-3 md:p-4 flex items-center gap-2 text-sm md:text-base font-semibold text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              >
+                {isWriteOpen ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
+                <PenLine className="w-4 h-4 text-blue-600" />
+                Non sai cosa rispondere? Fai scrivere l&apos;email all&apos;AI
+              </button>
+              {isWriteOpen && (
+                <div className="px-3 pb-3 md:px-4 md:pb-4 space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-600 dark:text-slate-300">
+                    <span>
+                      {draft.context
+                        ? "L'AI scriverà la risposta basandosi sul contesto della conversazione."
+                        : 'Il contesto è vuoto: aggiungilo per una risposta più pertinente.'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleReviewContext}
+                      className={classNameButton}
+                      title="Apri e rivedi il contesto"
+                    >
+                      <History className="w-3 h-3" />
+                      {draft.context ? 'Rivedi contesto' : 'Aggiungi contesto'}
+                    </button>
+                  </div>
+                  <label htmlFor="write-instructions" className="sr-only">
+                    Indicazioni per l&apos;AI
+                  </label>
+                  <textarea
+                    id="write-instructions"
+                    value={draft.writeInstructions ?? ''}
+                    disabled={isLoading}
+                    onChange={(e) => onUpdate({ writeInstructions: e.target.value })}
+                    placeholder="Indica all'AI cosa scrivere (es: 'rifiuta gentilmente la proposta e proponi una call la prossima settimana')"
+                    className="w-full h-28 p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y text-sm md:text-base text-slate-900 dark:text-white disabled:opacity-60"
+                  />
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={onWrite}
+                      disabled={isLoading || !draft.writeInstructions?.trim()}
+                      className="cursor-pointer bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 disabled:opacity-60 disabled:cursor-not-allowed text-blue-700 dark:text-blue-300 font-semibold text-xs md:text-sm px-3 py-1.5 md:py-2 rounded-lg flex items-center gap-2 transition-all border border-blue-200 dark:border-blue-700"
+                      title="Scrivi l'email da zero con l'AI, senza bozza"
+                    >
+                      {isWriting ? (
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <PenLine className="w-4 h-4" />
+                      )}
+                      {isWriting ? 'Scrivendo...' : 'Scrivi con AI'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
         </div>
 
         {(draft.result || isLoading) && (
@@ -713,7 +797,15 @@ export const EmailEditor = ({
               <>
                 <div className="flex items-center justify-between gap-2">
                   <p className="font-bold md:text-lg text-sm text-blue-800 dark:text-blue-300 flex items-center gap-2">
-                    <Sparkles className="w-5 h-5" /> Risultato Raffinato
+                    {draft.resultSource === 'write' ? (
+                      <>
+                        <PenLine className="w-5 h-5" /> Email scritta dall&apos;AI
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-5 h-5" /> Risultato Raffinato
+                      </>
+                    )}
                   </p>
                   <div className="flex gap-2">
                     <button
@@ -742,7 +834,7 @@ export const EmailEditor = ({
                     </button>
                   </div>
                 </div>
-                <div className="p-3 md:p-5 break-words bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-800 rounded-lg whitespace-pre-wrap text-slate-800 dark:text-slate-200 shadow-inner">
+                <div className="p-3 md:p-5 wrap-break-word bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-800 rounded-lg whitespace-pre-wrap text-slate-800 dark:text-slate-200 shadow-inner">
                   {draft.result}
                 </div>
                 <div className="flex flex-wrap justify-center gap-2 md:gap-3">

@@ -36,12 +36,11 @@ export const useAppHooks = () => {
         detail: 'balanced',
         language: 'it',
         structure: 'paragraphs',
-        temperature: 0.7,
         keywords: '',
         generateSubject: false,
         updatedAt: Date.now(),
       };
-      setDrafts([...drafts, newDraft]);
+      setDrafts((prev) => [...prev, newDraft]);
       return newDraft.id;
     };
 

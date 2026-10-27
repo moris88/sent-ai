@@ -29,6 +29,11 @@ export default defineConfig({
 
   renderer: {
     root: '.',
+    // La build Electron è sempre desktop, indipendentemente da VITE_APP nel file .env:
+    // da questo valore dipendono il salvataggio su file e l'esclusione della pulizia bozze.
+    define: {
+      'import.meta.env.VITE_APP': JSON.stringify('desktop'),
+    },
     build: {
       rollupOptions: {
         input: resolve(__dirname, 'index.html'),

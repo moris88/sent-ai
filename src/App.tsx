@@ -24,9 +24,13 @@ export default function App() {
     () => window.matchMedia('(min-width: 1024px)').matches
   );
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [provider, setProvider] = useState(localStorage.getItem('sentai_provider') || 'gemini');
   const [apiKey, setApiKey] = useState(localStorage.getItem('sentai_api_key') || '');
+  // Valori effettivamente salvati: provider e apiKey cambiano mentre si digita nelle impostazioni.
+  const [savedProvider, setSavedProvider] = useState(provider);
+  const [savedApiKey, setSavedApiKey] = useState(apiKey);
+  // Senza chiave l'app è inutilizzabile (LM Studio locale non la richiede).
+  const isAiConfigured = savedProvider === 'lmstudio' || savedApiKey.trim() !== '';
   const [lmStudioUrl, setLmStudioUrl] = useState(
     localStorage.getItem('sentai_lmstudio_url') || 'http://localhost:1234/api/v1'
   );
@@ -76,13 +80,13 @@ export default function App() {
 
   const checkApiKey = useMemo(() => {
     return () => {
-      if (!apiKey && provider !== 'lmstudio') {
-        setIsApiKeyModalOpen(true);
+      if (!isAiConfigured) {
+        setIsSettingsOpen(true);
         return false;
       }
       return true;
     };
-  }, [apiKey, provider]);
+  }, [isAiConfigured]);
 
   const handleAiError = useCallback((message: string) => {
     setAiError(message);
@@ -99,7 +103,6 @@ export default function App() {
       persona: 'dev',
       tone: 'formal',
       detail: 'balanced',
-      temperature: 0.5,
       keywords: '',
       generateSubject: false,
       updatedAt: Date.now(),
@@ -109,7 +112,10 @@ export default function App() {
     isLoading,
     isGeneratingSubject,
     isModifying,
+    isWriting,
     handleRefine,
+    handleWrite,
+    handleRegenerate,
     handleGenerateSubject,
     handleModifyResult,
     copyToClipboard,
@@ -146,6 +152,8 @@ export default function App() {
     localStorage.setItem('sentai_lmstudio_url', lmStudioUrl);
     localStorage.setItem('sentai_model', modelName);
     localStorage.setItem('sentai_additional_prompt', additionalPrompt);
+    setSavedProvider(provider);
+    setSavedApiKey(apiKey);
     setIsSettingsOpen(false);
   };
   const handleContinueThread = () => {
@@ -160,7 +168,13 @@ export default function App() {
 
   return (
     <div className="flex h-dvh bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans overflow-hidden">
-      <main className="flex-1 flex flex-col h-full relative overflow-hidden">
+      <main
+        inert={!isAiConfigured}
+        aria-hidden={!isAiConfigured || undefined}
+        className={`flex-1 flex flex-col h-full relative overflow-hidden transition-opacity ${
+          isAiConfigured ? '' : 'opacity-40 pointer-events-none select-none'
+        }`}
+      >
         <Header
           isSidebarOpen={isSidebarOpen}
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -190,13 +204,15 @@ export default function App() {
               isLoading={isLoading}
               isGeneratingSubject={isGeneratingSubject}
               isModifying={isModifying}
+              isWriting={isWriting}
               onUpdate={(u) => updateDraft(activeId, u)}
               onRefine={() => checkApiKey() && handleRefine()}
+              onWrite={() => checkApiKey() && handleWrite()}
               onPaste={pasteFromClipboard}
               onContinueThread={() => setThreadModalOpen(true)}
               onCopyResult={copyToClipboard}
               onDiscard={() => updateDraft(activeId, { result: '' })}
-              onRegenerate={() => checkApiKey() && handleRefine()}
+              onRegenerate={() => checkApiKey() && handleRegenerate()}
               onGenerateSubject={() => checkApiKey() && handleGenerateSubject()}
               onCopySubject={copySubjectToClipboard}
               onModifyResult={handleModifyResult}
@@ -222,12 +238,8 @@ export default function App() {
         <DesktopAppToast />
       </main>
       <ApiKeyModal
-        isOpen={isApiKeyModalOpen}
-        onClose={() => setIsApiKeyModalOpen(false)}
-        onSettings={() => {
-          setIsApiKeyModalOpen(false);
-          setIsSettingsOpen(true);
-        }}
+        isOpen={!isAiConfigured && !isSettingsOpen}
+        onSettings={() => setIsSettingsOpen(true)}
       />
       <SettingsModal
         isOpen={isSettingsOpen}

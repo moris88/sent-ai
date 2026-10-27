@@ -34,7 +34,7 @@ export const Sidebar = ({
         isOpen ? 'w-full' : 'w-0'
       } fixed top-16 bottom-0 left-0 z-40 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 transition-all duration-300 flex flex-col overflow-hidden lg:static lg:w-80 lg:shrink-0`}
     >
-      <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between min-w-[280px]">
+      <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between min-w-70">
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -70,46 +70,52 @@ export const Sidebar = ({
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto min-w-[280px]">
+      <div className="flex-1 min-h-0 overflow-y-auto min-w-70">
         {view === 'drafts' ? (
           drafts.map((d) => (
-            <button
-              type="button"
+            // Contenitore senza pulsanti annidati: titolo e cestino sono fratelli del pulsante di selezione.
+            <div
               key={d.id}
-              onClick={() => setActiveId(d.id)}
-              className={`w-full text-left p-4 border-b border-slate-100 dark:border-slate-800 cursor-pointer transition-colors group ${
+              className={`w-full border-b border-slate-100 dark:border-slate-800 transition-colors group ${
                 activeId === d.id
                   ? 'bg-blue-50 dark:bg-slate-800 border-l-4 border-l-blue-600 dark:border-l-blue-600 text-blue-900 font-semibold'
                   : 'hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
             >
-              <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center justify-between px-4 pt-4 mb-1">
                 <div className="truncate w-full" title={d.title || d.id}>
                   <input
+                    aria-label="Titolo della bozza"
                     className={`bg-transparent font-semibold outline-none w-full truncate ${activeId === d.id ? 'text-blue-900 dark:text-blue-600' : 'text-slate-700 dark:text-slate-300'}`}
                     value={d.title || d.id}
                     onChange={(e) => updateDraft(d.id, { title: e.target.value })}
-                    onClick={(e) => activeId === d.id && e.stopPropagation()}
+                    onFocus={() => setActiveId(d.id)}
                   />
                 </div>
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(d.id);
-                  }}
-                  className="cursor-pointer lg:opacity-0 lg:group-hover:opacity-100 p-1 text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400 transition-all"
+                  onClick={() => onDelete(d.id)}
+                  className="cursor-pointer lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100 p-1 text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400 transition-all"
+                  title="Elimina bozza"
+                  aria-label="Elimina bozza"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                {d.draft ? 'È presente del contenuto' : 'Nessun contenuto...'}
-              </p>
-              <div className="text-[10px] text-slate-400 mt-2">
-                {`${new Date(d.updatedAt).toLocaleDateString()} ${new Date(d.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
-              </div>
-            </button>
+              <button
+                type="button"
+                onClick={() => setActiveId(d.id)}
+                aria-current={activeId === d.id ? 'true' : undefined}
+                className="cursor-pointer block w-full text-left px-4 pb-4"
+              >
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                  {d.draft ? 'È presente del contenuto' : 'Nessun contenuto...'}
+                </p>
+                <div className="text-[10px] text-slate-400 mt-2">
+                  {`${new Date(d.updatedAt).toLocaleDateString()} ${new Date(d.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                </div>
+              </button>
+            </div>
           ))
         ) : (
           <AIChat drafts={drafts} checkApiKey={checkApiKey} onAiError={onAiError} />

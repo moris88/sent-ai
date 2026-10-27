@@ -6,7 +6,7 @@ SentAI è un assistente per la gestione e la scrittura delle email. Usa modelli 
 
 - **Scrittura assistita:** crea e perfeziona email a partire da una bozza e da istruzioni personalizzate.
 - **Gestione delle bozze:** salva, modifica, elimina e organizza le email e le conversazioni.
-- **Provider multipli:** supporta Google Gemini, OpenAI, Anthropic e LM Studio.
+- **Provider multipli:** supporta Google Gemini, OpenAI e LM Studio.
 - **Esportazione PDF:** esporta le email rifinite in formato PDF.
 - **Modalità web e desktop:** usa SentAI nel browser oppure come applicazione Electron.
 
@@ -15,7 +15,7 @@ SentAI è un assistente per la gestione e la scrittura delle email. Usa modelli 
 - **Frontend:** React, TypeScript, Tailwind CSS
 - **Build tool:** Vite ed Electron Vite
 - **Desktop:** Electron
-- **AI services:** OpenAI, Anthropic, Google Gemini, LM Studio
+- **AI services:** OpenAI, Google Gemini, LM Studio
 
 ## Getting Started
 
@@ -46,7 +46,7 @@ VITE_APP="desktop"
 VITE_ENV="development"
 ```
 
-Le chiavi API non sono richieste nel file `.env`: possono essere inserite dalla finestra delle impostazioni dell'applicazione. SentAI supporta i provider `gemini`, `openai`, `anthropic` e `lmstudio`.
+Le chiavi API non sono richieste nel file `.env`: possono essere inserite dalla finestra delle impostazioni dell'applicazione. SentAI supporta i provider `gemini`, `openai` e `lmstudio`.
 
 ### Running the App
 
@@ -97,7 +97,6 @@ Per utilizzare l'applicazione, dovrai inserire le tue chiavi API nel pannello de
 
 - **Google Gemini**: Ottieni una chiave su [Google AI Studio](https://aistudio.google.com/).
 - **OpenAI**: Ottieni una chiave sulla [piattaforma OpenAI](https://platform.openai.com/).
-- **Anthropic**: Ottieni una chiave sulla [piattaforma Anthropic](https://console.anthropic.com/).
 
 ## 📝 Licenza
 

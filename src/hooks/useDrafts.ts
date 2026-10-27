@@ -45,7 +45,6 @@ export const useDrafts = () => {
       detail: 'balanced',
       language: 'it',
       structure: 'paragraphs',
-      temperature: 0.7,
       keywords: '',
       generateSubject: false,
       updatedAt: Date.now(),

@@ -27,22 +27,29 @@ export function useStorage<T>(key: string, initialValue: T) {
     load();
   }, [key]);
 
-  // 2. Funzione per aggiornare e salvare i dati
-  const setValue = async (value: T | ((val: T) => T)) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-
-      if (window.electronAPI) {
-        // Salva su File System
-        await window.electronAPI.saveData(key, valueToStore);
-      } else {
-        // Salva su localStorage
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+  // 2. Salvataggio ad ogni modifica, solo dopo il caricamento per non sovrascrivere i dati su disco
+  useEffect(() => {
+    if (loading) return;
+    async function save() {
+      try {
+        if (window.electronAPI) {
+          // Salva su File System
+          await window.electronAPI.saveData(key, storedValue);
+        } else {
+          // Salva su localStorage
+          window.localStorage.setItem(key, JSON.stringify(storedValue));
+        }
+      } catch (error) {
+        console.error(`Errore salvataggio ${key}:`, error);
       }
-    } catch (error) {
-      console.error(`Errore salvataggio ${key}:`, error);
     }
+
+    save();
+  }, [key, storedValue, loading]);
+
+  // 3. Aggiornamento funzionale: parte sempre dall'ultimo valore, anche se chiamato dopo un'attesa
+  const setValue = (value: T | ((val: T) => T)) => {
+    setStoredValue((prev) => (value instanceof Function ? value(prev) : value));
   };
 
   return [storedValue, setValue, loading] as const;

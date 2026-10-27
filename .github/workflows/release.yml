@@ -40,12 +40,20 @@ jobs:
           fi
           echo "Setting version to $VERSION"
           pnpm version $VERSION --no-git-tag-version
-      
+
+      - name: Set release date
+        env:
+          PUBLISHED_AT: ${{ github.event.release.published_at }}
+        run: |
+          # published_at è in formato ISO 8601 (es. 2026-09-14T20:46:38Z): tiene solo YYYY-MM-DD
+          echo "VITE_DATA_RELEASE=${PUBLISHED_AT%%T*}" >> "$GITHUB_ENV"
+
       - name: Build and Package
         run: |
           pnpm build:electron
         env:
           VITE_APP: desktop
+          VITE_RELEASE: ${{ github.event.release.tag_name }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Release

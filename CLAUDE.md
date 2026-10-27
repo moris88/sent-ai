@@ -18,13 +18,13 @@ There is no test suite. CI (`.github/workflows/ci.yml`) runs lint, `build`, and 
 
 ## Environment
 
-`.env` needs `VITE_APP` (`web`/`desktop`) and `VITE_ENV` (`development` enables dev behavior in `electron/main.ts`). API keys are not in `.env`: users enter them in the in-app settings, and they are kept in client storage.
+`.env` needs `VITE_APP` (`web`/`desktop`), which only picks the target for `pnpm dev`. Each build config hard-codes `import.meta.env.VITE_APP` through `define` (`electron.vite.config.ts` → `desktop`, `vite.config.ts` → `web`), so `.env` can never produce a desktop build with web behavior. `.env` also needs `VITE_ENV` (`development` enables dev behavior in `electron/main.ts`). API keys are not in `.env`: users enter them in the in-app settings, and they are kept in client storage.
 
 ## Architecture
 
 - **Two build configs:** `vite.config.ts` (web + PWA) and `electron.vite.config.ts` (main `electron/main.ts`, preload `electron/preload.ts`, renderer = `src/`). Output goes to `out/` (Electron) and `dist/`.
 - **Web vs desktop persistence:** `src/hooks/useAppHooks.ts` checks `import.meta.env.VITE_APP` and picks a backend. Desktop uses `useStorage`, which goes through `window.electronAPI` (preload) to the `save-data`/`load-data` IPC handlers. Those write `<key>.json` under Electron's `userData`. Web uses `useDrafts`/localStorage. Both are adapted to one interface that `App.tsx` consumes, so any change to draft operations must be made in both paths. `src/utils/storage.ts` and `LocalStorageLimitModal` handle the ~5MB localStorage limit on web.
-- **AI layer:** all provider calls live in `src/services/ai.ts` (`refineEmail`, `reviseEmail`, `generateTitle`, `generateSubject`, `querySavedEmails`, `getModels`). They dispatch on `Provider` (`gemini` | `openai` | `anthropic` | `lmstudio`) and call the provider SDKs straight from the renderer. LM Studio uses raw `fetch` with URL normalization to `/api/v1`, and its URL can come from localStorage (`sentai_lmstudio_url`). To add a provider, extend `Provider` and every dispatch function.
+- **AI layer:** all provider calls live in `src/services/ai.ts` (`refineEmail`, `reviseEmail`, `generateTitle`, `generateSubject`, `querySavedEmails`, `getModels`). They dispatch on `Provider` (`gemini` | `openai` | `lmstudio`) and call the provider SDKs straight from the renderer. LM Studio uses raw `fetch` with URL normalization to `/api/v1`, and its URL can come from localStorage (`sentai_lmstudio_url`). To add a provider, extend `Provider` and every dispatch function.
 - **State/logic hooks:** `useEmailLogic` orchestrates the editor and AI actions. Components in `src/components/` are mostly presentational modals and panels. Shared types are in `src/types/` (including the `electronAPI` typing in `electron.d.ts`).
 - PDF export uses `pdfjs-dist` (`src/utils/pdf.ts`).
 

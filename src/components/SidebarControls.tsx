@@ -154,24 +154,6 @@ export const SidebarControls = ({ isOpen, draft, onUpdate, onClose }: ControlsPr
                 </div>
                 <div>
                   <label
-                    htmlFor="temperature"
-                    className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1"
-                  >
-                    Creatività (Temperature: {draft.temperature})
-                  </label>
-                  <input
-                    id="temperature"
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    value={draft.temperature}
-                    onChange={(e) => onUpdate({ temperature: Number.parseFloat(e.target.value) })}
-                    className="cursor-pointer w-full accent-blue-700"
-                  />
-                </div>
-                <div>
-                  <label
                     htmlFor="keywords"
                     className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1"
                   >

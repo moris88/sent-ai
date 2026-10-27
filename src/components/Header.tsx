@@ -7,6 +7,10 @@ interface HeaderProps {
   onOpenSettings: () => void;
 }
 
+const VITE_RELEASE = import.meta.env.VITE_RELEASE ?? '';
+const VITE_DATA_RELEASE = import.meta.env.VITE_DATA_RELEASE ?? '';
+const version = [VITE_RELEASE, VITE_DATA_RELEASE].join(' - ');
+
 export const Header = ({ isSidebarOpen, toggleSidebar, onOpenSettings }: HeaderProps) => {
   const { isDark, toggleTheme } = useDarkMode(); // Hook per gestire il tema scuro
   return (
@@ -26,7 +30,7 @@ export const Header = ({ isSidebarOpen, toggleSidebar, onOpenSettings }: HeaderP
             <Mail className="text-white w-5 h-5" />
           </div>
           <h1 className="text-xl font-bold tracking-tight hidden sm:block text-slate-900 dark:text-white">
-            SentAI (⚠️ Beta version)
+            SentAI {version === ' - ' ? '' : `(${version})`}
           </h1>
         </div>
       </div>

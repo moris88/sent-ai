@@ -1,8 +1,10 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import OpenAI from 'openai';
 
-export type Provider = 'gemini' | 'openai' | 'anthropic' | 'lmstudio';
+export type Provider = 'gemini' | 'openai' | 'lmstudio';
+
+// Applicata solo ai provider che la supportano: i modelli di ragionamento OpenAI la rifiutano.
+const DEFAULT_TEMPERATURE = 1;
 
 const getLmStudioBaseUrl = (baseUrl?: string) => {
   let url = (
@@ -49,7 +51,6 @@ const completeWithLmStudio = async (
   model: string,
   apiKey: string,
   prompt: string,
-  temperature?: number,
   systemPrompt?: string,
   lmStudioUrl?: string
 ) => {
@@ -63,14 +64,11 @@ const completeWithLmStudio = async (
   const payload: Record<string, any> = {
     model: model,
     input: prompt,
+    temperature: DEFAULT_TEMPERATURE,
   };
 
   if (systemPrompt) {
     payload.system_prompt = systemPrompt;
-  }
-
-  if (typeof temperature === 'number') {
-    payload.temperature = temperature;
   }
 
   const raw = JSON.stringify(payload);
@@ -104,7 +102,6 @@ type RefineOptions = {
   generateSubject?: boolean;
   context?: string;
   draft: string;
-  temperature?: number;
   provider: Provider;
   apiKey: string;
   model: string;
@@ -135,21 +132,8 @@ export const refineEmail = async (options: RefineOptions): Promise<string> => {
     const completion = await openai.chat.completions.create({
       model: model,
       messages: [{ role: 'user', content: prompt }],
-      temperature: opts.temperature,
     });
     return completion.choices[0].message.content || '';
-  }
-
-  if (provider === 'anthropic') {
-    const anthropic = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
-    const message = await anthropic.messages.create({
-      model: model,
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: prompt }],
-      temperature: opts.temperature,
-    });
-    // @ts-expect-error
-    return message.content[0].text || '';
   }
 
   if (provider === 'lmstudio') {
@@ -157,7 +141,6 @@ export const refineEmail = async (options: RefineOptions): Promise<string> => {
       model,
       apiKey,
       prompt,
-      opts.temperature,
       'You are an AI assistant specialized in writing professional emails.'
     );
   }
@@ -165,13 +148,76 @@ export const refineEmail = async (options: RefineOptions): Promise<string> => {
   // Default to Gemini
   const genAI = new GoogleGenerativeAI(apiKey);
   const geminiModel = genAI.getGenerativeModel({
-    model: model,
+    model,
+    generationConfig: { temperature: DEFAULT_TEMPERATURE },
   });
   const result = await geminiModel.generateContent({
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    generationConfig: { temperature: opts.temperature },
   });
   return result.response.text();
+};
+
+const completePrompt = async (
+  provider: Provider,
+  apiKey: string,
+  model: string,
+  prompt: string,
+  systemPrompt?: string
+): Promise<string> => {
+  if (provider === 'openai') {
+    const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
+    const completion = await openai.chat.completions.create({
+      model,
+      messages: [{ role: 'user', content: prompt }],
+    });
+    return completion.choices[0].message.content?.trim() || '';
+  }
+
+  if (provider === 'lmstudio') {
+    return (await completeWithLmStudio(model, apiKey, prompt, systemPrompt)).trim();
+  }
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const geminiModel = genAI.getGenerativeModel({
+    model,
+    generationConfig: { temperature: DEFAULT_TEMPERATURE },
+  });
+  const result = await geminiModel.generateContent(prompt);
+  return result.response.text().trim();
+};
+
+type WriteEmailOptions = Omit<RefineOptions, 'draft'> & {
+  instructions: string;
+};
+
+// Scrive l'email da zero partendo dal contesto e dalle indicazioni dell'utente, senza una bozza.
+export const writeEmail = async (options: WriteEmailOptions): Promise<string> => {
+  const { provider, apiKey, model, ...opts } = options;
+
+  const prompt = `
+  You are an AI assistant specialized in writing professional emails.
+  The user does not have a draft: write the email from scratch, as a reply that fits the conversation context and follows the user's instructions.
+
+  <persona>${opts.persona}</persona>
+  <tone>${opts.tone}</tone>
+  <detail>${opts.detail}</detail>
+  <language>${opts.language}</language>
+  <structure>${opts.structure}</structure>
+  ${opts.keywords ? `<keywords>${opts.keywords}</keywords>` : ''}
+
+  <context>${opts.context || 'No context provided.'}</context>
+  <instructions>${opts.instructions}</instructions>
+  ${opts.prompt ? `<additional_prompt>${opts.prompt}</additional_prompt>` : ''}
+
+  Write ONLY the email text in ${opts.language}.`;
+
+  return completePrompt(
+    provider,
+    apiKey,
+    model,
+    prompt,
+    'You are an AI assistant specialized in writing professional emails.'
+  );
 };
 
 type QuerySavedEmailsOptions = {
@@ -180,11 +226,10 @@ type QuerySavedEmailsOptions = {
   provider: Provider;
   apiKey: string;
   model: string;
-  temperature?: number;
 };
 
 export const querySavedEmails = async (options: QuerySavedEmailsOptions): Promise<string> => {
-  const { question, emails, provider, apiKey, model, temperature } = options;
+  const { question, emails, provider, apiKey, model } = options;
   const prompt = `
 You are an AI assistant answering questions about the user's saved emails.
 Use only the email data provided below. If the answer is not present, say so clearly.
@@ -199,21 +244,8 @@ Answer the user's question directly in Italian. Do not write or rewrite an email
     const completion = await openai.chat.completions.create({
       model,
       messages: [{ role: 'user', content: prompt }],
-      temperature,
     });
     return completion.choices[0].message.content?.trim() || '';
-  }
-
-  if (provider === 'anthropic') {
-    const anthropic = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
-    const message = await anthropic.messages.create({
-      model,
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: prompt }],
-      temperature,
-    });
-    // @ts-expect-error
-    return message.content[0].text?.trim() || '';
   }
 
   if (provider === 'lmstudio') {
@@ -221,16 +253,17 @@ Answer the user's question directly in Italian. Do not write or rewrite an email
       model,
       apiKey,
       prompt,
-      temperature,
       'You are an AI assistant answering questions about saved emails.'
     );
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const geminiModel = genAI.getGenerativeModel({ model });
+  const geminiModel = genAI.getGenerativeModel({
+    model,
+    generationConfig: { temperature: DEFAULT_TEMPERATURE },
+  });
   const result = await geminiModel.generateContent({
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    generationConfig: { temperature },
   });
   return result.response.text().trim();
 };
@@ -265,11 +298,6 @@ export async function getModels(
   if (provider === 'openai') {
     const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
     return openai.models.list().then((res) => res.data.map((model) => model.id));
-  }
-
-  if (provider === 'anthropic') {
-    const anthropic = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
-    return anthropic.models.list().then((res) => res.data.map((model) => model.display_name));
   }
 
   let OriginalModels: any = {};
@@ -334,24 +362,14 @@ export const generateTitle = async (
     return completion.choices[0].message.content?.trim() || 'Nuova conversazione';
   }
 
-  if (provider === 'anthropic') {
-    const anthropic = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
-    const message = await anthropic.messages.create({
-      model: model,
-      max_tokens: 100,
-      messages: [{ role: 'user', content: prompt }],
-    });
-    // @ts-expect-error
-    return message.content[0].text?.trim() || 'Nuova conversazione';
-  }
-
   if (provider === 'lmstudio') {
     return completeWithLmStudio(model, apiKey, prompt);
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const geminiModel = genAI.getGenerativeModel({
-    model: model,
+    model,
+    generationConfig: { temperature: DEFAULT_TEMPERATURE },
   });
   const result = await geminiModel.generateContent(prompt);
   return result.response.text().trim() || 'Nuova conversazione';
@@ -388,24 +406,14 @@ export const generateSubject = async (options: GenerateSubjectOptions): Promise<
     return completion.choices[0].message.content?.trim() || '';
   }
 
-  if (provider === 'anthropic') {
-    const anthropic = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
-    const message = await anthropic.messages.create({
-      model: model,
-      max_tokens: 100,
-      messages: [{ role: 'user', content: prompt }],
-    });
-    // @ts-expect-error
-    return message.content[0].text?.trim() || '';
-  }
-
   if (provider === 'lmstudio') {
     return completeWithLmStudio(model, apiKey, prompt);
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const geminiModel = genAI.getGenerativeModel({
-    model: model,
+    model,
+    generationConfig: { temperature: DEFAULT_TEMPERATURE },
   });
   const result_ = await geminiModel.generateContent(prompt);
   return result_.response.text().trim() || '';
@@ -418,11 +426,10 @@ type ReviseEmailOptions = {
   provider: Provider;
   apiKey: string;
   model: string;
-  temperature?: number;
 };
 
 export const reviseEmail = async (options: ReviseEmailOptions): Promise<string> => {
-  const { provider, apiKey, model, result, instructions, language, temperature } = options;
+  const { provider, apiKey, model, result, instructions, language } = options;
 
   const prompt = `
   You are an AI assistant specialized in editing professional emails.
@@ -438,21 +445,8 @@ export const reviseEmail = async (options: ReviseEmailOptions): Promise<string> 
     const completion = await openai.chat.completions.create({
       model: model,
       messages: [{ role: 'user', content: prompt }],
-      temperature,
     });
     return completion.choices[0].message.content?.trim() || result;
-  }
-
-  if (provider === 'anthropic') {
-    const anthropic = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
-    const message = await anthropic.messages.create({
-      model: model,
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: prompt }],
-      temperature,
-    });
-    // @ts-expect-error
-    return message.content[0].text?.trim() || result;
   }
 
   if (provider === 'lmstudio') {
@@ -461,7 +455,6 @@ export const reviseEmail = async (options: ReviseEmailOptions): Promise<string> 
         model,
         apiKey,
         prompt,
-        temperature,
         'You are an AI assistant specialized in editing professional emails.'
       )) || result
     );
@@ -469,11 +462,11 @@ export const reviseEmail = async (options: ReviseEmailOptions): Promise<string> 
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const geminiModel = genAI.getGenerativeModel({
-    model: model,
+    model,
+    generationConfig: { temperature: DEFAULT_TEMPERATURE },
   });
   const result_ = await geminiModel.generateContent({
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    generationConfig: { temperature },
   });
   return result_.response.text().trim() || result;
 };
