@@ -2,15 +2,6 @@ import { ShieldCheck, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { type RedactionEvent, subscribeToRedactions } from '../utils/redact';
 
-const LABELS: Record<string, string> = {
-  EMAIL: 'email',
-  IBAN: 'IBAN',
-  CODICE_FISCALE: 'codici fiscali',
-  PARTITA_IVA: 'partite IVA',
-  CARTA: 'numeri di carta',
-  TELEFONO: 'numeri di telefono',
-};
-
 const FIELD_LABELS: Record<string, string> = {
   draft: 'Bozza',
   context: 'Contesto',
@@ -29,23 +20,24 @@ export const PrivacyNotice = () => {
 
   if (!event) return null;
 
-  const details = Object.entries(event.summary)
-    .map(([type, count]) => `${count} ${LABELS[type] ?? type}`)
-    .join(', ');
+  // Mostra un solo testo: la bozza se presente, altrimenti il primo campo non vuoto (senza id).
+  const visible = event.sentFields.filter(({ field, text }) => field !== 'id' && text.trim() !== '');
+  const shown = visible.find(({ field }) => field === 'draft') ?? visible[0];
+
+  if (!shown) return null;
 
   return (
     <div
       role="status"
-      className="flex items-start gap-3 p-3 mb-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg animate-in fade-in slide-in-from-bottom-2"
+      className="flex items-start gap-3 p-3 mt-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg animate-in fade-in slide-in-from-bottom-2"
     >
       <div className="bg-primary-600 p-2 rounded-lg shrink-0">
-        <ShieldCheck className="w-4 h-4 text-white" />
+        <ShieldCheck className="w-4 h-4 text-white" aria-hidden="true" />
       </div>
       <div className="flex-1 min-w-0 space-y-2">
         <p className="text-sm font-semibold text-slate-900 dark:text-white">
           Dati oscurati prima dell'invio all'AI
         </p>
-        <p className="text-xs text-slate-600 dark:text-slate-300">Oscurati: {details}</p>
         <p className="text-xs text-slate-600 dark:text-slate-300">
           Prima dell'invio, l'app sostituisce i dati personali e sensibili con segnaposto come
           [EMAIL_1]. Il provider AI riceve solo i segnaposto, mai i valori originali. Quando arriva
@@ -53,20 +45,12 @@ export const PrivacyNotice = () => {
           qui sotto è quello inviato, cioè con i segnaposto. Nomi di persona e dati non
           riconoscibili dalle regole non vengono oscurati.
         </p>
-        <div className="space-y-2">
-          {event.sentFields
-            .filter(({ text }) => text.trim() !== '')
-            .map(({ field, text }) => (
-              <div key={field}>
-                <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                  {FIELD_LABELS[field] ?? field} inviato all'AI:
-                </p>
-                <pre className="max-h-40 overflow-y-auto whitespace-pre-wrap break-words text-xs p-2 rounded-md bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
-                  {text}
-                </pre>
-              </div>
-            ))}
-        </div>
+        <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+          Testo inviato all'AI ({FIELD_LABELS[shown.field] ?? shown.field}):
+        </p>
+        <pre className="max-h-40 overflow-y-auto whitespace-pre-wrap break-words text-xs p-2 rounded-md bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+          {shown.text}
+        </pre>
       </div>
       <button
         type="button"

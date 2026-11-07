@@ -2,6 +2,7 @@ import { ClipboardPaste, Download, Eye, EyeOff, X } from 'lucide-react';
 import React from 'react';
 import { getModels, verifyModel } from '../services/ai';
 import { ThemeSettings } from './ThemeSettings';
+import { saveForbiddenTerms } from '../utils/draftChecks';
 
 export const SettingsModal = ({
   isOpen,
@@ -78,6 +79,10 @@ export const SettingsModal = ({
       });
     }
   };
+
+  const [forbiddenTerms, setForbiddenTerms] = React.useState(
+    () => localStorage.getItem('sentai_forbidden_terms') ?? ''
+  );
 
   const requiresApiKey = provider !== 'lmstudio';
 
@@ -232,6 +237,27 @@ export const SettingsModal = ({
                 placeholder="Istruzioni aggiuntive per l'AI per la raffinazione del testo dell'email..."
                 className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white h-24"
               />
+            </div>
+            <div>
+              <label
+                htmlFor="forbidden-terms"
+                className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
+              >
+                Termini da evitare
+              </label>
+              <input
+                id="forbidden-terms"
+                value={forbiddenTerms}
+                onChange={(e) => {
+                  setForbiddenTerms(e.target.value);
+                  saveForbiddenTerms(e.target.value);
+                }}
+                placeholder="es: urgentissimo, garantito, gratis"
+                className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white"
+              />
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Separali con una virgola: il controllo bozza ti avvisa se compaiono. Si salvano subito.
+              </p>
             </div>
             <ThemeSettings />
             <p className="text-xs text-slate-500 dark:text-slate-400">

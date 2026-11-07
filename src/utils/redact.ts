@@ -42,6 +42,17 @@ const ibanValid = (match: string): boolean => {
 
 // L'ordine conta: le regole più specifiche vanno prima di quelle generiche (es. telefono).
 const RULES: RedactionRule[] = [
+  // Password scritte con un'etichetta (es. "password: abc123"): si oscura solo il valore.
+  {
+    type: 'PASSWORD',
+    regex: /(?<=\b(?:password|passwd|pwd)\s*[:=]\s*)[^\s'"]{3,}/gi,
+  },
+  // Chiavi e token con un formato riconoscibile o con un'etichetta esplicita.
+  {
+    type: 'TOKEN',
+    regex:
+      /\b(?:sk|pk|rk)[-_][A-Za-z0-9_-]{16,}\b|\bAIza[0-9A-Za-z_-]{35}\b|\bgh[pousr]_[A-Za-z0-9]{36,}\b|\bxox[abprs]-[A-Za-z0-9-]{10,}\b|(?<=\bBearer\s+)[A-Za-z0-9._~+/-]{16,}=*|(?<=\b(?:api[_ -]?key|apikey|access[_ -]?token|token|secret)\s*[:=]\s*)[^\s'"]{8,}/gi,
+  },
   {
     type: 'EMAIL',
     regex: /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/g,
@@ -170,4 +181,11 @@ export const withPrivacy = <T extends object>(
     const result = await fn(Object.fromEntries(redactedEntries) as T);
     return session.restore(result);
   };
+};
+
+// Conta i dati personali presenti nel testo senza modificarlo: serve per gli avvisi prima dell'invio.
+export const findSensitiveData = (text: string): RedactionSummary => {
+  const session = createPrivacySession();
+  session.redact(text);
+  return session.summary();
 };

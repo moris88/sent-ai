@@ -1,5 +1,5 @@
 // Segnaposto rimasti nella bozza: quelli di oscuramento (es. [EMAIL_1]) e quelli da compilare (es. [Nome], {{data}}).
-const REDACTION_PLACEHOLDER = /\[(?:EMAIL|IBAN|CODICE_FISCALE|PARTITA_IVA|CARTA|TELEFONO)_\d+\]/g;
+const REDACTION_PLACEHOLDER = /\[(?:EMAIL|IBAN|CODICE_FISCALE|PARTITA_IVA|CARTA|TELEFONO|PASSWORD|TOKEN)_\d+\]/g;
 
 const TEMPLATE_PATTERNS: RegExp[] = [
   // [Nome], [Data]: esclude i link Markdown come [testo](url)

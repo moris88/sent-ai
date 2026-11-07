@@ -21,11 +21,11 @@ import {
   X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { generateTitle } from '../services/ai';
+import { generateTitle, type Provider, reviewDraft } from '../services/ai';
 import type { EmailDraft } from '../types';
 import { markdownToPlainText } from '../utils/markdown';
 import { extractTextFromPDF } from '../utils/pdf';
-import { findPlaceholders } from '../utils/placeholders';
+import { type CheckIssue, type CheckSeverity, runLocalChecks } from '../utils/draftChecks';
 import { MarkdownContent } from './MarkdownContent';
 import { MarkdownEditor } from './MarkdownEditor';
 import { PrivacyNotice } from './PrivacyNotice';
@@ -68,6 +68,12 @@ interface EditorProps {
   onAiError: (message: string) => void;
 }
 
+const SEVERITY_CLASS: Record<CheckSeverity, string> = {
+  error: 'text-red-700 dark:text-red-400',
+  warning: 'text-amber-800 dark:text-amber-300',
+  info: 'text-slate-600 dark:text-slate-300',
+};
+
 export const EmailEditor = ({
   draft,
   isLoading,
@@ -97,8 +103,10 @@ export const EmailEditor = ({
   const [isWriteOpen, setIsWriteOpen] = useState(false);
   const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
   const [isModifyFormOpen, setIsModifyFormOpen] = useState(false);
-  // Risultato del controllo segnaposto: null finché non viene eseguito sulla bozza corrente.
-  const [placeholderResult, setPlaceholderResult] = useState<string[] | null>(null);
+  // Risultati del controllo bozza: null finché non viene eseguito sul testo corrente.
+  const [checkIssues, setCheckIssues] = useState<CheckIssue[] | null>(null);
+  const [aiReview, setAiReview] = useState<string | null>(null);
+  const [isReviewing, setIsReviewing] = useState(false);
   const [modifyInstructions, setModifyInstructions] = useState('');
   const wasModifyingRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -233,8 +241,37 @@ export const EmailEditor = ({
 
   // Il risultato del controllo vale solo per il testo attuale: si azzera al cambio di bozza o di testo.
   useEffect(() => {
-    setPlaceholderResult(null);
-  }, [draft.id, draft.draft]);
+    setCheckIssues(null);
+    setAiReview(null);
+  }, [draft.id, draft.draft, draft.subject]);
+
+  const handleAiReview = async () => {
+    const apiKey = localStorage.getItem('sentai_api_key') || '';
+    const provider = localStorage.getItem('sentai_provider') as Provider | null;
+    const model = localStorage.getItem('sentai_model');
+    if ((!apiKey && provider !== 'lmstudio') || !provider || !model) {
+      onAiError('Configura provider, chiave e modello nelle impostazioni.');
+      return;
+    }
+    setIsReviewing(true);
+    try {
+      const review = await reviewDraft({
+        draft: draft.draft,
+        subject: draft.subject,
+        context: draft.context,
+        tone: draft.tone,
+        language: draft.language,
+        provider,
+        apiKey,
+        model,
+      });
+      setAiReview(review.trim() || 'Nessun suggerimento.');
+    } catch (error) {
+      onAiError(error instanceof Error ? error.message : 'Errore durante la richiesta di suggerimenti.');
+    } finally {
+      setIsReviewing(false);
+    }
+  };
 
   useEffect(() => {
     console.debug('[EmailEditor] Risultato Raffinato:', {
@@ -694,34 +731,69 @@ export const EmailEditor = ({
                 canUndo={canUndo}
                 placeholder="Scrivi qui la tua bozza di email, poi clicca su 'Raffina Email' e lascia fare all'AI."
               />
-            </div>
-            {placeholderResult && (
-              <div role="status" className="mx-3 md:mx-4 mb-3 rounded-lg border p-3 text-sm">
-                {placeholderResult.length === 0 ? (
-                  <p className="flex items-center gap-2 font-semibold text-green-700 dark:text-green-400">
-                    <Check className="w-4 h-4" aria-hidden="true" />
-                    Nessun segnaposto trovato nella bozza.
-                  </p>
-                ) : (
-                  <div className="space-y-2 text-amber-800 dark:text-amber-300">
-                    <p className="font-semibold">
-                      Trovati {placeholderResult.length} segnaposto da sostituire prima
-                      dell&apos;invio:
-                    </p>
-                    <ul className="flex flex-wrap gap-1.5">
-                      {placeholderResult.map((placeholder) => (
-                        <li
-                          key={placeholder}
-                          className="rounded-md bg-amber-100 px-2 py-0.5 font-mono text-xs dark:bg-amber-900/40"
-                        >
-                          {placeholder}
-                        </li>
-                      ))}
-                    </ul>
+              {checkIssues && (
+                <div
+                  role="status"
+                  className="flex items-start gap-3 mt-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg animate-in fade-in slide-in-from-bottom-2"
+                >
+                  <div className="bg-primary-600 p-2 rounded-lg shrink-0">
+                    <Search className="w-4 h-4 text-white" aria-hidden="true" />
                   </div>
-                )}
-              </div>
-            )}
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Controllo bozza</p>
+                    {checkIssues.length === 0 ? (
+                      <p className="flex items-center gap-1.5 text-xs font-semibold text-green-700 dark:text-green-400">
+                        <Check className="w-3.5 h-3.5" aria-hidden="true" />
+                        Nessun problema trovato nella bozza.
+                      </p>
+                    ) : (
+                      <ul className="space-y-1">
+                        {checkIssues.map((issue) => (
+                          <li
+                            key={issue.id}
+                            className={`flex items-start gap-2 text-xs ${SEVERITY_CLASS[issue.severity]}`}
+                          >
+                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-current" aria-hidden="true" />
+                            <span>{issue.message}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={handleAiReview}
+                        disabled={isReviewing || isLoading || !draft.draft.trim()}
+                        className="cursor-pointer bg-primary-100 dark:bg-primary-900/50 hover:bg-primary-200 dark:hover:bg-primary-800 text-primary-700 dark:text-primary-300 font-semibold text-xs px-2.5 py-1.5 rounded-lg transition-all border border-primary-200 dark:border-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {isReviewing ? 'Analisi in corso...' : 'Suggerimenti AI'}
+                      </button>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                        La bozza viene inviata all&apos;AI per una revisione. Il testo non viene modificato.
+                      </span>
+                    </div>
+                    {aiReview && (
+                      <div className="rounded-md bg-primary-50 p-3 dark:bg-primary-900/30">
+                        <MarkdownContent>{aiReview}</MarkdownContent>
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCheckIssues(null);
+                      setAiReview(null);
+                    }}
+                    className="cursor-pointer p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-700 shrink-0"
+                    title="Chiudi"
+                    aria-label="Chiudi il controllo bozza"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+              <PrivacyNotice key={draft.id} />
+            </div>
             <div className="p-3 md:p-4 flex flex-wrap justify-center items-center w-full gap-2 md:gap-3">
               <button
                 type="button"
@@ -734,7 +806,10 @@ export const EmailEditor = ({
               </button>
               <button
                 type="button"
-                onClick={() => setPlaceholderResult(findPlaceholders(draft.draft))}
+                onClick={() => {
+                  setCheckIssues(runLocalChecks(draft));
+                  setAiReview(null);
+                }}
                 disabled={!draft.draft || isLoading}
                 title="Controlla se nella bozza ci sono segnaposto da compilare"
                 className="cursor-pointer bg-primary-100 dark:bg-primary-900/50 hover:bg-primary-200 dark:hover:bg-primary-800 text-primary-700 dark:text-primary-300 font-semibold text-xs md:text-base px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg flex shrink-0 whitespace-nowrap items-center justify-center gap-1.5 md:gap-2 transition-all border border-primary-200 dark:border-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
@@ -839,8 +914,6 @@ export const EmailEditor = ({
           )}
         </div>
 
-        {/* key: al cambio di bozza l'avviso si azzera, così non mostra dati di altre bozze */}
-        <PrivacyNotice key={draft.id} />
         {(draft.result || isLoading) && (
           <section
             ref={resultSectionRef}

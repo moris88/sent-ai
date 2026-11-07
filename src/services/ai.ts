@@ -1,11 +1,16 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import OpenAI from 'openai';
 import { createPrivacySession, notifyRedactions, withPrivacy } from '../utils/redact';
+import { LANGUAGES } from '../types';
 
 export type Provider = 'gemini' | 'openai' | 'lmstudio';
 
 // Applicata solo ai provider che la supportano: i modelli di ragionamento OpenAI la rifiutano.
 const DEFAULT_TEMPERATURE = 1;
+
+// Il valore salvato è un id (es. "it"): i prompt ricevono il nome della lingua (es. "Italiano").
+const languageName = (id: string): string =>
+  LANGUAGES.find((language) => language.id === id)?.label ?? id;
 
 // Il modello risponde in Markdown: l'app lo mostra formattato e lo converte per copia e invio.
 const MARKDOWN_OUTPUT_RULE =
@@ -122,7 +127,7 @@ const refineEmailImpl = async (options: RefineOptions): Promise<string> => {
   <persona>${opts.persona}</persona>
   <tone>${opts.tone}</tone>
   <detail>${opts.detail}</detail>
-  <language>${opts.language}</language>
+  <language>${languageName(opts.language)}</language>
   <structure>${opts.structure}</structure>
   ${opts.keywords ? `<keywords>${opts.keywords}</keywords>` : ''}
 
@@ -131,7 +136,7 @@ const refineEmailImpl = async (options: RefineOptions): Promise<string> => {
   ${opts.prompt ? `<additional_prompt>${opts.prompt}</additional_prompt>` : ''}
 
   ${MARKDOWN_OUTPUT_RULE}
-  Write ONLY the email text in ${opts.language}.`;
+  Write ONLY the email text in ${languageName(opts.language)}.`;
 
   if (provider === 'openai') {
     const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
@@ -207,7 +212,7 @@ const writeEmailImpl = async (options: WriteEmailOptions): Promise<string> => {
   <persona>${opts.persona}</persona>
   <tone>${opts.tone}</tone>
   <detail>${opts.detail}</detail>
-  <language>${opts.language}</language>
+  <language>${languageName(opts.language)}</language>
   <structure>${opts.structure}</structure>
   ${opts.keywords ? `<keywords>${opts.keywords}</keywords>` : ''}
 
@@ -216,7 +221,7 @@ const writeEmailImpl = async (options: WriteEmailOptions): Promise<string> => {
   ${opts.prompt ? `<additional_prompt>${opts.prompt}</additional_prompt>` : ''}
 
   ${MARKDOWN_OUTPUT_RULE}
-  Write ONLY the email text in ${opts.language}.`;
+  Write ONLY the email text in ${languageName(opts.language)}.`;
 
   return completePrompt(
     provider,
@@ -405,7 +410,7 @@ const generateSubjectImpl = async (options: GenerateSubjectOptions): Promise<str
   const { provider, apiKey, model, context, draft, result, language } = options;
 
   const prompt = `
-  Analyze the following email context and text and generate ONLY a concise, professional email subject line in ${language}.
+  Analyze the following email context and text and generate ONLY a concise, professional email subject line in ${languageName(language)}.
   Return ONLY the subject text, without quotes, prefixes (like "Oggetto:" or "Subject:") or additional formatting.
 
   <context>${context || 'No context provided.'}</context>
@@ -450,7 +455,7 @@ const reviseEmailImpl = async (options: ReviseEmailOptions): Promise<string> => 
   const prompt = `
   You are an AI assistant specialized in editing professional emails.
   Modify the following email applying ONLY the requested changes, keeping the rest of the meaning and structure intact unless the changes require otherwise.
-  Write ONLY the updated email text in ${language}, without explanations or notes. ${MARKDOWN_OUTPUT_RULE}
+  Write ONLY the updated email text in ${languageName(language)}, without explanations or notes. ${MARKDOWN_OUTPUT_RULE}
 
   <email>${result}</email>
   <requested_changes>${instructions}</requested_changes>
@@ -521,3 +526,34 @@ export const verifyModel = async (provider: Provider, apiKey: string, model: str
   if (!reply) throw new Error('Il modello non ha restituito alcuna risposta.');
   return reply;
 };
+
+type ReviewDraftOptions = {
+  draft: string;
+  subject: string;
+  context: string;
+  tone: string;
+  language: string;
+  provider: Provider;
+  apiKey: string;
+  model: string;
+};
+
+// Revisione della bozza: suggerimenti, senza riscrivere l'email.
+const reviewDraftImpl = async (options: ReviewDraftOptions): Promise<string> => {
+  const { provider, apiKey, model, ...opts } = options;
+  const prompt = `
+  You are reviewing an email draft before it is sent. Do NOT rewrite the email.
+  Reply in ${languageName(opts.language)} with a short Markdown bullet list of at most 6 suggestions, covering only:
+  - grammar and spelling mistakes (quote the wrong fragment and give the fix);
+  - consistency with the requested tone (${opts.tone}) and with the context: say if a question in the context is not answered;
+  - clarity of the request or call to action;
+  - a better subject line, if the current one can be improved.
+  If there is nothing to improve, reply with a single line saying so.
+
+  <subject>${opts.subject || 'No subject.'}</subject>
+  <context>${opts.context || 'No context provided.'}</context>
+  <draft>${opts.draft}</draft>`;
+  return completePrompt(provider, apiKey, model, prompt, 'You review email drafts and reply in Markdown.');
+};
+
+export const reviewDraft = withPrivacy(reviewDraftImpl);
