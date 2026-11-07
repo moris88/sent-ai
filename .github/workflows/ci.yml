@@ -24,9 +24,15 @@ jobs:
           cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Audit
+        run: pnpm audit --audit-level=critical
       - name: Lint
         run: pnpm lint
       - name: Build Web
         run: pnpm build
       - name: Build Desktop
         run: pnpm build:electron
+      - name: Install Electron
+        run: pnpm electron:install
+      - name: Run Tests
+        run: pnpm test:coverage
