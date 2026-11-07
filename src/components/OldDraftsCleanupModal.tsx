@@ -49,7 +49,7 @@ const OldDraftsCleanupModal = ({
             Annulla
           </button>
           <button
-            className="cursor-pointer flex items-center justify-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-blue-900/50 hover:bg-white dark:hover:bg-blue-800 p-2 md:px-3 md:py-1.5 rounded-md font-medium border border-blue-200 dark:border-blue-700 transition-colors"
+            className="cursor-pointer flex items-center justify-center gap-2 text-sm text-primary-700 dark:text-primary-300 bg-white/50 dark:bg-primary-900/50 hover:bg-white dark:hover:bg-primary-800 p-2 md:px-3 md:py-1.5 rounded-md font-medium border border-primary-200 dark:border-primary-700 transition-colors"
             type="button"
             onClick={onConfirm}
           >

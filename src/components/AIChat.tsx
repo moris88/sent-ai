@@ -80,9 +80,9 @@ export const AIChat = ({ drafts, checkApiKey, onAiError }: AIChatProps) => {
             key={m.id}
             className={`flex gap-2 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            {m.role === 'ai' && <Bot className="w-6 h-6 text-blue-600 mt-1" />}
+            {m.role === 'ai' && <Bot className="w-6 h-6 text-primary-600 mt-1" />}
             <div
-              className={`p-3 rounded-lg text-sm max-w-[80%] ${m.role === 'user' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-sm'}`}
+              className={`p-3 rounded-lg text-sm max-w-[80%] ${m.role === 'user' ? 'bg-primary-600 text-white' : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-sm'}`}
             >
               {m.text}
             </div>
@@ -98,12 +98,12 @@ export const AIChat = ({ drafts, checkApiKey, onAiError }: AIChatProps) => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Chiedi qualcosa sulle tue email..."
-          className="flex-1 min-w-0 p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="flex-1 min-w-0 p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 outline-none focus:ring-2 focus:ring-primary-500 text-sm"
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
         />
         <button
           type="button"
-          className="cursor-pointer p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="cursor-pointer p-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
           onClick={handleSend}
           disabled={isLoading}
         >

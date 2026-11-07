@@ -23,7 +23,7 @@ export const SidebarControls = ({ isOpen, draft, onUpdate, onClose }: ControlsPr
     >
       <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 min-w-[280px]">
         <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <Bot className="w-5 h-5 text-blue-600" /> Controlli AI
+          <Bot className="w-5 h-5 text-primary-600" /> Controlli AI
         </h2>
         <button
           type="button"
@@ -54,8 +54,8 @@ export const SidebarControls = ({ isOpen, draft, onUpdate, onClose }: ControlsPr
                   }}
                   className={`cursor-pointer flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
                     draft.persona === p.id
-                      ? 'border-blue-600 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200 font-semibold'
-                      : 'border-slate-200 dark:border-slate-600 hover:border-blue-600 text-slate-600 dark:text-slate-400'
+                      ? 'border-primary-600 bg-primary-50 dark:bg-primary-900 text-primary-700 dark:text-primary-200 font-semibold'
+                      : 'border-slate-200 dark:border-slate-600 hover:border-primary-600 text-slate-600 dark:text-slate-400'
                   }`}
                   title={p.description}
                 >
@@ -80,8 +80,8 @@ export const SidebarControls = ({ isOpen, draft, onUpdate, onClose }: ControlsPr
                   onClick={() => onUpdate({ tone: t.id })}
                   className={`cursor-pointer px-3 py-1.5 rounded-lg text-sm font-medium border transition-all flex items-center gap-1.5 ${
                     draft.tone === t.id
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500'
+                      ? 'bg-primary-600 text-white border-primary-600'
+                      : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500'
                   }`}
                   title={t.description}
                 >
@@ -96,7 +96,7 @@ export const SidebarControls = ({ isOpen, draft, onUpdate, onClose }: ControlsPr
             <button
               type="button"
               onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-              className="cursor-pointer w-full flex items-center justify-between text-sm font-bold dark:text-slate-300 uppercase tracking-wider bg-blue-600 p-2 rounded-lg text-white hover:bg-blue-700 transition-colors"
+              className="cursor-pointer w-full flex items-center justify-between text-sm font-bold dark:text-slate-300 uppercase tracking-wider bg-primary-600 p-2 rounded-lg text-white hover:bg-primary-700 transition-colors"
             >
               Impostazioni Avanzate
               {isAdvancedOpen ? (
@@ -143,8 +143,8 @@ export const SidebarControls = ({ isOpen, draft, onUpdate, onClose }: ControlsPr
                         onClick={() => onUpdate({ detail: d.id })}
                         className={`cursor-pointer flex-1 py-1.5 rounded-md text-sm font-medium transition-all ${
                           draft.detail === d.id
-                            ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm'
-                            : 'text-slate-500 hover:text-blue-600 dark:text-slate-300 hover:bg-white dark:hover:bg-gray-800'
+                            ? 'bg-white dark:bg-gray-800 text-primary-600 shadow-sm'
+                            : 'text-slate-500 hover:text-primary-600 dark:text-slate-300 hover:bg-white dark:hover:bg-gray-800'
                         }`}
                       >
                         {d.label}
@@ -165,7 +165,7 @@ export const SidebarControls = ({ isOpen, draft, onUpdate, onClose }: ControlsPr
                     value={draft.keywords}
                     onChange={(e) => onUpdate({ keywords: e.target.value })}
                     placeholder="Es: urgente, follow-up, meeting"
-                    className="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg dark:text-white ring-blue-600 focus:ring-1 focus:outline-none"
+                    className="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg dark:text-white ring-primary-600 focus:ring-1 focus:outline-none"
                   />
                 </div>
                 <label
@@ -177,7 +177,7 @@ export const SidebarControls = ({ isOpen, draft, onUpdate, onClose }: ControlsPr
                     type="checkbox"
                     checked={draft.generateSubject}
                     onChange={(e) => onUpdate({ generateSubject: e.target.checked })}
-                    className="cursor-pointer accent-blue-700"
+                    className="cursor-pointer accent-primary-700"
                   />
                   Genera Oggetto Email
                 </label>

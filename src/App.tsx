@@ -138,7 +138,7 @@ export default function App() {
         <button
           type="button"
           onClick={() => setActiveId(createDraft())}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
+          className="bg-primary-600 text-white px-4 py-2 rounded"
         >
           Crea prima bozza
         </button>
@@ -166,6 +166,9 @@ export default function App() {
     setThreadModalOpen(false);
   };
 
+  // Finché l'AI sta lavorando sulla bozza attiva, non si può cambiare bozza né crearne una nuova.
+  const isBusy = isLoading || isGeneratingSubject || isModifying || isWriting;
+
   return (
     <div className="flex h-dvh bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans overflow-hidden">
       <main
@@ -185,11 +188,14 @@ export default function App() {
             drafts={drafts}
             activeId={activeId}
             isOpen={isSidebarOpen}
+            isLocked={isBusy}
             setActiveId={(id) => {
+              if (isBusy && id !== activeId) return;
               setActiveId(id);
               if (!window.matchMedia('(min-width: 1024px)').matches) setIsSidebarOpen(false);
             }}
             createDraft={() => {
+              if (isBusy) return;
               setActiveId(createDraft());
               if (!window.matchMedia('(min-width: 1024px)').matches) setIsSidebarOpen(false);
             }}
@@ -229,7 +235,7 @@ export default function App() {
         </div>
         <button
           type="button"
-          className="xl:hidden absolute bottom-4 right-4 sm:bottom-6 sm:right-6 z-30 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-bold p-3 rounded-full flex items-center justify-center gap-2 transition-all shadow-lg"
+          className="xl:hidden absolute bottom-4 right-4 sm:bottom-6 sm:right-6 z-30 cursor-pointer bg-primary-600 hover:bg-primary-700 text-white font-bold p-3 rounded-full flex items-center justify-center gap-2 transition-all shadow-lg"
           onClick={() => setShowSidebarControls((prev) => !prev)}
           title="Mostra i controlli AI"
         >

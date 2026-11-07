@@ -20,7 +20,7 @@ export const ThreadModal = ({ isOpen, onClose, onConfirm, value, onChange, onPas
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Incolla qui una eventuale risposta del cliente... o semplicemente scrivi un contesto aggiuntivo per l'AI. Non è obbligatorio, ma può aiutare a generare una risposta più pertinente."
-          className="w-full h-40 p-3 bg-slate-50 dark:bg-gray-700 border border-slate-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y"
+          className="w-full h-40 p-3 bg-slate-50 dark:bg-gray-700 border border-slate-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none resize-y"
         />
         <div className="flex gap-3 pt-2">
           <button
@@ -31,7 +31,7 @@ export const ThreadModal = ({ isOpen, onClose, onConfirm, value, onChange, onPas
             Annulla
           </button>
           <button
-            className="cursor-pointer flex-1 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold"
+            className="cursor-pointer flex-1 py-2 rounded-lg bg-primary-600 text-white hover:bg-primary-700 font-semibold"
             type="button"
             onClick={onConfirm}
           >

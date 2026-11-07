@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import OpenAI from 'openai';
+import { createPrivacySession, notifyRedactions, withPrivacy } from '../utils/redact';
 
 export type Provider = 'gemini' | 'openai' | 'lmstudio';
 
@@ -108,7 +109,7 @@ type RefineOptions = {
   prompt?: string;
 };
 
-export const refineEmail = async (options: RefineOptions): Promise<string> => {
+const refineEmailImpl = async (options: RefineOptions): Promise<string> => {
   const { provider, apiKey, model, ...opts } = options;
 
   const prompt = `
@@ -191,7 +192,7 @@ type WriteEmailOptions = Omit<RefineOptions, 'draft'> & {
 };
 
 // Scrive l'email da zero partendo dal contesto e dalle indicazioni dell'utente, senza una bozza.
-export const writeEmail = async (options: WriteEmailOptions): Promise<string> => {
+const writeEmailImpl = async (options: WriteEmailOptions): Promise<string> => {
   const { provider, apiKey, model, ...opts } = options;
 
   const prompt = `
@@ -228,7 +229,7 @@ type QuerySavedEmailsOptions = {
   model: string;
 };
 
-export const querySavedEmails = async (options: QuerySavedEmailsOptions): Promise<string> => {
+const querySavedEmailsImpl = async (options: QuerySavedEmailsOptions): Promise<string> => {
   const { question, emails, provider, apiKey, model } = options;
   const prompt = `
 You are an AI assistant answering questions about the user's saved emails.
@@ -338,7 +339,7 @@ export async function getModels(
     });
 }
 
-export const generateTitle = async (
+const generateTitleImpl = async (
   context: string,
   draft: string,
   provider: Provider,
@@ -385,7 +386,7 @@ type GenerateSubjectOptions = {
   model: string;
 };
 
-export const generateSubject = async (options: GenerateSubjectOptions): Promise<string> => {
+const generateSubjectImpl = async (options: GenerateSubjectOptions): Promise<string> => {
   const { provider, apiKey, model, context, draft, result, language } = options;
 
   const prompt = `
@@ -428,7 +429,7 @@ type ReviseEmailOptions = {
   model: string;
 };
 
-export const reviseEmail = async (options: ReviseEmailOptions): Promise<string> => {
+const reviseEmailImpl = async (options: ReviseEmailOptions): Promise<string> => {
   const { provider, apiKey, model, result, instructions, language } = options;
 
   const prompt = `
@@ -469,4 +470,32 @@ export const reviseEmail = async (options: ReviseEmailOptions): Promise<string> 
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
   });
   return result_.response.text().trim() || result;
+};
+
+// Oscuramento dei dati personali e sensibili: i testi inviati al modello sono segnaposto, la risposta viene ripristinata.
+export const refineEmail = withPrivacy(refineEmailImpl);
+export const writeEmail = withPrivacy(writeEmailImpl);
+export const querySavedEmails = withPrivacy(querySavedEmailsImpl);
+export const generateSubject = withPrivacy(generateSubjectImpl);
+export const reviseEmail = withPrivacy(reviseEmailImpl);
+
+export const generateTitle = async (
+  context: string,
+  draft: string,
+  provider: Provider,
+  apiKey: string,
+  model: string
+): Promise<string> => {
+  const session = createPrivacySession();
+  const redactedContext = session.redact(context);
+  const redactedDraft = session.redact(draft);
+  notifyRedactions({
+    summary: session.summary(),
+    sentFields: [
+      { field: 'context', text: redactedContext },
+      { field: 'draft', text: redactedDraft },
+    ],
+  });
+  const title = await generateTitleImpl(redactedContext, redactedDraft, provider, apiKey, model);
+  return session.restore(title);
 };

@@ -22,11 +22,11 @@ export const Header = ({ isSidebarOpen, toggleSidebar, onOpenSettings }: HeaderP
           onClick={toggleSidebar}
         >
           <MenuIcon
-            className={`w-5 h-5 ${isSidebarOpen ? 'text-blue-600' : 'text-slate-600 dark:text-slate-400'}`}
+            className={`w-5 h-5 ${isSidebarOpen ? 'text-primary-600' : 'text-slate-600 dark:text-slate-400'}`}
           />
         </button>
         <div className="flex items-center gap-2">
-          <div className="bg-blue-600 p-1.5 rounded-lg">
+          <div className="bg-primary-600 p-1.5 rounded-lg">
             <Mail className="text-white w-5 h-5" />
           </div>
           <h1 className="text-xl font-bold tracking-tight hidden sm:block text-slate-900 dark:text-white">

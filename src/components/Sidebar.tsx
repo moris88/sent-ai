@@ -13,6 +13,8 @@ interface SidebarProps {
   updateDraft: (id: string, updates: Partial<EmailDraft>) => void;
   checkApiKey: () => boolean;
   onAiError: (message: string) => void;
+  // Durante un'elaborazione AI la bozza attiva non può cambiare.
+  isLocked?: boolean;
 }
 
 export const Sidebar = ({
@@ -25,6 +27,7 @@ export const Sidebar = ({
   updateDraft,
   checkApiKey,
   onAiError,
+  isLocked = false,
 }: SidebarProps) => {
   const [view, setView] = useState<'drafts' | 'chat'>('drafts');
 
@@ -43,7 +46,7 @@ export const Sidebar = ({
             title="Le tue email"
           >
             <History
-              className={`w-4 h-4 ${view === 'drafts' ? 'text-blue-600' : 'text-slate-500'}`}
+              className={`w-4 h-4 ${view === 'drafts' ? 'text-primary-600' : 'text-slate-500'}`}
             />
           </button>
           <button
@@ -52,15 +55,16 @@ export const Sidebar = ({
             onClick={() => setView('chat')}
             title="Chat con AI"
           >
-            <Bot className={`w-4 h-4 ${view === 'chat' ? 'text-blue-600' : 'text-slate-500'}`} />
+            <Bot className={`w-4 h-4 ${view === 'chat' ? 'text-primary-600' : 'text-slate-500'}`} />
           </button>
         </div>
         <div className="flex items-center gap-2">
           {view === 'drafts' && (
             <button
               type="button"
-              className="cursor-pointer text-white font-bold px-3 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2"
+              className="cursor-pointer text-white font-bold px-3 py-2 bg-primary-600 rounded-lg hover:bg-primary-700 transition-all flex items-center gap-2"
               onClick={createDraft}
+              disabled={isLocked}
               title="Crea Nuova Bozza"
             >
               <span className="hidden md:inline text-xs">Nuova Bozza Email</span>
@@ -71,6 +75,11 @@ export const Sidebar = ({
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto min-w-70">
+        {isLocked && view === 'drafts' && (
+          <p className="px-4 pt-3 text-xs text-slate-500 dark:text-slate-400">
+            Elaborazione in corso: il cambio bozza sarà disponibile al termine.
+          </p>
+        )}
         {view === 'drafts' ? (
           drafts.map((d) => (
             // Contenitore senza pulsanti annidati: titolo e cestino sono fratelli del pulsante di selezione.
@@ -78,7 +87,7 @@ export const Sidebar = ({
               key={d.id}
               className={`w-full border-b border-slate-100 dark:border-slate-800 transition-colors group ${
                 activeId === d.id
-                  ? 'bg-blue-50 dark:bg-slate-800 border-l-4 border-l-blue-600 dark:border-l-blue-600 text-blue-900 font-semibold'
+                  ? 'bg-primary-50 dark:bg-slate-800 border-l-4 border-l-primary-600 dark:border-l-primary-600 text-primary-900 font-semibold'
                   : 'hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
             >
@@ -86,16 +95,18 @@ export const Sidebar = ({
                 <div className="truncate w-full" title={d.title || d.id}>
                   <input
                     aria-label="Titolo della bozza"
-                    className={`bg-transparent font-semibold outline-none w-full truncate ${activeId === d.id ? 'text-blue-900 dark:text-blue-600' : 'text-slate-700 dark:text-slate-300'}`}
+                    className={`bg-transparent font-semibold outline-none w-full truncate ${activeId === d.id ? 'text-primary-900 dark:text-primary-600' : 'text-slate-700 dark:text-slate-300'}`}
                     value={d.title || d.id}
                     onChange={(e) => updateDraft(d.id, { title: e.target.value })}
                     onFocus={() => setActiveId(d.id)}
+                    disabled={isLocked && activeId !== d.id}
                   />
                 </div>
                 <button
                   type="button"
                   onClick={() => onDelete(d.id)}
-                  className="cursor-pointer lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100 p-1 text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400 transition-all"
+                  disabled={isLocked}
+                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100 p-1 text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400 transition-all"
                   title="Elimina bozza"
                   aria-label="Elimina bozza"
                 >
@@ -105,8 +116,9 @@ export const Sidebar = ({
               <button
                 type="button"
                 onClick={() => setActiveId(d.id)}
+                disabled={isLocked && activeId !== d.id}
                 aria-current={activeId === d.id ? 'true' : undefined}
-                className="cursor-pointer block w-full text-left px-4 pb-4"
+                className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 block w-full text-left px-4 pb-4"
               >
                 <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                   {d.draft ? 'È presente del contenuto' : 'Nessun contenuto...'}

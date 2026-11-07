@@ -26,9 +26,9 @@ export const DesktopAppToast = () => {
   return (
     <div
       role="status"
-      className="fixed bottom-4 left-4 right-20 sm:right-auto sm:max-w-sm z-45 flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg animate-in fade-in slide-in-from-bottom-2"
+      className="fixed bottom-4 left-4 right-20 sm:right-auto sm:max-w-sm z-45 flex items-center gap-3 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg animate-in fade-in slide-in-from-bottom-2"
     >
-      <div className="bg-blue-600 p-2 rounded-lg shrink-0">
+      <div className="bg-primary-600 p-2 rounded-lg shrink-0">
         <Download className="w-4 h-4 text-white" />
       </div>
       <div className="flex-1 min-w-0">
@@ -39,7 +39,7 @@ export const DesktopAppToast = () => {
           href="https://github.com/moris88/sent-ai/releases"
           target="_blank"
           rel="noreferrer"
-          className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+          className="text-xs font-semibold text-primary-600 dark:text-primary-400 hover:underline"
         >
           Scarica
         </a>

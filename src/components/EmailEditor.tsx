@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { generateTitle } from '../services/ai';
+import { PrivacyNotice } from './PrivacyNotice';
 import type { EmailDraft } from '../types';
 import { extractTextFromPDF } from '../utils/pdf';
 
@@ -338,7 +339,7 @@ export const EmailEditor = ({
   return (
     <div className="flex-1 md:p-4 p-2 w-full overflow-y-auto">
       <div className="max-w-5xl mx-auto space-y-4 md:space-y-6 w-full pb-24 xl:pb-8">
-        <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-3 md:p-4 flex items-center gap-2">
+        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-3 md:p-4 flex items-center gap-2">
           <input
             type="text"
             value={draft.title}
@@ -348,7 +349,7 @@ export const EmailEditor = ({
           />
           <button
             type="button"
-            className="cursor-pointer p-2 text-slate-400 hover:text-blue-600 transition-colors"
+            className="cursor-pointer p-2 text-slate-400 hover:text-primary-600 transition-colors"
             onClick={handleGenerateTitle}
             disabled={isGeneratingTitle}
             title="Genera titolo con AI"
@@ -362,10 +363,10 @@ export const EmailEditor = ({
         </section>
 
         {draft.generateSubject && (
-          <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
             <div className="p-3 md:p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex flex-wrap items-center justify-between gap-2 font-semibold text-slate-700 dark:text-slate-300">
               <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-blue-600" /> Oggetto Email
+                <Mail className="w-4 h-4 text-primary-600" /> Oggetto Email
               </div>
               <div className="flex flex-wrap items-center gap-1.5 md:gap-2">
                 <button
@@ -407,7 +408,7 @@ export const EmailEditor = ({
                 value={draft.subject}
                 onChange={(e) => onUpdate({ subject: e.target.value })}
                 placeholder="Oggetto dell'email..."
-                className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-lg text-slate-900 dark:text-white"
+                className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-lg text-slate-900 dark:text-white"
               />
             </div>
           </section>
@@ -416,13 +417,13 @@ export const EmailEditor = ({
         <div className="flex flex-col gap-6 w-full">
           <section
             ref={contextSectionRef}
-            className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
+            className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
           >
             <div className="p-3 md:p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex flex-wrap items-center justify-between gap-2 font-semibold text-slate-700 dark:text-slate-300">
               <button
                 type="button"
                 onClick={() => setIsContextOpen(!isContextOpen)}
-                className="cursor-pointer flex items-center gap-2 hover:text-blue-600 transition-colors"
+                className="cursor-pointer flex items-center gap-2 hover:text-primary-600 transition-colors"
                 title={isContextOpen ? 'Chiudi Contesto' : 'Apri Contesto'}
               >
                 {isContextOpen ? (
@@ -430,7 +431,7 @@ export const EmailEditor = ({
                 ) : (
                   <ChevronDown className="w-4 h-4" />
                 )}
-                <History className="w-4 h-4 text-blue-600" /> Contesto
+                <History className="w-4 h-4 text-primary-600" /> Contesto
               </button>
               <div className="flex flex-wrap items-center gap-1.5 md:gap-2">
                 <button
@@ -472,16 +473,16 @@ export const EmailEditor = ({
                   value={draft.context}
                   placeholder="Incolla qui il contesto della conversazione o carica un PDF..."
                   onChange={(e) => onUpdate({ context: e.target.value })}
-                  className="w-full h-56 md:h-64 p-3 md:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y text-base md:text-lg text-slate-900 dark:text-white"
+                  className="w-full h-56 md:h-64 p-3 md:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none resize-y text-base md:text-lg text-slate-900 dark:text-white"
                 />
               </div>
             )}
           </section>
 
-          <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
             <div className="p-3 md:p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex flex-wrap items-center justify-between gap-2 font-semibold text-slate-700 dark:text-slate-300">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-blue-600" /> La tua bozza
+                <Sparkles className="w-4 h-4 text-primary-600" /> La tua bozza
               </div>
               <div className="flex flex-wrap items-center gap-1.5 md:gap-2">
                 <button
@@ -552,7 +553,7 @@ export const EmailEditor = ({
                       value={templateClientName}
                       onChange={(e) => setTemplateClientName(e.target.value)}
                       placeholder="Es: Mario Rossi"
-                      className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm text-slate-900 dark:text-white"
+                      className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-slate-900 dark:text-white"
                     />
                   </div>
                   <div>
@@ -568,7 +569,7 @@ export const EmailEditor = ({
                       value={templateSenderName}
                       onChange={(e) => setTemplateSenderName(e.target.value)}
                       placeholder="Es: Maurizio"
-                      className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm text-slate-900 dark:text-white"
+                      className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-slate-900 dark:text-white"
                     />
                   </div>
                 </div>
@@ -586,7 +587,7 @@ export const EmailEditor = ({
                   <button
                     type="button"
                     onClick={handleInsertTemplate}
-                    className="cursor-pointer flex items-center gap-2 text-sm text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-md font-medium transition-colors"
+                    className="cursor-pointer flex items-center gap-2 text-sm text-white bg-primary-600 hover:bg-primary-700 px-3 py-1.5 rounded-md font-medium transition-colors"
                   >
                     <LayoutTemplate className="w-4 h-4" />
                     Inserisci
@@ -634,13 +635,13 @@ export const EmailEditor = ({
                   value={newSnippetLabel}
                   onChange={(e) => setNewSnippetLabel(e.target.value)}
                   placeholder="Nome breve (es: Preventivo in corso)"
-                  className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm text-slate-900 dark:text-white"
+                  className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-slate-900 dark:text-white"
                 />
                 <textarea
                   value={newSnippetText}
                   onChange={(e) => setNewSnippetText(e.target.value)}
                   placeholder="Testo da inserire nella bozza..."
-                  className="w-full h-20 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y text-sm text-slate-900 dark:text-white"
+                  className="w-full h-20 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none resize-y text-sm text-slate-900 dark:text-white"
                 />
                 <div className="flex justify-end gap-2">
                   <button
@@ -658,7 +659,7 @@ export const EmailEditor = ({
                     type="button"
                     onClick={handleAddCustomSnippet}
                     disabled={!newSnippetLabel.trim() || !newSnippetText.trim()}
-                    className="cursor-pointer flex items-center gap-2 text-sm text-white bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 px-3 py-1.5 rounded-md font-medium transition-colors disabled:cursor-not-allowed"
+                    className="cursor-pointer flex items-center gap-2 text-sm text-white bg-primary-600 hover:bg-primary-700 disabled:bg-slate-400 px-3 py-1.5 rounded-md font-medium transition-colors disabled:cursor-not-allowed"
                   >
                     <Plus className="w-4 h-4" />
                     Salva frase
@@ -673,13 +674,13 @@ export const EmailEditor = ({
                 disabled={isLoading}
                 onChange={(e) => onUpdate({ draft: e.target.value })}
                 placeholder="Scrivi qui la tua bozza di email, poi clicca su 'Raffina Email' e lascia fare all'AI."
-                className="w-full h-56 md:h-64 p-3 md:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y text-base md:text-lg text-slate-900 dark:text-white"
+                className="w-full h-56 md:h-64 p-3 md:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none resize-y text-base md:text-lg text-slate-900 dark:text-white"
               />
             </div>
             <div className="p-3 md:p-4 flex flex-wrap justify-center items-center w-full gap-2 md:gap-3">
               <button
                 type="button"
-                className="cursor-pointer bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 font-semibold text-xs md:text-base px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg flex shrink-0 whitespace-nowrap items-center justify-center gap-1.5 md:gap-2 transition-all border border-blue-200 dark:border-blue-700"
+                className="cursor-pointer bg-primary-100 dark:bg-primary-900/50 hover:bg-primary-200 dark:hover:bg-primary-800 text-primary-700 dark:text-primary-300 font-semibold text-xs md:text-base px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg flex shrink-0 whitespace-nowrap items-center justify-center gap-1.5 md:gap-2 transition-all border border-primary-200 dark:border-primary-700"
                 onClick={onContinueThread}
                 title="Aggiungi al contesto la bozza e continua il thread"
               >
@@ -688,7 +689,7 @@ export const EmailEditor = ({
               </button>
               <button
                 type="button"
-                className="cursor-pointer bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold text-xs md:text-base px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg flex shrink-0 whitespace-nowrap items-center justify-center gap-1.5 md:gap-2 transition-all disabled:cursor-not-allowed"
+                className="cursor-pointer bg-primary-600 hover:bg-primary-700 disabled:bg-slate-400 text-white font-bold text-xs md:text-base px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg flex shrink-0 whitespace-nowrap items-center justify-center gap-1.5 md:gap-2 transition-all disabled:cursor-not-allowed"
                 onClick={onRefine}
                 disabled={isLoading || !draft.draft}
                 title="Raffina la bozza con l'AI"
@@ -702,7 +703,7 @@ export const EmailEditor = ({
               </button>
               <button
                 type="button"
-                className="cursor-pointer bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 font-semibold text-xs md:text-base px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg flex shrink-0 whitespace-nowrap items-center justify-center gap-1.5 md:gap-2 transition-all border border-blue-200 dark:border-blue-700"
+                className="cursor-pointer bg-primary-100 dark:bg-primary-900/50 hover:bg-primary-200 dark:hover:bg-primary-800 text-primary-700 dark:text-primary-300 font-semibold text-xs md:text-base px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg flex shrink-0 whitespace-nowrap items-center justify-center gap-1.5 md:gap-2 transition-all border border-primary-200 dark:border-primary-700"
                 onClick={() => {
                   setSendSubject(draft.subject);
                   setSendBody(draft.result || draft.draft);
@@ -717,19 +718,19 @@ export const EmailEditor = ({
           </section>
 
           {!draft.draft.trim() && (
-            <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-dashed border-slate-300 dark:border-slate-600 overflow-hidden">
+            <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-dashed border-slate-300 dark:border-slate-600 overflow-hidden">
               <button
                 type="button"
                 onClick={() => setIsWriteOpen((prev) => !prev)}
                 aria-expanded={isWriteOpen}
-                className="cursor-pointer w-full p-3 md:p-4 flex items-center gap-2 text-sm md:text-base font-semibold text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                className="cursor-pointer w-full p-3 md:p-4 flex items-center gap-2 text-sm md:text-base font-semibold text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
               >
                 {isWriteOpen ? (
                   <ChevronUp className="w-4 h-4" />
                 ) : (
                   <ChevronDown className="w-4 h-4" />
                 )}
-                <PenLine className="w-4 h-4 text-blue-600" />
+                <PenLine className="w-4 h-4 text-primary-600" />
                 Non sai cosa rispondere? Fai scrivere l&apos;email all&apos;AI
               </button>
               {isWriteOpen && (
@@ -759,14 +760,14 @@ export const EmailEditor = ({
                     disabled={isLoading}
                     onChange={(e) => onUpdate({ writeInstructions: e.target.value })}
                     placeholder="Indica all'AI cosa scrivere (es: 'rifiuta gentilmente la proposta e proponi una call la prossima settimana')"
-                    className="w-full h-28 p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y text-sm md:text-base text-slate-900 dark:text-white disabled:opacity-60"
+                    className="w-full h-28 p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none resize-y text-sm md:text-base text-slate-900 dark:text-white disabled:opacity-60"
                   />
                   <div className="flex justify-end">
                     <button
                       type="button"
                       onClick={onWrite}
                       disabled={isLoading || !draft.writeInstructions?.trim()}
-                      className="cursor-pointer bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 disabled:opacity-60 disabled:cursor-not-allowed text-blue-700 dark:text-blue-300 font-semibold text-xs md:text-sm px-3 py-1.5 md:py-2 rounded-lg flex items-center gap-2 transition-all border border-blue-200 dark:border-blue-700"
+                      className="cursor-pointer bg-primary-100 dark:bg-primary-900/50 hover:bg-primary-200 dark:hover:bg-primary-800 disabled:opacity-60 disabled:cursor-not-allowed text-primary-700 dark:text-primary-300 font-semibold text-xs md:text-sm px-3 py-1.5 md:py-2 rounded-lg flex items-center gap-2 transition-all border border-primary-200 dark:border-primary-700"
                       title="Scrivi l'email da zero con l'AI, senza bozza"
                     >
                       {isWriting ? (
@@ -783,20 +784,22 @@ export const EmailEditor = ({
           )}
         </div>
 
+        {/* key: al cambio di bozza l'avviso si azzera, così non mostra dati di altre bozze */}
+        <PrivacyNotice key={draft.id} />
         {(draft.result || isLoading) && (
           <section
             ref={resultSectionRef}
-            className="bg-blue-50 dark:bg-blue-950/30 rounded-xl shadow-sm border-2 border-blue-500 dark:border-blue-600 p-3 md:p-6 space-y-4 animate-in fade-in zoom-in duration-300"
+            className="bg-primary-50 dark:bg-primary-950/30 rounded-2xl shadow-sm border-2 border-primary-500 dark:border-primary-600 p-3 md:p-6 space-y-4 animate-in fade-in zoom-in duration-300"
           >
             {isLoading ? (
               <div className="animate-pulse space-y-4">
-                <div className="h-7 w-48 bg-blue-200 dark:bg-blue-800 rounded"></div>
+                <div className="h-7 w-48 bg-primary-200 dark:bg-primary-800 rounded"></div>
                 <div className="h-40 bg-white/50 dark:bg-slate-900/50 rounded-lg"></div>
               </div>
             ) : (
               <>
                 <div className="flex items-center justify-between gap-2">
-                  <p className="font-bold md:text-lg text-sm text-blue-800 dark:text-blue-300 flex items-center gap-2">
+                  <p className="font-bold md:text-lg text-sm text-primary-800 dark:text-primary-300 flex items-center gap-2">
                     {draft.resultSource === 'write' ? (
                       <>
                         <PenLine className="w-5 h-5" /> Email scritta dall&apos;AI
@@ -819,7 +822,7 @@ export const EmailEditor = ({
                     <button
                       type="button"
                       onClick={onRegenerate}
-                      className="cursor-pointer flex items-center justify-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-blue-900/50 hover:bg-white dark:hover:bg-blue-800 p-2 custom-lg:px-3 custom-lg:py-1.5 rounded-md font-medium border border-blue-200 dark:border-blue-700 transition-colors"
+                      className="cursor-pointer flex items-center justify-center gap-2 text-sm text-primary-700 dark:text-primary-300 bg-white/50 dark:bg-primary-900/50 hover:bg-white dark:hover:bg-primary-800 p-2 custom-lg:px-3 custom-lg:py-1.5 rounded-md font-medium border border-primary-200 dark:border-primary-700 transition-colors"
                       title="Rigenera"
                     >
                       <RefreshCw className="w-4 h-4" />
@@ -827,21 +830,21 @@ export const EmailEditor = ({
                     <button
                       type="button"
                       onClick={onCopyResult}
-                      className="cursor-pointer flex items-center justify-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-blue-900/50 hover:bg-white dark:hover:bg-blue-800 p-2 custom-lg:px-3 custom-lg:py-1.5 rounded-md font-medium border border-blue-200 dark:border-blue-700 transition-colors"
+                      className="cursor-pointer flex items-center justify-center gap-2 text-sm text-primary-700 dark:text-primary-300 bg-white/50 dark:bg-primary-900/50 hover:bg-white dark:hover:bg-primary-800 p-2 custom-lg:px-3 custom-lg:py-1.5 rounded-md font-medium border border-primary-200 dark:border-primary-700 transition-colors"
                       title="Copia"
                     >
                       <Copy className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
-                <div className="p-3 md:p-5 wrap-break-word bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-800 rounded-lg whitespace-pre-wrap text-slate-800 dark:text-slate-200 shadow-inner">
+                <div className="p-3 md:p-5 wrap-break-word bg-white dark:bg-slate-900 border border-primary-200 dark:border-primary-800 rounded-lg whitespace-pre-wrap text-slate-800 dark:text-slate-200 shadow-inner">
                   {draft.result}
                 </div>
                 <div className="flex flex-wrap justify-center gap-2 md:gap-3">
                   <button
                     type="button"
                     onClick={() => setIsModifyFormOpen((prev) => !prev)}
-                    className="cursor-pointer flex items-center justify-center gap-2 text-sm text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 font-semibold px-4 py-2 rounded-lg transition-colors border border-blue-200 dark:border-blue-700"
+                    className="cursor-pointer flex items-center justify-center gap-2 text-sm text-primary-700 dark:text-primary-300 bg-primary-100 dark:bg-primary-900/50 hover:bg-primary-200 dark:hover:bg-primary-800 font-semibold px-4 py-2 rounded-lg transition-colors border border-primary-200 dark:border-primary-700"
                     title="Modifica o sostituisci la bozza dell'AI"
                   >
                     <Edit3 className="w-4 h-4" />
@@ -853,7 +856,7 @@ export const EmailEditor = ({
                       onUpdate({ draft: draft.result, result: '' });
                       setIsApprovalModalOpen(true);
                     }}
-                    className="cursor-pointer flex items-center justify-center gap-2 text-sm text-white bg-blue-600 hover:bg-blue-700 font-bold px-4 py-2 rounded-lg transition-colors"
+                    className="cursor-pointer flex items-center justify-center gap-2 text-sm text-white bg-primary-600 hover:bg-primary-700 font-bold px-4 py-2 rounded-lg transition-colors"
                     title="Sostituisci la tua bozza con la bozza dell'AI!"
                   >
                     <CheckCircle2 className="w-4 h-4" />
@@ -861,14 +864,14 @@ export const EmailEditor = ({
                   </button>
                 </div>
                 {isModifyFormOpen && (
-                  <div className="p-4 bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-800 rounded-lg space-y-3">
+                  <div className="p-4 bg-white dark:bg-slate-900 border border-primary-200 dark:border-primary-800 rounded-lg space-y-3">
                     <textarea
                       ref={modifyTextareaRef}
                       value={modifyInstructions}
                       onChange={(e) => setModifyInstructions(e.target.value)}
                       placeholder="Descrivi la modifica da applicare al testo (es: 'rendilo più breve', 'aggiungi un saluto finale'...)"
                       disabled={isModifying}
-                      className="w-full h-24 p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y text-sm text-slate-900 dark:text-white disabled:opacity-60"
+                      className="w-full h-24 p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none resize-y text-sm text-slate-900 dark:text-white disabled:opacity-60"
                     />
                     <div className="flex justify-end gap-2">
                       <button
@@ -889,7 +892,7 @@ export const EmailEditor = ({
                           onModifyResult(modifyInstructions);
                         }}
                         disabled={isModifying || !modifyInstructions.trim()}
-                        className="cursor-pointer flex items-center gap-2 text-sm text-white bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 px-3 py-1.5 rounded-md font-medium transition-colors disabled:cursor-not-allowed"
+                        className="cursor-pointer flex items-center gap-2 text-sm text-white bg-primary-600 hover:bg-primary-700 disabled:bg-slate-400 px-3 py-1.5 rounded-md font-medium transition-colors disabled:cursor-not-allowed"
                       >
                         {isModifying ? (
                           <RefreshCw className="w-4 h-4 animate-spin" />
@@ -915,7 +918,7 @@ export const EmailEditor = ({
             onClick={() => setIsSendFormOpen(false)}
           />
           <form
-            className="relative z-10 w-full max-w-2xl max-h-[90dvh] overflow-y-auto rounded-xl bg-white dark:bg-slate-800 shadow-2xl border border-slate-200 dark:border-slate-700 p-5 space-y-4"
+            className="relative z-10 w-full max-w-2xl max-h-[90dvh] overflow-y-auto rounded-2xl bg-white dark:bg-slate-800 shadow-2xl border border-slate-200 dark:border-slate-700 p-5 space-y-4"
             onSubmit={(event) => {
               event.preventDefault();
               handleSendEmail();
@@ -944,11 +947,11 @@ export const EmailEditor = ({
               >
                 A
               </label>
-              <div className="flex flex-wrap items-center gap-2 min-h-11 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus-within:ring-2 focus-within:ring-blue-500">
+              <div className="flex flex-wrap items-center gap-2 min-h-11 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus-within:ring-2 focus-within:ring-primary-500">
                 {toRecipients.map((recipient) => (
                   <span
                     key={recipient}
-                    className="flex items-center gap-1 rounded-md bg-blue-100 dark:bg-blue-900/50 px-2 py-1 text-sm text-blue-800 dark:text-blue-200"
+                    className="flex items-center gap-1 rounded-md bg-primary-100 dark:bg-primary-900/50 px-2 py-1 text-sm text-primary-800 dark:text-primary-200"
                   >
                     {recipient}
                     <button
@@ -956,7 +959,7 @@ export const EmailEditor = ({
                       onClick={() =>
                         setToRecipients(toRecipients.filter((item) => item !== recipient))
                       }
-                      className="cursor-pointer text-blue-500 hover:text-blue-800 dark:hover:text-blue-100"
+                      className="cursor-pointer text-primary-500 hover:text-primary-800 dark:hover:text-primary-100"
                       title={`Rimuovi ${recipient}`}
                     >
                       <X className="w-3 h-3" />
@@ -990,7 +993,7 @@ export const EmailEditor = ({
               >
                 CC
               </label>
-              <div className="flex flex-wrap items-center gap-2 min-h-11 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus-within:ring-2 focus-within:ring-blue-500">
+              <div className="flex flex-wrap items-center gap-2 min-h-11 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus-within:ring-2 focus-within:ring-primary-500">
                 {ccRecipients.map((recipient) => (
                   <span
                     key={recipient}
@@ -1043,7 +1046,7 @@ export const EmailEditor = ({
                   value={sendSubject}
                   onChange={(event) => setSendSubject(event.target.value)}
                   placeholder="Oggetto dell'email"
-                  className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-3 text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-3 text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
               <div>
@@ -1058,7 +1061,7 @@ export const EmailEditor = ({
                   value={sendBody}
                   onChange={(event) => setSendBody(event.target.value)}
                   placeholder="Contenuto dell'email"
-                  className="mt-1 h-40 w-full resize-y rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-3 text-sm text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-1 h-40 w-full resize-y rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-3 text-sm text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
             </div>
@@ -1073,7 +1076,7 @@ export const EmailEditor = ({
               </button>
               <button
                 type="submit"
-                className="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700"
+                className="cursor-pointer rounded-lg bg-primary-600 px-4 py-2 text-sm font-bold text-white hover:bg-primary-700"
               >
                 Apri client email
               </button>
@@ -1088,13 +1091,13 @@ export const EmailEditor = ({
           role="presentation"
         >
           <div
-            className="w-full max-w-md rounded-xl bg-white dark:bg-slate-800 border border-green-200 dark:border-green-900 shadow-2xl p-5 space-y-4"
+            className="w-full max-w-md rounded-2xl bg-white dark:bg-slate-800 border border-primary-200 dark:border-primary-900 shadow-2xl p-5 space-y-4"
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="approval-modal-title"
           >
             <div className="flex items-start gap-3">
-              <CheckCircle2 className="w-6 h-6 shrink-0 text-green-600 dark:text-green-400" />
+              <CheckCircle2 className="w-6 h-6 shrink-0 text-primary-600 dark:text-primary-400" />
               <div>
                 <h2
                   id="approval-modal-title"
@@ -1111,7 +1114,7 @@ export const EmailEditor = ({
               <button
                 type="button"
                 onClick={() => setIsApprovalModalOpen(false)}
-                className="cursor-pointer rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
+                className="cursor-pointer rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700"
               >
                 Chiudi
               </button>

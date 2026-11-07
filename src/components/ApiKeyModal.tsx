@@ -22,7 +22,7 @@ const ApiKeyModal = ({ isOpen, onSettings }: ApiKeyModalProps) => {
     >
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4 animate-in zoom-in-95 duration-200">
         <div className="flex items-center gap-3">
-          <div className="bg-blue-600 p-2 rounded-lg shrink-0">
+          <div className="bg-primary-600 p-2 rounded-lg shrink-0">
             <KeyRound className="w-5 h-5 text-white" />
           </div>
           <h2 id="api-key-modal-title" className="text-xl font-bold text-slate-900 dark:text-white">
@@ -36,7 +36,7 @@ const ApiKeyModal = ({ isOpen, onSettings }: ApiKeyModalProps) => {
         <button
           type="button"
           onClick={onSettings}
-          className="cursor-pointer w-full py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold text-sm transition-colors"
+          className="cursor-pointer w-full py-2.5 rounded-lg bg-primary-600 text-white hover:bg-primary-700 font-semibold text-sm transition-colors"
         >
           Vai alle Impostazioni
         </button>

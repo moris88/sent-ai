@@ -1,6 +1,7 @@
 import { ClipboardPaste, Download, Eye, EyeOff, X } from 'lucide-react';
 import React from 'react';
 import { getModels } from '../services/ai';
+import { ThemeSettings } from './ThemeSettings';
 
 export const SettingsModal = ({
   isOpen,
@@ -83,7 +84,7 @@ export const SettingsModal = ({
                 id="provider-ai"
                 value={provider}
                 onChange={(e) => setProvider(e.target.value)}
-                className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white"
               >
                 <option value="gemini">Google Gemini</option>
                 <option value="openai">OpenAI</option>
@@ -104,7 +105,7 @@ export const SettingsModal = ({
                   value={lmStudioUrl}
                   onChange={(e) => setLmStudioUrl(e.target.value)}
                   placeholder="http://localhost:1234/api/v1"
-                  className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                  className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white"
                 />
               </div>
             )}
@@ -122,7 +123,7 @@ export const SettingsModal = ({
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   placeholder="Incolla qui la tua API Key..."
-                  className="w-full p-3 pr-20 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                  className="w-full p-3 pr-20 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white"
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center space-x-1.5 text-slate-400">
                   <button
@@ -159,7 +160,7 @@ export const SettingsModal = ({
                 placeholder={
                   isLoadingModels ? 'Caricamento modelli...' : 'Scrivi o seleziona un modello'
                 }
-                className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white"
               />
               <datalist id="available-models">{options}</datalist>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -182,9 +183,10 @@ export const SettingsModal = ({
                 value={additionalPrompt}
                 onChange={(e) => setAdditionalPrompt(e.target.value)}
                 placeholder="Istruzioni aggiuntive per l'AI per la raffinazione del testo dell'email..."
-                className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 dark:text-white h-24"
+                className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white h-24"
               />
             </div>
+            <ThemeSettings />
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Le credenziali vengono salvate solo nel tuo browser/pc.
             </p>
@@ -193,19 +195,19 @@ export const SettingsModal = ({
                 href="https://github.com/moris88/sent-ai/releases"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center justify-between gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 hover:border-blue-500 transition-colors"
+                className="flex items-center justify-between gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 hover:border-primary-500 transition-colors"
               >
                 <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Versione desktop
                 </span>
-                <span className="flex items-center gap-1 text-sm font-semibold text-blue-600 dark:text-blue-400">
+                <span className="flex items-center gap-1 text-sm font-semibold text-primary-600 dark:text-primary-400">
                   <Download className="w-4 h-4" /> Scarica
                 </span>
               </a>
             )}
           </div>
           <button
-            className="cursor-pointer w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-800 transition-colors"
+            className="cursor-pointer w-full bg-primary-600 text-white font-bold py-3 rounded-lg hover:bg-primary-800 transition-colors"
             type="button"
             onClick={onSave}
           >
