@@ -61,7 +61,7 @@ export const SettingsModal = ({
   return (
     isOpen && (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4 animate-in zoom-in-95 duration-200">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-md w-full max-h-[90dvh] overflow-y-auto p-6 space-y-4 animate-in zoom-in-95 duration-200">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold dark:text-white">Impostazioni</h2>
             <button
@@ -216,7 +216,12 @@ export const SettingsModal = ({
           <footer className="mx-auto max-w-7xl px-4 py-2 text-center text-slate-400 text-sm sm:px-6 lg:px-8 dark:text-slate-500">
             <p>
               © 2026 SentAI - Powered by{' '}
-              <a href="https://www.mauriziotolomeo.it" target="_blank" rel="noreferrer">
+              <a
+                href="https://www.mauriziotolomeo.it"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-primary-600 hover:underline dark:text-primary-400"
+              >
                 Maurizio Tolomeo
               </a>
             </p>
