@@ -1,10 +1,10 @@
 import { Palette, RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 import {
-  DEFAULT_PRIMARY_COLOR,
-  PRIMARY_PRESETS,
   applyPrimaryColor,
+  DEFAULT_PRIMARY_COLOR,
   loadPrimaryColor,
+  PRIMARY_PRESETS,
   resetPrimaryColor,
   savePrimaryColor,
 } from '../utils/theme';

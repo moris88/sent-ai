@@ -32,7 +32,7 @@ export const useAppHooks = () => {
         result: '',
         subject: '',
         persona: 'dev',
-        tone: 'formal',
+        tone: 'friendly',
         detail: 'balanced',
         language: 'it',
         structure: 'paragraphs',

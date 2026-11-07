@@ -3,8 +3,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ApiKeyModal from './components/ApiKeyModal';
 import { DeleteConfirmationModal } from './components/DeleteConfirmationModal';
 import { DesktopAppToast } from './components/DesktopAppToast';
-import { EmptyState } from './components/EmptyState';
 import { EmailEditor } from './components/EmailEditor';
+import { EmptyState } from './components/EmptyState';
 import { ErrorModal } from './components/ErrorModal';
 import { Header } from './components/Header';
 import LocalStorageLimitModal from './components/LocalStorageLimitModal';
@@ -14,12 +14,14 @@ import { Sidebar } from './components/Sidebar';
 import { SidebarControls } from './components/SidebarControls';
 import { ThreadModal } from './components/ThreadModal';
 import { useAppHooks } from './hooks/useAppHooks';
+import { useDraftHistory } from './hooks/useDraftHistory';
 import { useEmailLogic } from './hooks/useEmailLogic';
 import type { EmailDraft } from './types';
 import { getLocalStorageSize, isLocalStorageApproachingLimit } from './utils/storage';
 
 export default function App() {
   const { drafts, updateDraft, createDraft, deleteDraft, loading } = useAppHooks();
+  const { updateWithHistory, undo, canUndo } = useDraftHistory(drafts, updateDraft);
   const [activeId, setActiveId] = useState<string>(drafts[0]?.id || '1');
   const [isSidebarOpen, setIsSidebarOpen] = useState(
     () => window.matchMedia('(min-width: 1024px)').matches
@@ -102,7 +104,7 @@ export default function App() {
       result: '',
       subject: '',
       persona: 'dev',
-      tone: 'formal',
+      tone: 'friendly',
       detail: 'balanced',
       keywords: '',
       generateSubject: false,
@@ -124,7 +126,7 @@ export default function App() {
     pasteFromClipboard,
   } = useEmailLogic(
     activeDraft,
-    (updates) => updateDraft(activeId, updates),
+    (updates) => updateWithHistory(activeId, updates),
     setIsSettingsOpen,
     handleAiError
   );
@@ -152,7 +154,7 @@ export default function App() {
     // Usa il risultato raffinato se presente, altrimenti la bozza scritta manualmente, per non perdere il testo
     const previousEmail = activeDraft.result || activeDraft.draft;
     const newContext = `${activeDraft.context}\n\n[Email Precedente]:\n${previousEmail}\n\n[Risposta Cliente - ${timestamp}]:\n${clientReply}`;
-    updateDraft(activeId, { context: newContext, draft: '', result: '' });
+    updateWithHistory(activeId, { context: newContext, draft: '', result: '' });
     setClientReply('');
     setThreadModalOpen(false);
   };
@@ -202,13 +204,15 @@ export default function App() {
               isGeneratingSubject={isGeneratingSubject}
               isModifying={isModifying}
               isWriting={isWriting}
-              onUpdate={(u) => updateDraft(activeId, u)}
+              onUpdate={(u) => updateWithHistory(activeId, u)}
               onRefine={() => checkApiKey() && handleRefine()}
               onWrite={() => checkApiKey() && handleWrite()}
               onPaste={pasteFromClipboard}
               onContinueThread={() => setThreadModalOpen(true)}
               onCopyResult={copyToClipboard}
-              onDiscard={() => updateDraft(activeId, { result: '' })}
+              onDiscard={() => updateWithHistory(activeId, { result: '' })}
+              onUndo={() => undo(activeId)}
+              canUndo={canUndo(activeId)}
               onRegenerate={() => checkApiKey() && handleRegenerate()}
               onGenerateSubject={() => checkApiKey() && handleGenerateSubject()}
               onCopySubject={copySubjectToClipboard}

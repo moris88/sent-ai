@@ -21,9 +21,12 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { generateTitle } from '../services/ai';
-import { PrivacyNotice } from './PrivacyNotice';
 import type { EmailDraft } from '../types';
+import { markdownToPlainText } from '../utils/markdown';
 import { extractTextFromPDF } from '../utils/pdf';
+import { MarkdownContent } from './MarkdownContent';
+import { MarkdownEditor } from './MarkdownEditor';
+import { PrivacyNotice } from './PrivacyNotice';
 
 type Snippet = { id: string; label: string; text: string };
 
@@ -52,6 +55,8 @@ interface EditorProps {
   onPaste: (target: 'context' | 'draft') => void;
   onContinueThread: () => void;
   onCopyResult: () => void;
+  onUndo: () => void;
+  canUndo: boolean;
   onDiscard: () => void;
   onRegenerate: () => void;
   onGenerateSubject: () => void;
@@ -73,6 +78,8 @@ export const EmailEditor = ({
   onPaste,
   onContinueThread,
   onCopyResult,
+  onUndo,
+  canUndo,
   onDiscard,
   onRegenerate,
   onGenerateSubject,
@@ -199,7 +206,8 @@ export const EmailEditor = ({
       ...ccRecipients,
       ...pendingCc.filter((recipient) => !ccRecipients.includes(recipient)),
     ];
-    const emailBody = sendBody;
+    // mailto supporta solo testo semplice: il Markdown viene ripulito dai simboli.
+    const emailBody = markdownToPlainText(sendBody);
 
     if (emailBody.trim() === '') {
       alert("Il contenuto dell'email non può essere vuoto.");
@@ -668,13 +676,14 @@ export const EmailEditor = ({
               </div>
             )}
             <div className="p-3 md:p-4">
-              <textarea
-                ref={draftTextareaRef}
+              <MarkdownEditor
+                textareaRef={draftTextareaRef}
                 value={draft.draft}
                 disabled={isLoading}
-                onChange={(e) => onUpdate({ draft: e.target.value })}
+                onChange={(value) => onUpdate({ draft: value })}
+                onUndo={onUndo}
+                canUndo={canUndo}
                 placeholder="Scrivi qui la tua bozza di email, poi clicca su 'Raffina Email' e lascia fare all'AI."
-                className="w-full h-56 md:h-64 p-3 md:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none resize-y text-base md:text-lg text-slate-900 dark:text-white"
               />
             </div>
             <div className="p-3 md:p-4 flex flex-wrap justify-center items-center w-full gap-2 md:gap-3">
@@ -731,7 +740,7 @@ export const EmailEditor = ({
                   <ChevronDown className="w-4 h-4" />
                 )}
                 <PenLine className="w-4 h-4 text-primary-600" />
-                Non sai cosa rispondere? Fai scrivere l&apos;email all&apos;AI
+                Non sai cosa rispondere/inviare? Fai scrivere l&apos;email all&apos;AI
               </button>
               {isWriteOpen && (
                 <div className="px-3 pb-3 md:px-4 md:pb-4 space-y-3">
@@ -837,8 +846,8 @@ export const EmailEditor = ({
                     </button>
                   </div>
                 </div>
-                <div className="p-3 md:p-5 wrap-break-word bg-white dark:bg-slate-900 border border-primary-200 dark:border-primary-800 rounded-lg whitespace-pre-wrap text-slate-800 dark:text-slate-200 shadow-inner">
-                  {draft.result}
+                <div className="p-3 md:p-5 bg-white dark:bg-slate-900 border border-primary-200 dark:border-primary-800 rounded-lg shadow-inner">
+                  <MarkdownContent>{draft.result}</MarkdownContent>
                 </div>
                 <div className="flex flex-wrap justify-center gap-2 md:gap-3">
                   <button

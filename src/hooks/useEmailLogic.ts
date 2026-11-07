@@ -7,6 +7,7 @@ import {
   writeEmail,
 } from '../services/ai';
 import type { EmailDraft } from '../types';
+import { markdownToHtml, markdownToPlainText } from '../utils/markdown';
 
 export const useEmailLogic = (
   activeDraft: EmailDraft,
@@ -170,8 +171,19 @@ export const useEmailLogic = (
     }
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(activeDraft.result);
+  // Copia HTML formattato e testo semplice: incollando in un client di posta mantieni grassetto ed elenchi.
+  const copyToClipboard = async () => {
+    const markdown = activeDraft.result;
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/html': new Blob([markdownToHtml(markdown)], { type: 'text/html' }),
+          'text/plain': new Blob([markdownToPlainText(markdown)], { type: 'text/plain' }),
+        }),
+      ]);
+    } catch {
+      await navigator.clipboard.writeText(markdownToPlainText(markdown));
+    }
     alert('Email copiata negli appunti!');
   };
 

@@ -87,7 +87,9 @@ export const savePrimaryColor = (hex: string): void => {
 // Ripristina il colore di default rimuovendo sia le variabili sia la preferenza salvata.
 export const resetPrimaryColor = (): void => {
   const root = document.documentElement;
-  SHADES.forEach((shade) => root.style.removeProperty(`--color-primary-${shade}`));
+  SHADES.forEach((shade) => {
+    root.style.removeProperty(`--color-primary-${shade}`);
+  });
   try {
     localStorage.removeItem(STORAGE_KEY);
   } catch {

@@ -2,8 +2,16 @@ import { Mail, PenLine, Plus, ShieldCheck, Sparkles } from 'lucide-react';
 
 const HIGHLIGHTS = [
   { icon: Sparkles, title: 'Raffina', text: 'Migliora tono e struttura di una bozza esistente.' },
-  { icon: PenLine, title: 'Scrivi da zero', text: 'Parti dal contesto e lascia che l’AI scriva la risposta.' },
-  { icon: ShieldCheck, title: 'Dati protetti', text: 'Dati personali e sensibili vengono oscurati prima dell’invio.' },
+  {
+    icon: PenLine,
+    title: 'Scrivi da zero',
+    text: 'Parti dal contesto e lascia che l’AI scriva la risposta.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Dati protetti',
+    text: 'Dati personali e sensibili vengono oscurati prima dell’invio.',
+  },
 ];
 
 interface EmptyStateProps {
@@ -45,10 +53,15 @@ export const EmptyState = ({ onCreate }: EmptyStateProps) => {
               className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60"
             >
               <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/50">
-                <Icon className="h-4 w-4 text-primary-700 dark:text-primary-300" aria-hidden="true" />
+                <Icon
+                  className="h-4 w-4 text-primary-700 dark:text-primary-300"
+                  aria-hidden="true"
+                />
               </div>
               <p className="text-sm font-semibold text-slate-900 dark:text-white">{title}</p>
-              <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{text}</p>
+              <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                {text}
+              </p>
             </li>
           ))}
         </ul>

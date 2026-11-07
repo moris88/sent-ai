@@ -53,16 +53,16 @@ export const PERSONAS = [
 
 export const TONES = [
   {
-    id: 'formal',
-    label: 'Formale',
-    icon: '👔',
-    description: "L'ai userà un tono formale",
-  },
-  {
     id: 'friendly',
     label: 'Amichevole',
     icon: '😊',
     description: "L'ai userà un tono amichevole",
+  },
+  {
+    id: 'formal',
+    label: 'Formale',
+    icon: '👔',
+    description: "L'ai userà un tono formale",
   },
   {
     id: 'technical',

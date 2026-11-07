@@ -7,6 +7,10 @@ export type Provider = 'gemini' | 'openai' | 'lmstudio';
 // Applicata solo ai provider che la supportano: i modelli di ragionamento OpenAI la rifiutano.
 const DEFAULT_TEMPERATURE = 1;
 
+// Il modello risponde in Markdown: l'app lo mostra formattato e lo converte per copia e invio.
+const MARKDOWN_OUTPUT_RULE =
+  'Format the email as Markdown: use **bold** for emphasis where useful, "-" bullet lists and numbered lists when they help, and plain paragraphs otherwise. Do not wrap the output in a code block.';
+
 const getLmStudioBaseUrl = (baseUrl?: string) => {
   let url = (
     baseUrl ||
@@ -126,6 +130,7 @@ const refineEmailImpl = async (options: RefineOptions): Promise<string> => {
   <draft>${opts.draft}</draft>
   ${opts.prompt ? `<additional_prompt>${opts.prompt}</additional_prompt>` : ''}
 
+  ${MARKDOWN_OUTPUT_RULE}
   Write ONLY the email text in ${opts.language}.`;
 
   if (provider === 'openai') {
@@ -210,6 +215,7 @@ const writeEmailImpl = async (options: WriteEmailOptions): Promise<string> => {
   <instructions>${opts.instructions}</instructions>
   ${opts.prompt ? `<additional_prompt>${opts.prompt}</additional_prompt>` : ''}
 
+  ${MARKDOWN_OUTPUT_RULE}
   Write ONLY the email text in ${opts.language}.`;
 
   return completePrompt(
@@ -435,7 +441,7 @@ const reviseEmailImpl = async (options: ReviseEmailOptions): Promise<string> => 
   const prompt = `
   You are an AI assistant specialized in editing professional emails.
   Modify the following email applying ONLY the requested changes, keeping the rest of the meaning and structure intact unless the changes require otherwise.
-  Write ONLY the updated email text in ${language}, without explanations, notes or additional formatting.
+  Write ONLY the updated email text in ${language}, without explanations or notes. ${MARKDOWN_OUTPUT_RULE}
 
   <email>${result}</email>
   <requested_changes>${instructions}</requested_changes>

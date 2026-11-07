@@ -50,22 +50,22 @@ export const PrivacyNotice = () => {
           Prima dell'invio, l'app sostituisce i dati personali e sensibili con segnaposto come
           [EMAIL_1]. Il provider AI riceve solo i segnaposto, mai i valori originali. Quando arriva
           la risposta, l'app riporta i valori originali nel risultato, sul tuo dispositivo. Il testo
-          qui sotto è quello inviato, cioè con i segnaposto. Nomi di persona e dati non riconoscibili
-          dalle regole non vengono oscurati.
+          qui sotto è quello inviato, cioè con i segnaposto. Nomi di persona e dati non
+          riconoscibili dalle regole non vengono oscurati.
         </p>
         <div className="space-y-2">
           {event.sentFields
             .filter(({ text }) => text.trim() !== '')
             .map(({ field, text }) => (
-            <div key={field}>
-              <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                {FIELD_LABELS[field] ?? field} inviato all'AI:
-              </p>
-              <pre className="max-h-40 overflow-y-auto whitespace-pre-wrap break-words text-xs p-2 rounded-md bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
-                {text}
-              </pre>
-            </div>
-          ))}
+              <div key={field}>
+                <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  {FIELD_LABELS[field] ?? field} inviato all'AI:
+                </p>
+                <pre className="max-h-40 overflow-y-auto whitespace-pre-wrap break-words text-xs p-2 rounded-md bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+                  {text}
+                </pre>
+              </div>
+            ))}
         </div>
       </div>
       <button
