@@ -5,9 +5,7 @@ export const ThreadModal = ({ isOpen, onClose, onConfirm, value, onChange, onPas
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-lg w-full p-6 space-y-4 animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-            Aggiungi Contesto
-          </h2>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Aggiungi Contesto</h2>
           <button
             type="button"
             onClick={() => onPaste('context')}

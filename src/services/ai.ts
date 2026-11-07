@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import OpenAI from 'openai';
-import { createPrivacySession, notifyRedactions, withPrivacy } from '../utils/redact';
 import { LANGUAGES } from '../types';
+import { createPrivacySession, notifyRedactions, withPrivacy } from '../utils/redact';
 
 export type Provider = 'gemini' | 'openai' | 'lmstudio';
 
@@ -310,10 +310,13 @@ export async function getModels(
   if (provider === 'openai') {
     const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
     // La lista OpenAI non indica le capacità: escludiamo per nome le famiglie non testuali.
-    const NON_CHAT_OPENAI_MODEL = /embedding|whisper|tts|dall-e|moderation|transcribe|image|davinci|babbage|realtime/i;
+    const NON_CHAT_OPENAI_MODEL =
+      /embedding|whisper|tts|dall-e|moderation|transcribe|image|davinci|babbage|realtime/i;
     return openai.models
       .list()
-      .then((res) => res.data.map((model) => model.id).filter((id) => !NON_CHAT_OPENAI_MODEL.test(id)));
+      .then((res) =>
+        res.data.map((model) => model.id).filter((id) => !NON_CHAT_OPENAI_MODEL.test(id))
+      );
   }
 
   let OriginalModels: any = {};
@@ -521,7 +524,11 @@ export const generateTitle = async (
 };
 
 // Chiamata di prova minima per capire se un modello risponde con la chiave inserita.
-export const verifyModel = async (provider: Provider, apiKey: string, model: string): Promise<string> => {
+export const verifyModel = async (
+  provider: Provider,
+  apiKey: string,
+  model: string
+): Promise<string> => {
   const reply = await completePrompt(provider, apiKey, model, 'Rispondi solo con la parola: ok');
   if (!reply) throw new Error('Il modello non ha restituito alcuna risposta.');
   return reply;
@@ -553,7 +560,13 @@ const reviewDraftImpl = async (options: ReviewDraftOptions): Promise<string> => 
   <subject>${opts.subject || 'No subject.'}</subject>
   <context>${opts.context || 'No context provided.'}</context>
   <draft>${opts.draft}</draft>`;
-  return completePrompt(provider, apiKey, model, prompt, 'You review email drafts and reply in Markdown.');
+  return completePrompt(
+    provider,
+    apiKey,
+    model,
+    prompt,
+    'You review email drafts and reply in Markdown.'
+  );
 };
 
 export const reviewDraft = withPrivacy(reviewDraftImpl);

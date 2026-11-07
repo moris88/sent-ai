@@ -7,7 +7,8 @@ export type CheckIssue = { id: string; severity: CheckSeverity; message: string 
 const FORBIDDEN_TERMS_KEY = 'sentai_forbidden_terms';
 const SUBJECT_MAX_LENGTH = 70;
 const GREETING = /^(gentile|buongiorno|buonasera|ciao|salve|hi|hello|dear)\b/i;
-const CLOSING = /(cordiali saluti|distinti saluti|un saluto|saluti|grazie|a presto|buona giornata|buon lavoro|best regards|kind regards|regards|thanks)/i;
+const CLOSING =
+  /(cordiali saluti|distinti saluti|un saluto|saluti|grazie|a presto|buona giornata|buon lavoro|best regards|kind regards|regards|thanks)/i;
 
 const SENSITIVE_LABELS: Record<string, string> = {
   EMAIL: 'email',
@@ -82,7 +83,11 @@ export const runLocalChecks = (draft: { subject: string; draft: string }): Check
       message: `L'oggetto è lungo ${subject.length} caratteri: meglio restare sotto i ${SUBJECT_MAX_LENGTH}.`,
     });
   } else if (isMostlyUppercase(subject)) {
-    issues.push({ id: 'subject-uppercase', severity: 'warning', message: "L'oggetto ha troppe maiuscole." });
+    issues.push({
+      id: 'subject-uppercase',
+      severity: 'warning',
+      message: "L'oggetto ha troppe maiuscole.",
+    });
   }
 
   // Struttura
@@ -94,7 +99,11 @@ export const runLocalChecks = (draft: { subject: string; draft: string }): Check
     }
     const lines = body.split('\n').filter((line) => line.trim() !== '');
     if (!GREETING.test(lines[0] ?? '')) {
-      issues.push({ id: 'greeting-missing', severity: 'warning', message: 'Manca un saluto iniziale.' });
+      issues.push({
+        id: 'greeting-missing',
+        severity: 'warning',
+        message: 'Manca un saluto iniziale.',
+      });
     }
     if (!CLOSING.test(lines.slice(-3).join(' '))) {
       issues.push({
@@ -107,10 +116,18 @@ export const runLocalChecks = (draft: { subject: string; draft: string }): Check
 
   // Stile
   if ((body.match(/!/g) ?? []).length >= 3) {
-    issues.push({ id: 'exclamations', severity: 'warning', message: 'Ci sono molti punti esclamativi.' });
+    issues.push({
+      id: 'exclamations',
+      severity: 'warning',
+      message: 'Ci sono molti punti esclamativi.',
+    });
   }
   if ((body.match(/\b[A-ZÀ-Ý]{4,}\b/g) ?? []).length >= 3) {
-    issues.push({ id: 'shouting', severity: 'warning', message: 'Ci sono molte parole in maiuscolo.' });
+    issues.push({
+      id: 'shouting',
+      severity: 'warning',
+      message: 'Ci sono molte parole in maiuscolo.',
+    });
   }
   const longSentences = body
     .split(/[.!?]+\s/)
