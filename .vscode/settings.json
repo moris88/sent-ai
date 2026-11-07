@@ -4,7 +4,7 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.biome": "always",
     "source.organizeImports.biome": "always",
-    "source.suppressRule.topLevel.biome": "never",
+    "source.suppressRule.topLevel.biome": "never"
   },
   "github.copilot.chat.commitMessageGeneration.instructions": [
     {

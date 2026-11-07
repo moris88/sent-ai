@@ -3,11 +3,11 @@ name: CI
 on:
   pull_request:
     branches:
-      - '**'
+      - "**"
     types: [opened, synchronize, reopened]
   push:
     branches:
-      - 'main'
+      - "main"
 permissions: {}
 
 jobs:
@@ -20,8 +20,8 @@ jobs:
           version: 11
       - uses: actions/setup-node@v6
         with:
-          node-version: '24'
-          cache: 'pnpm'
+          node-version: "24"
+          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Lint

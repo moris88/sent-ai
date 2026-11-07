@@ -1,7 +1,2 @@
 allowBuilds:
-  electron: true
   electron-winstaller: true
-  esbuild: true
-minimumReleaseAgeExclude:
-  - lucide-react@1.62.0
-  - openai@7.45.0
