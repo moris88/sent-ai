@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ApiKeyModal from './components/ApiKeyModal';
 import { DeleteConfirmationModal } from './components/DeleteConfirmationModal';
 import { DesktopAppToast } from './components/DesktopAppToast';
+import { EmptyState } from './components/EmptyState';
 import { EmailEditor } from './components/EmailEditor';
 import { ErrorModal } from './components/ErrorModal';
 import { Header } from './components/Header';
@@ -133,17 +134,7 @@ export default function App() {
   }
 
   if (!drafts.length) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <button
-          type="button"
-          onClick={() => setActiveId(createDraft())}
-          className="bg-primary-600 text-white px-4 py-2 rounded"
-        >
-          Crea prima bozza
-        </button>
-      </div>
-    );
+    return <EmptyState onCreate={() => setActiveId(createDraft())} />;
   }
 
   const saveSettings = () => {
