@@ -304,7 +304,11 @@ export async function getModels(
 
   if (provider === 'openai') {
     const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
-    return openai.models.list().then((res) => res.data.map((model) => model.id));
+    // La lista OpenAI non indica le capacità: escludiamo per nome le famiglie non testuali.
+    const NON_CHAT_OPENAI_MODEL = /embedding|whisper|tts|dall-e|moderation|transcribe|image|davinci|babbage|realtime/i;
+    return openai.models
+      .list()
+      .then((res) => res.data.map((model) => model.id).filter((id) => !NON_CHAT_OPENAI_MODEL.test(id)));
   }
 
   let OriginalModels: any = {};
@@ -326,9 +330,14 @@ export async function getModels(
       OriginalModels = data;
       // get the name only list
 
-      OriginalModels.models.forEach((model: { name: string }) => {
-        nameOnlyList.push(model.name);
-      });
+      // Solo i modelli che generano testo: esclude embedding, audio e immagini.
+      OriginalModels.models.forEach(
+        (model: { name: string; supportedGenerationMethods?: string[] }) => {
+          if (model.supportedGenerationMethods?.includes('generateContent')) {
+            nameOnlyList.push(model.name);
+          }
+        }
+      );
 
       // get the real model name
 
@@ -504,4 +513,11 @@ export const generateTitle = async (
   });
   const title = await generateTitleImpl(redactedContext, redactedDraft, provider, apiKey, model);
   return session.restore(title);
+};
+
+// Chiamata di prova minima per capire se un modello risponde con la chiave inserita.
+export const verifyModel = async (provider: Provider, apiKey: string, model: string): Promise<string> => {
+  const reply = await completePrompt(provider, apiKey, model, 'Rispondi solo con la parola: ok');
+  if (!reply) throw new Error('Il modello non ha restituito alcuna risposta.');
+  return reply;
 };

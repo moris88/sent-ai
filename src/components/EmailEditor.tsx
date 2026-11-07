@@ -734,6 +734,16 @@ export const EmailEditor = ({
               </button>
               <button
                 type="button"
+                onClick={() => setPlaceholderResult(findPlaceholders(draft.draft))}
+                disabled={!draft.draft || isLoading}
+                title="Controlla se nella bozza ci sono segnaposto da compilare"
+                className="cursor-pointer bg-primary-100 dark:bg-primary-900/50 hover:bg-primary-200 dark:hover:bg-primary-800 text-primary-700 dark:text-primary-300 font-semibold text-xs md:text-base px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg flex shrink-0 whitespace-nowrap items-center justify-center gap-1.5 md:gap-2 transition-all border border-primary-200 dark:border-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Search className="w-4 h-4 md:w-5 md:h-5" />
+                Check Bozza
+              </button>
+              <button
+                type="button"
                 className="cursor-pointer bg-primary-600 hover:bg-primary-700 disabled:bg-slate-400 text-white font-bold text-xs md:text-base px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg flex shrink-0 whitespace-nowrap items-center justify-center gap-1.5 md:gap-2 transition-all disabled:cursor-not-allowed"
                 onClick={onRefine}
                 disabled={isLoading || !draft.draft}
@@ -744,17 +754,7 @@ export const EmailEditor = ({
                 ) : (
                   <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
                 )}
-                {isLoading && !isWriting ? 'Raffinando...' : 'Raffina Email'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setPlaceholderResult(findPlaceholders(draft.draft))}
-                disabled={!draft.draft || isLoading}
-                title="Controlla se nella bozza ci sono segnaposto da compilare"
-                className="cursor-pointer bg-primary-100 dark:bg-primary-900/50 hover:bg-primary-200 dark:hover:bg-primary-800 text-primary-700 dark:text-primary-300 font-semibold text-xs md:text-base px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg flex shrink-0 whitespace-nowrap items-center justify-center gap-1.5 md:gap-2 transition-all border border-primary-200 dark:border-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Search className="w-4 h-4 md:w-5 md:h-5" />
-                Check email
+                {isLoading && !isWriting ? 'Raffinando...' : 'Raffina Bozza'}
               </button>
               <button
                 type="button"

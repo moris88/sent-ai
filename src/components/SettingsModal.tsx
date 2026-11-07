@@ -1,6 +1,6 @@
 import { ClipboardPaste, Download, Eye, EyeOff, X } from 'lucide-react';
 import React from 'react';
-import { getModels } from '../services/ai';
+import { getModels, verifyModel } from '../services/ai';
 import { ThemeSettings } from './ThemeSettings';
 
 export const SettingsModal = ({
@@ -55,6 +55,29 @@ export const SettingsModal = ({
       {model}
     </option>
   ));
+
+  const [verifyState, setVerifyState] = React.useState<{
+    status: 'idle' | 'loading' | 'ok' | 'error';
+    message: string;
+  }>({ status: 'idle', message: '' });
+
+  // Il risultato della verifica vale solo per modello, provider e chiave correnti.
+  React.useEffect(() => {
+    setVerifyState({ status: 'idle', message: '' });
+  }, [provider, modelName, apiKey]);
+
+  const handleVerify = async () => {
+    setVerifyState({ status: 'loading', message: '' });
+    try {
+      await verifyModel(provider, apiKey, modelName);
+      setVerifyState({ status: 'ok', message: 'Il modello risponde correttamente.' });
+    } catch (error) {
+      setVerifyState({
+        status: 'error',
+        message: error instanceof Error ? error.message : 'Il modello non risponde.',
+      });
+    }
+  };
 
   const requiresApiKey = provider !== 'lmstudio';
 
@@ -163,6 +186,30 @@ export const SettingsModal = ({
                 className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white"
               />
               <datalist id="available-models">{options}</datalist>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleVerify}
+                  disabled={
+                    !modelName.trim() ||
+                    verifyState.status === 'loading' ||
+                    (requiresApiKey && !apiKey.trim())
+                  }
+                  className="cursor-pointer rounded-lg border border-primary-200 bg-primary-100 px-3 py-1.5 text-xs font-semibold text-primary-700 hover:bg-primary-200 disabled:cursor-not-allowed disabled:opacity-50 dark:border-primary-700 dark:bg-primary-900/50 dark:text-primary-300 dark:hover:bg-primary-800"
+                >
+                  {verifyState.status === 'loading' ? 'Verifica in corso...' : 'Verifica modello'}
+                </button>
+                {verifyState.status === 'ok' && (
+                  <span className="text-xs font-semibold text-green-700 dark:text-green-400">
+                    {verifyState.message}
+                  </span>
+                )}
+                {verifyState.status === 'error' && (
+                  <span className="text-xs font-semibold text-red-700 dark:text-red-400">
+                    {verifyState.message}
+                  </span>
+                )}
+              </div>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 {provider === 'lmstudio'
                   ? 'Inserisci manualmente il nome del modello caricato su LM Studio (es. google/gemma-4-e4b).'
