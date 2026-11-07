@@ -135,10 +135,6 @@ export default function App() {
     return <div className="flex h-screen items-center justify-center">Caricamento...</div>;
   }
 
-  if (!drafts.length) {
-    return <EmptyState onCreate={() => setActiveId(createDraft())} />;
-  }
-
   const saveSettings = () => {
     localStorage.setItem('sentai_provider', provider);
     localStorage.setItem('sentai_api_key', apiKey);
@@ -161,6 +157,38 @@ export default function App() {
 
   // Finché l'AI sta lavorando sulla bozza attiva, non si può cambiare bozza né crearne una nuova.
   const isBusy = isLoading || isGeneratingSubject || isModifying || isWriting;
+
+  const settingsModal = (
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          apiKey={apiKey}
+          setApiKey={setApiKey}
+          modelName={modelName}
+          setModelName={setModelName}
+          onSave={saveSettings}
+          setProvider={setProvider}
+          provider={provider}
+          lmStudioUrl={lmStudioUrl}
+          setLmStudioUrl={setLmStudioUrl}
+          onAiError={handleAiError}
+          additionalPrompt={additionalPrompt}
+          setAdditionalPrompt={setAdditionalPrompt}
+        />
+  );
+
+  // Senza bozze l'app mostra la schermata iniziale, ma le impostazioni restano disponibili.
+  if (!drafts.length) {
+    return (
+      <>
+        <EmptyState
+          onCreate={() => setActiveId(createDraft())}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+        />
+        {settingsModal}
+      </>
+    );
+  }
 
   return (
     <div className="flex h-dvh bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans overflow-hidden">
@@ -242,22 +270,7 @@ export default function App() {
         isOpen={!isAiConfigured && !isSettingsOpen}
         onSettings={() => setIsSettingsOpen(true)}
       />
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        apiKey={apiKey}
-        setApiKey={setApiKey}
-        modelName={modelName}
-        setModelName={setModelName}
-        onSave={saveSettings}
-        setProvider={setProvider}
-        provider={provider}
-        lmStudioUrl={lmStudioUrl}
-        setLmStudioUrl={setLmStudioUrl}
-        onAiError={handleAiError}
-        additionalPrompt={additionalPrompt}
-        setAdditionalPrompt={setAdditionalPrompt}
-      />
+      {settingsModal}
       <ErrorModal message={aiError} onClose={() => setAiError(null)} />
       <DeleteConfirmationModal
         isOpen={!!deleteConfirmation}

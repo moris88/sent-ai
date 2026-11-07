@@ -1,5 +1,6 @@
 import {
   Check,
+  Search,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
@@ -23,6 +24,7 @@ import { useEffect, useRef, useState } from 'react';
 import { generateTitle } from '../services/ai';
 import type { EmailDraft } from '../types';
 import { markdownToPlainText } from '../utils/markdown';
+import { findPlaceholders } from '../utils/placeholders';
 import { extractTextFromPDF } from '../utils/pdf';
 import { MarkdownContent } from './MarkdownContent';
 import { MarkdownEditor } from './MarkdownEditor';
@@ -95,6 +97,8 @@ export const EmailEditor = ({
   const [isWriteOpen, setIsWriteOpen] = useState(false);
   const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
   const [isModifyFormOpen, setIsModifyFormOpen] = useState(false);
+  // Risultato del controllo segnaposto: null finché non viene eseguito sulla bozza corrente.
+  const [placeholderResult, setPlaceholderResult] = useState<string[] | null>(null);
   const [modifyInstructions, setModifyInstructions] = useState('');
   const wasModifyingRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -226,6 +230,11 @@ export const EmailEditor = ({
     window.location.href = `mailto:${allTo.join(',')}?${params.toString()}`;
     setIsSendFormOpen(false);
   };
+
+  // Il risultato del controllo vale solo per il testo attuale: si azzera al cambio di bozza o di testo.
+  useEffect(() => {
+    setPlaceholderResult(null);
+  }, [draft.id, draft.draft]);
 
   useEffect(() => {
     console.debug('[EmailEditor] Risultato Raffinato:', {
@@ -686,6 +695,35 @@ export const EmailEditor = ({
                 placeholder="Scrivi qui la tua bozza di email, poi clicca su 'Raffina Email' e lascia fare all'AI."
               />
             </div>
+            {placeholderResult && (
+              <div
+                role="status"
+                className="mx-3 md:mx-4 mb-3 rounded-lg border p-3 text-sm"
+              >
+                {placeholderResult.length === 0 ? (
+                  <p className="flex items-center gap-2 font-semibold text-green-700 dark:text-green-400">
+                    <Check className="w-4 h-4" aria-hidden="true" />
+                    Nessun segnaposto trovato nella bozza.
+                  </p>
+                ) : (
+                  <div className="space-y-2 text-amber-800 dark:text-amber-300">
+                    <p className="font-semibold">
+                      Trovati {placeholderResult.length} segnaposto da sostituire prima dell&apos;invio:
+                    </p>
+                    <ul className="flex flex-wrap gap-1.5">
+                      {placeholderResult.map((placeholder) => (
+                        <li
+                          key={placeholder}
+                          className="rounded-md bg-amber-100 px-2 py-0.5 font-mono text-xs dark:bg-amber-900/40"
+                        >
+                          {placeholder}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
             <div className="p-3 md:p-4 flex flex-wrap justify-center items-center w-full gap-2 md:gap-3">
               <button
                 type="button"
@@ -709,6 +747,16 @@ export const EmailEditor = ({
                   <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
                 )}
                 {isLoading && !isWriting ? 'Raffinando...' : 'Raffina Email'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setPlaceholderResult(findPlaceholders(draft.draft))}
+                disabled={!draft.draft || isLoading}
+                title="Controlla se nella bozza ci sono segnaposto da compilare"
+                className="cursor-pointer bg-primary-100 dark:bg-primary-900/50 hover:bg-primary-200 dark:hover:bg-primary-800 text-primary-700 dark:text-primary-300 font-semibold text-xs md:text-base px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg flex shrink-0 whitespace-nowrap items-center justify-center gap-1.5 md:gap-2 transition-all border border-primary-200 dark:border-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Search className="w-4 h-4 md:w-5 md:h-5" />
+                Check email
               </button>
               <button
                 type="button"
