@@ -159,22 +159,22 @@ export default function App() {
   const isBusy = isLoading || isGeneratingSubject || isModifying || isWriting;
 
   const settingsModal = (
-        <SettingsModal
-          isOpen={isSettingsOpen}
-          onClose={() => setIsSettingsOpen(false)}
-          apiKey={apiKey}
-          setApiKey={setApiKey}
-          modelName={modelName}
-          setModelName={setModelName}
-          onSave={saveSettings}
-          setProvider={setProvider}
-          provider={provider}
-          lmStudioUrl={lmStudioUrl}
-          setLmStudioUrl={setLmStudioUrl}
-          onAiError={handleAiError}
-          additionalPrompt={additionalPrompt}
-          setAdditionalPrompt={setAdditionalPrompt}
-        />
+    <SettingsModal
+      isOpen={isSettingsOpen}
+      onClose={() => setIsSettingsOpen(false)}
+      apiKey={apiKey}
+      setApiKey={setApiKey}
+      modelName={modelName}
+      setModelName={setModelName}
+      onSave={saveSettings}
+      setProvider={setProvider}
+      provider={provider}
+      lmStudioUrl={lmStudioUrl}
+      setLmStudioUrl={setLmStudioUrl}
+      onAiError={handleAiError}
+      additionalPrompt={additionalPrompt}
+      setAdditionalPrompt={setAdditionalPrompt}
+    />
   );
 
   // Senza bozze l'app mostra la schermata iniziale, ma le impostazioni restano disponibili.

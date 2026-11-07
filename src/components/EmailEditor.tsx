@@ -1,6 +1,5 @@
 import {
   Check,
-  Search,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
@@ -14,6 +13,7 @@ import {
   PenLine,
   Plus,
   RefreshCw,
+  Search,
   Send,
   Sparkles,
   Trash2,
@@ -24,8 +24,8 @@ import { useEffect, useRef, useState } from 'react';
 import { generateTitle } from '../services/ai';
 import type { EmailDraft } from '../types';
 import { markdownToPlainText } from '../utils/markdown';
-import { findPlaceholders } from '../utils/placeholders';
 import { extractTextFromPDF } from '../utils/pdf';
+import { findPlaceholders } from '../utils/placeholders';
 import { MarkdownContent } from './MarkdownContent';
 import { MarkdownEditor } from './MarkdownEditor';
 import { PrivacyNotice } from './PrivacyNotice';
@@ -696,10 +696,7 @@ export const EmailEditor = ({
               />
             </div>
             {placeholderResult && (
-              <div
-                role="status"
-                className="mx-3 md:mx-4 mb-3 rounded-lg border p-3 text-sm"
-              >
+              <div role="status" className="mx-3 md:mx-4 mb-3 rounded-lg border p-3 text-sm">
                 {placeholderResult.length === 0 ? (
                   <p className="flex items-center gap-2 font-semibold text-green-700 dark:text-green-400">
                     <Check className="w-4 h-4" aria-hidden="true" />
@@ -708,7 +705,8 @@ export const EmailEditor = ({
                 ) : (
                   <div className="space-y-2 text-amber-800 dark:text-amber-300">
                     <p className="font-semibold">
-                      Trovati {placeholderResult.length} segnaposto da sostituire prima dell&apos;invio:
+                      Trovati {placeholderResult.length} segnaposto da sostituire prima
+                      dell&apos;invio:
                     </p>
                     <ul className="flex flex-wrap gap-1.5">
                       {placeholderResult.map((placeholder) => (
