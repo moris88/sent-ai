@@ -25,5 +25,5 @@ export const markdownToPlainText = (markdown: string): string =>
     .replace(/\*(.+?)\*/g, '$1')
     .replace(/(^|\s)_(.+?)_(?=\s|$)/g, '$1$2')
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/^>\s?/gm, '')
+    .replace(/^\s*>\s?/gm, '')
     .trim();

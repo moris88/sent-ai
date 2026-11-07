@@ -23,9 +23,9 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { generateTitle, type Provider, reviewDraft } from '../services/ai';
 import type { EmailDraft } from '../types';
+import { type CheckIssue, type CheckSeverity, runLocalChecks } from '../utils/draftChecks';
 import { markdownToPlainText } from '../utils/markdown';
 import { extractTextFromPDF } from '../utils/pdf';
-import { type CheckIssue, type CheckSeverity, runLocalChecks } from '../utils/draftChecks';
 import { MarkdownContent } from './MarkdownContent';
 import { MarkdownEditor } from './MarkdownEditor';
 import { PrivacyNotice } from './PrivacyNotice';
@@ -267,7 +267,9 @@ export const EmailEditor = ({
       });
       setAiReview(review.trim() || 'Nessun suggerimento.');
     } catch (error) {
-      onAiError(error instanceof Error ? error.message : 'Errore durante la richiesta di suggerimenti.');
+      onAiError(
+        error instanceof Error ? error.message : 'Errore durante la richiesta di suggerimenti.'
+      );
     } finally {
       setIsReviewing(false);
     }
@@ -740,7 +742,9 @@ export const EmailEditor = ({
                     <Search className="w-4 h-4 text-white" aria-hidden="true" />
                   </div>
                   <div className="flex-1 min-w-0 space-y-2">
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Controllo bozza</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                      Controllo bozza
+                    </p>
                     {checkIssues.length === 0 ? (
                       <p className="flex items-center gap-1.5 text-xs font-semibold text-green-700 dark:text-green-400">
                         <Check className="w-3.5 h-3.5" aria-hidden="true" />
@@ -753,7 +757,10 @@ export const EmailEditor = ({
                             key={issue.id}
                             className={`flex items-start gap-2 text-xs ${SEVERITY_CLASS[issue.severity]}`}
                           >
-                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-current" aria-hidden="true" />
+                            <span
+                              className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-current"
+                              aria-hidden="true"
+                            />
                             <span>{issue.message}</span>
                           </li>
                         ))}
@@ -769,7 +776,8 @@ export const EmailEditor = ({
                         {isReviewing ? 'Analisi in corso...' : 'Suggerimenti AI'}
                       </button>
                       <span className="text-xs text-slate-500 dark:text-slate-400">
-                        La bozza viene inviata all&apos;AI per una revisione. Il testo non viene modificato.
+                        La bozza viene inviata all&apos;AI per una revisione. Il testo non viene
+                        modificato.
                       </span>
                     </div>
                     {aiReview && (

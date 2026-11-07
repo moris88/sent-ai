@@ -1,8 +1,8 @@
 import { ClipboardPaste, Download, Eye, EyeOff, X } from 'lucide-react';
 import React from 'react';
 import { getModels, verifyModel } from '../services/ai';
-import { ThemeSettings } from './ThemeSettings';
 import { saveForbiddenTerms } from '../utils/draftChecks';
+import { ThemeSettings } from './ThemeSettings';
 
 export const SettingsModal = ({
   isOpen,
@@ -256,7 +256,8 @@ export const SettingsModal = ({
                 className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white"
               />
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Separali con una virgola: il controllo bozza ti avvisa se compaiono. Si salvano subito.
+                Separali con una virgola: il controllo bozza ti avvisa se compaiono. Si salvano
+                subito.
               </p>
             </div>
             <ThemeSettings />

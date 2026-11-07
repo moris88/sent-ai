@@ -21,7 +21,9 @@ export const PrivacyNotice = () => {
   if (!event) return null;
 
   // Mostra un solo testo: la bozza se presente, altrimenti il primo campo non vuoto (senza id).
-  const visible = event.sentFields.filter(({ field, text }) => field !== 'id' && text.trim() !== '');
+  const visible = event.sentFields.filter(
+    ({ field, text }) => field !== 'id' && text.trim() !== ''
+  );
   const shown = visible.find(({ field }) => field === 'draft') ?? visible[0];
 
   if (!shown) return null;
