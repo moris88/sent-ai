@@ -730,7 +730,7 @@ export const EmailEditor = ({
                 title="Aggiungi al contesto la bozza e continua il thread"
               >
                 <History className="w-4 h-4" />
-                Continua Thread
+                Aggiungi a Contesto
               </button>
               <button
                 type="button"
