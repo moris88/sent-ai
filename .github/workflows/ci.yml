@@ -30,8 +30,22 @@ jobs:
         run: pnpm lint
       - name: Build Web
         run: pnpm build
+      - name: Cache Electron
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/electron
+            ~/.cache/electron-builder
+          key: ${{ runner.os }}-electron-${{ hashFiles('pnpm-lock.yaml') }}
       - name: Build Desktop
         run: pnpm build:electron
+      - name: Build Desktop
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 3
+          timeout_minutes: 5
+          command: pnpm build:electron
+
       - name: Install Electron
         run: pnpm electron:install
       - name: Run Tests
