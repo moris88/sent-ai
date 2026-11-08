@@ -20,16 +20,16 @@ export const ThreadModal = ({ isOpen, onClose, onConfirm, value, onChange, onPas
           placeholder="Incolla qui una eventuale risposta del cliente... o semplicemente scrivi un contesto aggiuntivo per l'AI. Non è obbligatorio, ma può aiutare a generare una risposta più pertinente."
           className="w-full h-40 p-3 bg-slate-50 dark:bg-gray-700 border border-slate-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none resize-y"
         />
-        <div className="flex gap-3 pt-2">
+        <div className="flex gap-2 sm:gap-3 pt-2">
           <button
-            className="cursor-pointer flex-1 py-2 rounded-lg bg-slate-100 dark:bg-gray-700 hover:bg-slate-200 dark:hover:bg-gray-600 font-semibold"
+            className="cursor-pointer flex-1 py-1.5 sm:py-2 px-3 text-sm sm:text-base rounded-lg bg-slate-100 dark:bg-gray-700 hover:bg-slate-200 dark:hover:bg-gray-600 font-semibold"
             type="button"
             onClick={onClose}
           >
             Annulla
           </button>
           <button
-            className="cursor-pointer flex-1 py-2 rounded-lg bg-primary-600 text-white hover:bg-primary-700 font-semibold"
+            className="cursor-pointer flex-1 py-1.5 sm:py-2 px-3 text-sm sm:text-base rounded-lg bg-primary-600 text-white hover:bg-primary-700 font-semibold"
             type="button"
             onClick={onConfirm}
           >

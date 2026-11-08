@@ -230,12 +230,14 @@ export const EmailEditor = ({
       return;
     }
 
-    const params = new URLSearchParams({
-      subject: sendSubject,
-      body: emailBody,
-    });
-    if (allCc.length > 0) params.set('cc', allCc.join(','));
-    window.location.href = `mailto:${allTo.join(',')}?${params.toString()}`;
+    // mailto (RFC 6068) richiede %20 per gli spazi: URLSearchParams userebbe '+',
+    // che i client di posta mostrano letteralmente.
+    const params = [
+      `subject=${encodeURIComponent(sendSubject)}`,
+      `body=${encodeURIComponent(emailBody.replace(/\r?\n/g, '\r\n'))}`,
+    ];
+    if (allCc.length > 0) params.push(`cc=${encodeURIComponent(allCc.join(','))}`);
+    window.location.href = `mailto:${allTo.join(',')}?${params.join('&')}`;
     setIsSendFormOpen(false);
   };
 
@@ -1206,13 +1208,13 @@ export const EmailEditor = ({
               <button
                 type="button"
                 onClick={() => setIsSendFormOpen(false)}
-                className="cursor-pointer rounded-lg border border-slate-200 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
+                className="cursor-pointer rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
               >
                 Annulla
               </button>
               <button
                 type="submit"
-                className="cursor-pointer rounded-lg bg-primary-600 px-4 py-2 text-sm font-bold text-white hover:bg-primary-700"
+                className="cursor-pointer rounded-lg bg-primary-600 px-3 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm font-bold text-white hover:bg-primary-700"
               >
                 Apri client email
               </button>
